@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\\SharedBuildSettings.props" />
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyDescriptionAttribute">
+      <_Parameter1>POCO DataSet interfaces</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

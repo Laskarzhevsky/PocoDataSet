@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36623.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IData", "PocoDataSet.IData\PocoDataSet.IData.csproj", "{C6D966B9-90EC-DA99-1771-5DD487B4F711}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Data", "PocoDataSet.Data\PocoDataSet.Data.csproj", "{44F35706-E700-18B7-5A36-1F2BBB270F1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Extensions", "PocoDataSet.Extensions\PocoDataSet.Extensions.csproj", "{14CB0168-BD45-3BEB-413D-65595AD325D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Serializer", "PocoDataSet.Serializer\PocoDataSet.Serializer.csproj", "{CE2A3207-7897-DB8C-B064-52870FFDE828}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+		SharedBuildSettings.props = SharedBuildSettings.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Demo", "PocoDataSet.Demo\PocoDataSet.Demo.csproj", "{773EC83C-93B1-4827-9243-75DC68715B59}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C6D966B9-90EC-DA99-1771-5DD487B4F711}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6D966B9-90EC-DA99-1771-5DD487B4F711}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6D966B9-90EC-DA99-1771-5DD487B4F711}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6D966B9-90EC-DA99-1771-5DD487B4F711}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F35706-E700-18B7-5A36-1F2BBB270F1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F35706-E700-18B7-5A36-1F2BBB270F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F35706-E700-18B7-5A36-1F2BBB270F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F35706-E700-18B7-5A36-1F2BBB270F1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14CB0168-BD45-3BEB-413D-65595AD325D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14CB0168-BD45-3BEB-413D-65595AD325D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14CB0168-BD45-3BEB-413D-65595AD325D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14CB0168-BD45-3BEB-413D-65595AD325D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE2A3207-7897-DB8C-B064-52870FFDE828}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE2A3207-7897-DB8C-B064-52870FFDE828}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE2A3207-7897-DB8C-B064-52870FFDE828}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE2A3207-7897-DB8C-B064-52870FFDE828}.Release|Any CPU.Build.0 = Release|Any CPU
+		{773EC83C-93B1-4827-9243-75DC68715B59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{773EC83C-93B1-4827-9243-75DC68715B59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{773EC83C-93B1-4827-9243-75DC68715B59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{773EC83C-93B1-4827-9243-75DC68715B59}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33CA3A1D-AE80-41E9-9040-220D5A66995A}
+	EndGlobalSection
+EndGlobal

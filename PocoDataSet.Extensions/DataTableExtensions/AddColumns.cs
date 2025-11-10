@@ -1,0 +1,24 @@
+﻿using System.Collections.Generic;
+
+using PocoDataSet.IData;
+
+namespace PocoDataSet.Extensions
+{
+    /// <summary>
+    /// Contains data table extension methods
+    /// </summary>
+    public static partial class DataTableExtensions
+    {
+        #region Public Methods
+        /// <summary>
+        /// Adds columns
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public static void AddColumns(this IDataTable dataTable, List<IColumnMetadata> listOfColumnMetadata)
+        {
+            dataTable.Columns = listOfColumnMetadata;
+        }
+        #endregion
+    }
+}
