@@ -61,7 +61,6 @@ If you cloned this repo standalone:
 - Open `PocoDataSetSolution.sln` in Visual Studio or `dotnet` CLI.
 - Or reference the projects from your own solution:
 
-```xml
 <ItemGroup>
   <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
   <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
@@ -73,3 +72,16 @@ If you cloned this repo standalone:
 
 This project is licensed under the MIT License.  
 See the [LICENSE](LICENSE) file for details.
+
+## Installation
+
+The easiest way to get started is to install the meta-package:
+
+dotnet add package PocoDataSet
+
+This will bring in:
+PocoDataSet.IData
+PocoDataSet.Data
+PocoDataSet.Extensions
+PocoDataSet.Serializer
+

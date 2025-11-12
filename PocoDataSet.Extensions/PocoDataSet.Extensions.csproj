@@ -1,10 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
+  <PropertyGroup>
+    <Description>POCO DataSet extension methods</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>PocoDataSet.Extensions</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
+  </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="System.Reflection.AssemblyDescriptionAttribute">
-      <_Parameter1>POCO DataSet factory</_Parameter1>
-    </AssemblyAttribute>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
