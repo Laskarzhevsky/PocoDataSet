@@ -18,14 +18,14 @@ namespace PocoDataSet.Extensions
         /// <typeparam name="TInterface">data table interface type</typeparam>
         /// <param name="dataTable">Data table</param>
         /// <returns>Data table as a detached list</returns>
-        public static List<TInterface> ToDetachedList<TInterface>(this IDataTable dataTable) where TInterface : class
+        public static List<TInterface> ToDetachedList<TInterface>(this IDataTable? dataTable) where TInterface : class
         {
+            var list = new List<TInterface>();
             if (dataTable == null)
             {
-                throw new ArgumentNullException(nameof(dataTable));
+                return list;
             }
 
-            var list = new List<TInterface>();
             foreach (IDataRow row in dataTable.Rows)
             {
                 if (row == null)
@@ -48,11 +48,12 @@ namespace PocoDataSet.Extensions
         /// <param name="dataTable">Data table</param>
         /// <param name="nameMap">Name map</param>
         /// <returns>Data table as a detached list</returns>
-        public static List<TInterface> ToDetachedList<TInterface>(this IDataTable table, IDictionary<string, string> nameMap) where TInterface : class
+        public static List<TInterface> ToDetachedList<TInterface>(this IDataTable? table, IDictionary<string, string> nameMap) where TInterface : class
         {
+            List<TInterface> list = new List<TInterface>();
             if (table == null)
             {
-                throw new ArgumentNullException(nameof(table));
+                return list;
             }
 
             if (nameMap == null)
@@ -60,7 +61,6 @@ namespace PocoDataSet.Extensions
                 throw new ArgumentNullException(nameof(nameMap));
             }
 
-            List<TInterface> list = new List<TInterface>();
             foreach (IDataRow row in table.Rows)
             {
                 if (row == null)

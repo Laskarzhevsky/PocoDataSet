@@ -1,6 +1,4 @@
-﻿using System;
-
-using PocoDataSet.IData;
+﻿using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -11,25 +9,22 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Get value from row
+        /// Gets field value
         /// </summary>
+        /// <typeparam name="T">Value type</typeparam>
         /// <param name="dataTable">Data table</param>
         /// <param name="rowIndex">Row index</param>
         /// <param name="columnName">Column name</param>
-        public static T? GetValue<T>(this IDataTable dataTable, int rowIndex, string columnName)
+        /// <returns>Field value</returns>
+        public static T? GetFieldValue<T>(this IDataTable? dataTable, int rowIndex, string columnName)
         {
             if (dataTable == null)
             {
-                throw new ArgumentNullException(nameof(dataTable));
+                return default(T);
             }
 
             IDataRow dataRow = dataTable.Rows[rowIndex];
-            if (dataRow == null)
-            {
-                return default;
-            }
-
-            return dataRow.GetDataFieldValue<T>(columnName);
+            return DataRowExtensions.GetDataFieldValue<T>(dataRow, columnName);
         }
         #endregion
     }

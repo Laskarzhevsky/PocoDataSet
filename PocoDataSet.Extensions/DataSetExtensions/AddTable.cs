@@ -15,8 +15,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="dataTable">Data table for addition</param>
-        public static void AddTable(this IDataSet dataSet, IDataTable dataTable)
+        public static void AddTable(this IDataSet? dataSet, IDataTable dataTable)
         {
+            if (dataSet == null)
+            {
+                return;
+            }
+
             if (dataTable == null || string.IsNullOrEmpty(dataTable.TableName))
             {
                 throw new ArgumentException("Table or TableName cannot be null.");

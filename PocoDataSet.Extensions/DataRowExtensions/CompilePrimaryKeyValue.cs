@@ -19,7 +19,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataRow">Data row</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         /// <returns>Compiled primary key value</returns>
-        public static string CompilePrimaryKeyValue(this IDataRow dataRow, List<string> primaryKeyColumnNames)
+        public static string CompilePrimaryKeyValue(this IDataRow? dataRow, List<string> primaryKeyColumnNames)
         {
             StringBuilder stringBuilder = new System.Text.StringBuilder();
             if (dataRow == null)

@@ -16,11 +16,11 @@ namespace PocoDataSet.Extensions
         /// <param name="dataRow">Data row</param>
         /// <param name="columnName">Column name</param>
         /// <returns>Data field value</returns>
-        public static T? GetDataFieldValue<T>(this IDataRow dataRow, string columnName)
+        public static T? GetDataFieldValue<T>(this IDataRow? dataRow, string columnName)
         {
             if (dataRow == null)
             {
-                throw new ArgumentNullException(nameof(dataRow));
+                return default(T);
             }
 
             if (columnName == null)

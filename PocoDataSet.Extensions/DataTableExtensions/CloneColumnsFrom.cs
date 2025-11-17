@@ -16,8 +16,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="clonedDataTable">Cloned data table</param>
         /// <param name="dataTable">Data table</param>
-        public static void CloneColumnsFrom(this IDataTable clonedDataTable, IDataTable dataTable)
+        public static void CloneColumnsFrom(this IDataTable? clonedDataTable, IDataTable? dataTable)
         {
+            if (clonedDataTable == null || dataTable == null)
+            {
+                return;
+            }
+
             List<IColumnMetadata> clonedListOfColumnMetadata = new List<IColumnMetadata>();
             for (int i = 0; i < dataTable.Columns.Count; i++)
             {

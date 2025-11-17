@@ -16,11 +16,11 @@ namespace PocoDataSet.Extensions
         /// <param name="dataTable">Data table</param>
         /// <param name="columnName">Column name</param>
         /// <returns>Flag indicating whether data table contains column with specified name</returns>
-        public static bool ContainsColumn(this IDataTable dataTable, string columnName)
+        public static bool ContainsColumn(this IDataTable? dataTable, string columnName)
         {
             if (dataTable == null)
             {
-                throw new ArgumentNullException(nameof(dataTable));
+                return false;
             }
 
             string columnNameToLowerInvariant = columnName.ToLowerInvariant();

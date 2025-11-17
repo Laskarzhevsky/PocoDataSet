@@ -16,8 +16,13 @@ namespace PocoDataSet.Extensions
         /// <typeparam name="TInterface">POCO interface type</typeparam>
         /// <param name="dataRow">Data row</param>
         /// <returns>"Live" data row as an interface</returns>
-        public static TInterface AsInterface<TInterface>(this IDataRow dataRow) where TInterface : class
+        public static TInterface AsInterface<TInterface>(this IDataRow? dataRow) where TInterface : class
         {
+            if (dataRow == null)
+            {
+                return default!;
+            }
+
             return InterfaceRowProxy<TInterface>.CreateProxy(dataRow);
         }
 
@@ -28,8 +33,13 @@ namespace PocoDataSet.Extensions
         /// <param name="dataRow">Data row</param>
         /// <param name="nameMap">Name map</param>
         /// <returns>"Live" data row as an interface</returns>
-        public static TInterface AsInterface<TInterface>(this IDataRow dataRow, IDictionary<string, string> nameMap) where TInterface : class
+        public static TInterface AsInterface<TInterface>(this IDataRow? dataRow, IDictionary<string, string> nameMap) where TInterface : class
         {
+            if (dataRow == null)
+            {
+                return default!;
+            }
+
             return InterfaceRowProxy<TInterface>.CreateProxy(dataRow, nameMap);
         }
         #endregion

@@ -11,13 +11,18 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Add row to table
+        /// Adds row to table
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <param name="dataRow">Data row for addition</param>
-        public static void AddRow(this IDataSet dataSet, string tableName, IDataRow dataRow)
+        public static void AddRow(this IDataSet? dataSet, string tableName, IDataRow dataRow)
         {
+            if (dataSet == null)
+            {
+                return;
+            }
+
             if (!dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
             {
                 throw new KeyNotFoundException($"Table {tableName} not found.");

@@ -15,8 +15,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public static void AddColumns(this IDataTable dataTable, List<IColumnMetadata> listOfColumnMetadata)
+        public static void AddColumns(this IDataTable? dataTable, List<IColumnMetadata> listOfColumnMetadata)
         {
+            if (dataTable == null)
+            {
+                return;
+            }
+
             dataTable.Columns = listOfColumnMetadata;
         }
         #endregion

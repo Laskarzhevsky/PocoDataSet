@@ -17,9 +17,14 @@ namespace PocoDataSet.Extensions
         /// <typeparam name="T">POCO type</typeparam>
         /// <param name="dataRow">Data row</param>
         /// <returns>POCO</returns>
-        public static T ToPoco<T>(this IDataRow dataRow) where T : new()
+        public static T ToPoco<T>(this IDataRow? dataRow) where T : new()
         {
             T stronglyTypedObject = new T();
+            if (dataRow == null)
+            {
+                return stronglyTypedObject;
+            }
+
             Type targetType = typeof(T);
             PropertyInfo[] properties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 

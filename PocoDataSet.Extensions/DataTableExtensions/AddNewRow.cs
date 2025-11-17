@@ -13,8 +13,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <returns>New data row created in data table</returns>
-        public static IDataRow AddNewRow(this IDataTable dataTable)
+        public static IDataRow AddNewRow(this IDataTable? dataTable)
         {
+            if (dataTable == null)
+            {
+                throw new System.ArgumentNullException(nameof(dataTable));
+            }
+
             IDataRow dataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
             dataTable.Rows.Add(dataRow);
 

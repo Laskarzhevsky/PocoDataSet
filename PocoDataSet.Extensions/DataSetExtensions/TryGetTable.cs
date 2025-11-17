@@ -11,10 +11,9 @@ namespace PocoDataSet.Extensions
     public static partial class DataSetExtensions
     {
         #region Public Methods
-        public static bool TryGetTable(this IDataSet dataSet, string? tableName, out IDataTable? table)
+        public static bool TryGetTable(this IDataSet? dataSet, string? tableName, out IDataTable? table)
         {
             table = null;
-
             if (dataSet == null)
             {
                 return false;

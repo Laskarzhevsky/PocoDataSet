@@ -14,11 +14,11 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <returns>Specified table</returns>
-        public static IDataTable? GetTable(this IDataSet dataSet, string tableName)
+        public static IDataTable? GetTable(this IDataSet? dataSet, string tableName)
         {
-            if (dataSet.Tables == null)
+            if (dataSet == null)
             {
-                return null;
+                return default!;
             }
 
             dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable);

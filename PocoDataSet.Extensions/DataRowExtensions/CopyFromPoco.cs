@@ -17,8 +17,13 @@ namespace PocoDataSet.Extensions
         /// <typeparam name="T">POCO type</typeparam>
         /// <param name="dataRow">Data row</param>
         /// <param name="poco">POCO</param>
-        public static void CopyFromPoco<T>(this IDataRow dataRow, T poco)
+        public static void CopyFromPoco<T>(this IDataRow? dataRow, T poco)
         {
+            if (dataRow == null)
+            {
+                return;
+            }
+
             Type pocoObjectType = typeof(T);
             foreach (PropertyInfo propertyInfo in pocoObjectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {

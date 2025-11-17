@@ -16,8 +16,13 @@ namespace PocoDataSet.Extensions
         /// <typeparam name="TInterface">Data table interface type</typeparam>
         /// <param name="dataTable">Data table</param>
         /// <returns>Data table as a detached array</returns>
-        public static TInterface[] ToDetachedArray<TInterface>(this IDataTable dataTable) where TInterface : class
+        public static TInterface[] ToDetachedArray<TInterface>(this IDataTable? dataTable) where TInterface : class
         {
+            if (dataTable == null)
+            {
+                return System.Array.Empty<TInterface>();
+            }
+
             List<TInterface> list = ToDetachedList<TInterface>(dataTable);
             return list.ToArray();
         }
@@ -29,8 +34,13 @@ namespace PocoDataSet.Extensions
         /// <param name="dataTable">Data table</param>
         /// <param name="nameMap">Name map</param>
         /// <returns>Data table as a detached array</returns>
-        public static TInterface[] ToDetachedArray<TInterface>(this IDataTable dataTable, IDictionary<string, string> nameMap) where TInterface : class
+        public static TInterface[] ToDetachedArray<TInterface>(this IDataTable? dataTable, IDictionary<string, string> nameMap) where TInterface : class
         {
+            if (dataTable == null)
+            {
+                return System.Array.Empty<TInterface>();
+            }
+
             List<TInterface> list = ToDetachedList<TInterface>(dataTable, nameMap);
             return list.ToArray();
         }

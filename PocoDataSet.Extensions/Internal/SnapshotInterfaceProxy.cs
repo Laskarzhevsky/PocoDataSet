@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
+using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions

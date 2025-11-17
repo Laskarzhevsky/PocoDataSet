@@ -23,6 +23,9 @@ namespace PocoDataSet.Serializer
             JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
 
+            // This line is the key: prevents JsonElement in Dictionary<string, object?>
+            jsonSerializerOptions.Converters.Add(new ObjectToPrimitivesConverter());
+
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataSet, DataSet>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataTable, DataTable>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataRow, DataRow>());

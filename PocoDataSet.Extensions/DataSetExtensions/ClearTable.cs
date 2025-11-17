@@ -13,8 +13,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
-        public static void ClearTable(this IDataSet dataSet, string tableName)
+        public static void ClearTable(this IDataSet? dataSet, string tableName)
         {
+            if (dataSet == null)
+            {
+                return;
+            }
+
             if (dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
             {
                 dataTable.Rows.Clear();

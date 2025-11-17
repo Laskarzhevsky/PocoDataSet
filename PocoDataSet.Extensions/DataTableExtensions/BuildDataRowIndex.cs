@@ -13,19 +13,19 @@ namespace PocoDataSet.Extensions
         /// <summary>
         /// Builds data row index
         /// </summary>
-        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="dataTable">Current data table</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         /// <param name="scopeFunction">Scope function</param>
         /// <returns>Built data row index</returns>
-        public static Dictionary<string, IDataRow> BuildDataRowIndex(this IDataTable currentDataTable, List<string> primaryKeyColumnNames, Func<IDataRow, bool>? scopeFunction)
+        public static Dictionary<string, IDataRow> BuildDataRowIndex(this IDataTable? dataTable, List<string> primaryKeyColumnNames, Func<IDataRow, bool>? scopeFunction)
         {
             Dictionary<string, IDataRow> dataRowIndex = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
-            if (currentDataTable == null)
+            if (dataTable == null)
             {
                 return dataRowIndex;
             }
 
-            foreach (IDataRow dataRow in currentDataTable.Rows)
+            foreach (IDataRow dataRow in dataTable.Rows)
             {
                 if (scopeFunction != null && !scopeFunction(dataRow))
                 {

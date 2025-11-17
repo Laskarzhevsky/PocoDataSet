@@ -17,119 +17,53 @@ namespace PocoDataSet.Extensions
         /// <param name="currentDataSet">Current data set</param>
         /// <param name="refreshedDataSet">Refreshed data set</param>
         /// <param name="mergeOptions">Merge options</param>
-        public static DataSetsMergeResult MergeWith(this IDataSet currentDataSet, IDataSet refreshedDataSet, IMergeOptions? mergeOptions = null)
+        public static DataSetsMergeResult MergeWith(this IDataSet? currentDataSet, IDataSet? refreshedDataSet, IMergeOptions? mergeOptions = null)
         {
             List<IDataRow> listOfAddedDataRows = new List<IDataRow>();
             List<IDataRow> listOfDeletedDataRows = new List<IDataRow>();
             List<IDataRow> listOfUpdatedDataRows = new List<IDataRow>();
             DataSetsMergeResult dataSetsMergeResult = new DataSetsMergeResult(listOfAddedDataRows, listOfDeletedDataRows, listOfUpdatedDataRows);
-            if (currentDataSet == null)
+            if (currentDataSet == null || refreshedDataSet == null)
             {
                 return dataSetsMergeResult;
             }
 
-            if (refreshedDataSet == null)
+            List<string> mergedTableNames = new List<string>();
+            foreach (IDataTable dataTable in currentDataSet.Tables.Values)
             {
-                return dataSetsMergeResult;
+                mergedTableNames.Add(dataTable.TableName);
+                if (mergeOptions != null && mergeOptions.ExcludeTablesFromMerge.Contains(dataTable.TableName))
+                {
+                    continue;
+                }
+
+                IDataTable? refreshedDataTable = null;
+                refreshedDataSet.TryGetTable(dataTable.TableName, out refreshedDataTable);
+                if (refreshedDataTable != null)
+                {
+                    dataTable.MergeWith(refreshedDataTable, mergeOptions);
+                }
             }
 
-            if (mergeOptions == null) 
+            foreach (IDataTable dataTable in refreshedDataSet.Tables.Values)
             {
-                mergeOptions = new MergeOptions();
-            }
-            
-            foreach (KeyValuePair<string, IDataTable> keyValuePair in refreshedDataSet.Tables)
-            {
-                IDataTable refreshedDataTable = keyValuePair.Value;
-                if (refreshedDataTable == null)
+                if (mergedTableNames.Contains(dataTable.TableName))
                 {
                     continue;
                 }
 
-                if (mergeOptions.ExcludeTablesFromMerge.Contains(refreshedDataTable.TableName))
+                if (mergeOptions != null && mergeOptions.ExcludeTablesFromMerge.Contains(dataTable.TableName))
                 {
                     continue;
                 }
 
-                IDataTable? currentDataTable = null;
-                if (currentDataSet.Tables.ContainsKey(refreshedDataTable.TableName))
+                IDataTable? clonedDataTable = dataTable.Clone();
+                if (clonedDataTable == null)
                 {
-                    currentDataTable = currentDataSet.GetTable(refreshedDataTable.TableName);
-                }
-                else
-                {
-                    // No schema creation in this lite version.
                     continue;
                 }
 
-                // 1) Replace all rows in the current table by rows from refreshed table if current table has no primary keys defined
-                List<string> currentDataTablePrimaryKeyColumnNames = currentDataTable!.GetPrimaryKeyColumnNames(mergeOptions);
-                if (currentDataTablePrimaryKeyColumnNames.Count == 0 && mergeOptions.ReplaceAllRowsInTableWhenTableHasNoPrimaryKeyDefined)
-                {
-                    currentDataTable!.ReplaceAllRowsByRowsFrom(refreshedDataTable);
-                    continue;
-                }
-
-                Func<IDataRow, bool>? pruneScope = mergeOptions.GetPruneFilter(currentDataTable!.TableName);
-                Dictionary<string, IDataRow> currentDataTableIndex = currentDataTable.BuildDataRowIndex(currentDataTablePrimaryKeyColumnNames, pruneScope);
-                HashSet<string> processedPrimaryKeyValues = new HashSet<string>(StringComparer.Ordinal);
-
-                // 2) Upsert pass (respect scope if provided)
-                foreach (var refreshedDataRow in refreshedDataTable.Rows)
-                {
-                    if (pruneScope != null && !pruneScope(refreshedDataRow))
-                    {
-                        continue;  // ignore out-of-scope refreshed rows
-                    }
-
-                    string primaryKeyValue = refreshedDataRow.CompilePrimaryKeyValue(currentDataTablePrimaryKeyColumnNames);
-                    if (currentDataTableIndex.TryGetValue(primaryKeyValue, out var currentIndexedRow))
-                    {
-                        bool rowValueChanged = currentIndexedRow.MergeWith(refreshedDataRow, currentDataTable.Columns);
-                        if (rowValueChanged)
-                        {
-                            listOfUpdatedDataRows.Add(currentIndexedRow);
-                        }
-                    }
-                    else
-                    {
-                        IDataRow newDataRow = currentDataTable.AddNewRow();
-                        newDataRow.MergeWith(refreshedDataRow, currentDataTable.Columns);
-                        currentDataTableIndex[primaryKeyValue] = newDataRow;
-                        listOfAddedDataRows.Add(newDataRow);
-                    }
-
-                    processedPrimaryKeyValues.Add(primaryKeyValue);
-                }
-
-                // 3) Prune pass (only for configured tables; respect scope)
-                if (mergeOptions.PruneTables.Contains(currentDataTable.TableName))
-                {
-                    var listOfDataRowIndexesForRemoval = new List<int>();
-                    int i = 0;
-                    foreach (IDataRow dataRow in currentDataTable.Rows)
-                    {
-                        if (pruneScope != null && !pruneScope(dataRow))
-                        {
-                            i++;
-                            continue; // do not touch out-of-scope rows
-                        }
-
-                        string compiledPrimaryKeyValue = dataRow.CompilePrimaryKeyValue(currentDataTablePrimaryKeyColumnNames);
-                        if (!processedPrimaryKeyValues.Contains(compiledPrimaryKeyValue))
-                        {
-                            listOfDataRowIndexesForRemoval.Add(i);
-                            listOfDeletedDataRows.Add(dataRow);
-                        }
-
-                        i++;
-                    }
-
-                    for (int r = listOfDataRowIndexesForRemoval.Count - 1; r >= 0; r--)
-                    {
-                        currentDataTable.Rows.RemoveAt(listOfDataRowIndexesForRemoval[r]);
-                    }
-                }
+                currentDataSet.AddTable(clonedDataTable);
             }
 
             return dataSetsMergeResult;

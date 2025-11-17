@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
+using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
@@ -53,7 +54,7 @@ namespace PocoDataSet.Extensions
             }
         }
 
-        protected override object Invoke(MethodInfo targetMethod, object[] args)
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
             if (targetMethod == null)
             {

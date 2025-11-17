@@ -18,7 +18,7 @@ namespace PocoDataSet.Extensions
         /// <returns>Created row</returns>
         public static IDataRow CreateRowFromColumns(List<IColumnMetadata> columnsMetadata)
         {
-            IDataRow row = new DataRow();
+            IDataRow row = DataRowFactory.CreateEmpty(columnsMetadata.Count);
             foreach (IColumnMetadata column in columnsMetadata)
             {
                 row[column.ColumnName] = null;

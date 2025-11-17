@@ -17,8 +17,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="clonedDataTable">Cloned data table</param>
         /// <param name="dataTable">Data table</param>
-        public static void CloneRowsFrom(this IDataTable clonedDataTable, IDataTable dataTable)
+        public static void CloneRowsFrom(this IDataTable? clonedDataTable, IDataTable? dataTable)
         {
+            if (clonedDataTable == null || dataTable == null)
+            {
+                return;
+            }
+
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
                 IDictionary<string, object?> sourceRow = dataTable.Rows[i];
@@ -37,7 +42,7 @@ namespace PocoDataSet.Extensions
         /// <returns>Created empty row from source row</returns>
         static IDataRow CreateEmptyRowFrom(IDictionary<string, object?> sourceRow)
         {
-            IDataRow newRow = new DataRow();
+            IDataRow newRow = DataRowFactory.CreateEmpty(sourceRow.Count);
             foreach (KeyValuePair<string, object?> keyValuePair in sourceRow)
             {
                 if (!newRow.ContainsKey(keyValuePair.Key))

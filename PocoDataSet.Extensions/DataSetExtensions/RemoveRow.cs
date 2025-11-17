@@ -14,8 +14,13 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <param name="rowIndex">Row index</param>
-        public static void RemoveRow(this IDataSet dataSet, string tableName, int rowIndex)
+        public static void RemoveRow(this IDataSet? dataSet, string tableName, int rowIndex)
         {
+            if (dataSet == null)
+            {
+                return;
+            }
+
             if (!dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
             {
                 return;

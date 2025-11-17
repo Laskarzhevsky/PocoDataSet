@@ -13,8 +13,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="dataTable">Data table for removal</param>
-        public static void RemoveTable(this IDataSet dataSet, string tableName)
+        public static void RemoveTable(this IDataSet? dataSet, string tableName)
         {
+            if (dataSet is null)
+            {
+                return;
+            }
+
             dataSet.Tables.Remove(tableName);
         }
         #endregion

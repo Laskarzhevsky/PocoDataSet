@@ -16,10 +16,10 @@ namespace PocoDataSet.Extensions
         /// <param name="currentDataRow">Current data row</param>
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public static bool MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        public static bool MergeWith(this IDataRow? currentDataRow, IDataRow? refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
         {
             bool rowValueChanged = false;
-            if (currentDataRow == null)
+            if (currentDataRow == null || refreshedDataRow == null)
             {
                 return false;
             }

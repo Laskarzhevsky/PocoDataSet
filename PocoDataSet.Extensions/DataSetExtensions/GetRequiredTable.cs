@@ -14,8 +14,13 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <returns>Specified table</returns>
-        public static IDataTable GetRequiredTable(this IDataSet dataSet, string tableName)
+        public static IDataTable GetRequiredTable(this IDataSet? dataSet, string tableName)
         {
+            if (dataSet == null)
+            {
+                return default!;
+            }
+
             dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable);
             if (dataTable == null)
             {

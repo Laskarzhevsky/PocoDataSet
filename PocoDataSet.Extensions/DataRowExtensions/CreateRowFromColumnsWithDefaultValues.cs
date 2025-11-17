@@ -18,13 +18,13 @@ namespace PocoDataSet.Extensions
         /// <returns>Created row</returns>
         public static IDataRow CreateRowFromColumnsWithDefaultValues(List<IColumnMetadata> columnsMetadata)
         {
-            IDataRow row = new DataRow();
+            IDataRow dataRow = DataRowFactory.CreateEmpty(columnsMetadata.Count);
             foreach (IColumnMetadata columnMetadata in columnsMetadata)
             {
-                row[columnMetadata.ColumnName] = Defaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                dataRow[columnMetadata.ColumnName] = Defaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
-            return row;
+            return dataRow;
         }
         #endregion
     }

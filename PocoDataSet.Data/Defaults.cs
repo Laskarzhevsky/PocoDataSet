@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.Data
 {
     public static class Defaults
     {

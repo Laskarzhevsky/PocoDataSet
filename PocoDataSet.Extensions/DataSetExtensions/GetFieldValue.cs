@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using PocoDataSet.IData;
+﻿using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -19,8 +17,13 @@ namespace PocoDataSet.Extensions
         /// <param name="rowIndex">Row index</param>
         /// <param name="columnName">Column name</param>
         /// <returns>Field value</returns>
-        public static T? GetFieldValue<T>(this IDataSet dataSet, string tableName, int rowIndex, string columnName)
+        public static T? GetFieldValue<T>(this IDataSet? dataSet, string tableName, int rowIndex, string columnName)
         {
+            if (dataSet == null)
+            {
+                return default(T);
+            }
+
             IDataTable? dataTable = dataSet.GetTable(tableName);
             if (dataTable == null)
             {
