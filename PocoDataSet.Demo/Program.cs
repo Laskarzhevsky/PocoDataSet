@@ -87,7 +87,7 @@ namespace PocoDataSet.Demo
             employmentType.Code = "ET02";
             string? updatedEmploymentTypeCode = employmentTypeDataRow["Code"] as string;
 
-            // 4.d) Read employment type code from data row using POCO interface, change it from "ET02" to "ET03"
+            // 4.e) Read employment type code from data row using POCO interface, change it from "ET02" to "ET03"
             // and verify that changes are NOT propagated to underlying data row
             EmploymentType employmentTypePoco = DataRowExtensionExamples.ToPoco<EmploymentType>(employmentTypeDataRow);
             employmentTypePoco.Code = "ET03";
@@ -124,8 +124,7 @@ namespace PocoDataSet.Demo
             // 9. Clear table
             DataSetExtensionExamples.ClearTable(dataSet, "Department");
 
-            // 10) Read employment type code from data row using POCO interface, change it from "ET01" to "ET02"
-            // and verify that changes are propagated to underlying data row
+            // 10) Change information of employment type code in copied data set
             copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Id"] = 2;
             copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Code"] = "ET02";
             copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Description"] = "Part Time";
