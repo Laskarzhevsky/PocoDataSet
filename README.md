@@ -50,6 +50,40 @@ The solution contains four projects:
   - `DataSetSerializer.FromJsonString(string? json) : IDataSet?`
   - `DataSetSerializer.ToJsonString(IDataSet dataSet) : string`
 
+ - **PocoDataSet.SqlServerDataAdapter**  
+The `PocoDataSet.SqlServerDataAdapter` project provides a lightweight SQL Server adapter that fills `PocoDataSet` in-memory `IDataSet`/`IDataTable` structures from T-SQL queries. It is intended as an example/utility that demonstrates reading schema, primary key and foreign key information and populating `PocoDataSet.Data` model objects.
+
+## Purpose
+- Execute queries against SQL Server and populate `IDataSet`/`IDataTable`/`IDataRow`.
+- Preserve table/column metadata (column names, data types, max length, primary keys, foreign keys, nullability).
+- Provide an async-friendly `FillAsync` API that accepts parameter dictionaries to avoid inline concatenation and reduce risk of SQL injection.
+
+## Key types
+- `PocoDataSet.SqlServerDataAdapter.SqlDataAdapter` — main adapter class used to execute queries and return an `IDataSet`.
+- `PocoDataSet.SqlServerDataAdapter.DataTableCreator` — internal helper used by the adapter to create `DataTable` instances with columns, primary keys and rows.
+- `PocoDataSet.SqlServerDataAdapter.ForeignKeyData` — holds foreign key mapping information used when building `ColumnMetadata`.
+
+## Notable behaviors
+- `DataTableCreator` reads column schema from `SqlDataReader.GetSchemaTable()` and populates `ColumnMetadata` fields such as `ColumnName`, `DataType`, `MaxLength`, and (when implemented) `IsNullable`. The project also supports loading primary key information and populating `DataTable.PrimaryKey`.
+- The adapter supports a parameter dictionary passed into `FillAsync`, e.g. `IDictionary<string, object?>` to map command parameters.
+
+## Integration notes
+- The adapter uses `Microsoft.Data.SqlClient`. Ensure your application has the package referenced.
+- `FillAsync` supports parameter dictionaries; keys should match the parameter names used in the SQL (including the `@` if you use it in your code).
+- `DataTableCreator` exposes an event (`LoadDataTableKeysInformationRequest`) so callers can supply primary key and foreign-key lookup data before columns/rows are finalized. This allows key population logic to run before rows are added.
+
+## Recommended improvements (already implemented or easy to add)
+- Populate `ColumnMetadata.IsNullable` from `GetSchemaTable()` (`AllowDBNull` / `IsNullable`) when available.
+- Populate `DataTable.PrimaryKey` from key discovery (the adapter already provides hooks to fetch primary key information — call these before finalizing the `DataTable`).
+- Ensure the adapter infers nullability conservatively when the provider schema does not include it (for example, treat CLR non-nullable value types as non-nullable).
+
+## Where to find it in the solution
+- Project folder: `PocoDataSet.SqlServerDataAdapter`
+- Key files:
+  - `SqlDataAdapter.cs` — public adapter API
+  - `DataTableCreator/*.cs` — schema / row building helpers
+  - `ForeignKeyData.cs` — FK metadata model
+
 ---
 
 ## Getting started
@@ -66,6 +100,7 @@ If you cloned this repo standalone:
   <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
   <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
   <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
+  <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
 </ItemGroup>
 
 ## License
@@ -84,4 +119,5 @@ PocoDataSet.IData
 PocoDataSet.Data
 PocoDataSet.Extensions
 PocoDataSet.Serializer
+PocoDataSet.SqlServerDataAdapter
 

@@ -35,7 +35,7 @@ namespace PocoDataSet.IData
         /// <summary>
         /// Gets or sets List of primary keys
         /// </summary>
-        List<string> PrimaryKey
+        List<string> PrimaryKeys
         {
             get; set;
         }

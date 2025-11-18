@@ -41,7 +41,7 @@ namespace PocoDataSet.Data
         /// Gets or sets primary key
         /// IDataTable interface implementation
         /// </summary>
-        public List<string> PrimaryKey
+        public List<string> PrimaryKeys
         {
             get; set;
         } = new();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IData", "PocoDataSet.IData\PocoDataSet.IData.csproj", "{C6D966B9-90EC-DA99-1771-5DD487B4F711}"
 EndProject
@@ -27,6 +27,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DemoConsoleApplications", "DemoConsoleApplications", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NugetPackageProject", "NugetPackageProject", "{0B3F8A31-3A9E-4361-94DF-046F07D170F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAdapter", "PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj", "{176E7FE4-2F4A-7A0E-574E-8B86608901E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,10 @@ Global
 		{6E32C806-D0E7-439C-AFCE-C588F22277E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E32C806-D0E7-439C-AFCE-C588F22277E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E32C806-D0E7-439C-AFCE-C588F22277E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{176E7FE4-2F4A-7A0E-574E-8B86608901E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{176E7FE4-2F4A-7A0E-574E-8B86608901E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{176E7FE4-2F4A-7A0E-574E-8B86608901E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{176E7FE4-2F4A-7A0E-574E-8B86608901E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

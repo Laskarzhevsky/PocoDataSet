@@ -2,6 +2,7 @@
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.Serializer;
+using PocoDataSet.SqlServerDataAdapter;
 
 namespace PocoDataSet.DemoWithNugetPackage
 {
@@ -142,7 +143,37 @@ namespace PocoDataSet.DemoWithNugetPackage
             // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
             dataSet.MergeWith(copyOfDataSet!);
 
+            // 12) SQL Server data adapter example of loading data from database into data set
+            LoadDataFromDatabase().Wait();
+
             Console.ReadLine();
+        }
+
+        /// <summary>
+        /// Loading data from database example using PocoDataSet.SqlServerDataAdapter.SqlDataAdapter
+        /// Create PocoDataSetExamples database first and fill it with data using items located inside DatabaseItems folder
+        /// </summary>
+        static async Task LoadDataFromDatabase()
+        {
+            List<string> returnedTableNames = new List<string>();
+            returnedTableNames.Add("Department");
+
+            IDataSet requestDataSet = DataSetFactory.CreateDataSet();
+            string connectionString = "Server=localhost;Database=PocoDataSetExamples;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
+
+            // a) Load Department (no parameters)
+            IDataSet responseDataSet = await sqlDataAdapter.FillAsync("SELECT * FROM Department", false, null, returnedTableNames, null, requestDataSet);
+
+            // b) Load employees for department #2 using a parameter dictionary
+            returnedTableNames = new List<string>();
+            returnedTableNames.Add("Employee");
+
+            string employeeSql = "SELECT * FROM Employee WHERE DepartmentId = @DepartmentId";
+            Dictionary<string, object?> parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+            parameters.Add("@DepartmentId", 2);
+
+            responseDataSet = await sqlDataAdapter.FillAsync(employeeSql, false, parameters, returnedTableNames, null, responseDataSet);
         }
     }
 }

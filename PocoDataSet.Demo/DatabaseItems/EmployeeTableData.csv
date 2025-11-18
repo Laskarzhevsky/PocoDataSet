@@ -1,0 +1,5 @@
+﻿Id,DepartmentId,FirstName,LastName,IsDeveloper,Timestamp,EmployedOn,Rate
+1,1,My,Cat,0,0x00000000000007DB,NULL,NULL
+2,2,His,Mouse,1,0x00000000000007DD,NULL,NULL
+3,3,Dark,Red,0,0x00000000000007D9,NULL,NULL
+4,4,Blue,Color,0,0x00000000000007DA,NULL,NULL
