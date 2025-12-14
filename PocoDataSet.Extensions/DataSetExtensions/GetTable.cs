@@ -1,4 +1,6 @@
-﻿using PocoDataSet.IData;
+﻿using System.Collections.Generic;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -14,6 +16,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <returns>Specified table</returns>
+        /// <exception cref="KeyNotFoundException">Exception is thrown if dataset does not contains a table with specified name</exception>
         public static IDataTable? GetTable(this IDataSet? dataSet, string tableName)
         {
             if (dataSet == null)
@@ -21,7 +24,11 @@ namespace PocoDataSet.Extensions
                 return default!;
             }
 
-            dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable);
+            if (!dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
+            {
+                throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
+            }
+
             return dataTable;
         }
         #endregion

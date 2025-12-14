@@ -1,4 +1,6 @@
-﻿using PocoDataSet.IData;
+﻿using System;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -16,11 +18,17 @@ namespace PocoDataSet.Extensions
         /// <param name="tableName">Table name</param>
         /// <param name="rowIndex">Row index</param>
         /// <returns>"Live" data row as an interface</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if table does not have row with specified index</exception>
         public static TInterface? AsInterface<TInterface>(this IDataTable? dataTable, int rowIndex) where TInterface : class
         {
             if (dataTable == null)
             {
                 return default(TInterface);
+            }
+
+            if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rowIndex));
             }
 
             IDataRow dataRow = dataTable.Rows[rowIndex];

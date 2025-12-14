@@ -9,6 +9,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="DataSetExtensions\GetFieldValue.cs~RF9f13b1a.TMP" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />

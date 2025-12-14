@@ -1,4 +1,6 @@
-﻿using PocoDataSet.IData;
+﻿using System.Collections.Generic;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -13,6 +15,7 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="dataTable">Data table for removal</param>
+        /// <exception cref="KeyNotFoundException">Exception is thrown if dataset does not contains a table with specified name</exception>
         public static void RemoveTable(this IDataSet? dataSet, string tableName)
         {
             if (dataSet is null)
@@ -20,7 +23,12 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            dataSet.Tables.Remove(tableName);
+            if (dataSet.Tables.ContainsKey(tableName))
+            {
+                dataSet.Tables.Remove(tableName);
+            }
+
+            throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
         }
         #endregion
     }

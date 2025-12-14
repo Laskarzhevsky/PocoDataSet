@@ -16,12 +16,18 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
-        /// <returns>new table</returns>
+        /// <returns>New table</returns>
+        /// <exception cref="KeyDuplicationException">Exception is thrown if dataset contains a table with specified name already</exception>
         public static IDataTable AddNewTable(this IDataSet? dataSet, string tableName)
         {
             if (dataSet == null)
             {
                 return default!;
+            }
+
+            if (dataSet.Tables.ContainsKey(tableName))
+            {
+                throw new KeyDuplicationException($"DataSet contains table with name {tableName} already");
             }
 
             IDataTable dataTable = new DataTable();
@@ -38,11 +44,17 @@ namespace PocoDataSet.Extensions
         /// <param name="tableName">Table name</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>New table</returns>
+        /// <exception cref="KeyDuplicationException">Exception is thrown if dataset contains a table with specified name already</exception>
         public static IDataTable AddNewTable(this IDataSet? dataSet, string tableName, List<IColumnMetadata> listOfColumnMetadata)
         {
             if (dataSet == null)
             {
                 return default!;
+            }
+
+            if (dataSet.Tables.ContainsKey(tableName))
+            {
+                throw new KeyDuplicationException($"DataSet contains table with name {tableName} already");
             }
 
             IDataTable dataTable = new DataTable();

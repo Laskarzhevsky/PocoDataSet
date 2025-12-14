@@ -9,7 +9,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Creates new data row in data table
+        /// Creates new data row in data table with default values taken from columns metadata
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <returns>New data row created in data table</returns>

@@ -1,4 +1,7 @@
-﻿using PocoDataSet.IData;
+﻿using System;
+using System.Collections.Generic;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -14,6 +17,8 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <param name="rowIndex">Row index</param>
+        /// <exception cref="KeyNotFoundException">Exception is thrown if dataset does not contains a table with specified name</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if table does not have row with specified index</exception>
         public static void RemoveRow(this IDataSet? dataSet, string tableName, int rowIndex)
         {
             if (dataSet == null)
@@ -23,12 +28,12 @@ namespace PocoDataSet.Extensions
 
             if (!dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
             {
-                return;
+                throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
             if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
             {
-                return;
+                throw new ArgumentOutOfRangeException(nameof(rowIndex));
             }
 
             dataTable.Rows.RemoveAt(rowIndex);

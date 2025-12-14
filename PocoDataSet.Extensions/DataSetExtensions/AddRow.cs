@@ -16,6 +16,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
         /// <param name="dataRow">Data row for addition</param>
+        /// <exception cref="KeyNotFoundException">Exception is thrown if dataset does not contains a table with specified name</exception>
         public static void AddRow(this IDataSet? dataSet, string tableName, IDataRow dataRow)
         {
             if (dataSet == null)
@@ -25,7 +26,7 @@ namespace PocoDataSet.Extensions
 
             if (!dataSet.Tables.TryGetValue(tableName, out IDataTable? dataTable))
             {
-                throw new KeyNotFoundException($"Table {tableName} not found.");
+                throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
             dataTable.Rows.Add(dataRow);

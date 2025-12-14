@@ -11,6 +11,13 @@ namespace PocoDataSet.Extensions
     public static partial class DataSetExtensions
     {
         #region Public Methods
+        /// <summary>
+        /// Tries to get table from dataset by its name
+        /// </summary>
+        /// <param name="dataSet">Data set</param>
+        /// <param name="tableName">Table name</param>
+        /// <param name="table">Specified table</param>
+        /// <returns>True if table found, otherwise false</returns>
         public static bool TryGetTable(this IDataSet? dataSet, string? tableName, out IDataTable? table)
         {
             table = null;

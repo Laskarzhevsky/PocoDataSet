@@ -17,6 +17,7 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="interfaceType">Interface type</param>
+        /// <exception cref="ArgumentException">Exception is thrown if specified type is not an interface</exception>
         public static void AddColumnsFromInterface(this IDataTable? dataTable, Type interfaceType)
         {
             if (dataTable == null)

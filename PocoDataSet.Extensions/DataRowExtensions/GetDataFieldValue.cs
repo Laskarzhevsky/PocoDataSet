@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
@@ -16,6 +18,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataRow">Data row</param>
         /// <param name="columnName">Column name</param>
         /// <returns>Data field value</returns>
+        /// <exception cref="KeyNotFoundException">Exception is thrown if table does not contain the column with specified name</exception>
         public static T? GetDataFieldValue<T>(this IDataRow? dataRow, string columnName)
         {
             if (dataRow == null)
@@ -32,7 +35,7 @@ namespace PocoDataSet.Extensions
             bool found = dataRow.TryGetValue(columnName, out raw);
             if (!found)
             {
-                return default(T);
+                throw new KeyNotFoundException(nameof(columnName));
             }
 
             if (raw == null)

@@ -15,6 +15,8 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="dataTable">Data table for addition</param>
+        /// <exception cref="ArgumentException">Exception is thrown if specified table does not have assigned name</exception>
+        /// <exception cref="KeyDuplicationException">Exception is thrown if a dataset contains a table with specified name already</exception>
         public static void AddTable(this IDataSet? dataSet, IDataTable dataTable)
         {
             if (dataSet == null)
@@ -22,14 +24,14 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            if (dataTable == null || string.IsNullOrEmpty(dataTable.TableName))
+            if (string.IsNullOrEmpty(dataTable.TableName))
             {
-                throw new ArgumentException("Table or TableName cannot be null.");
+                throw new ArgumentException("Table name cannot be null");
             }
 
             if (dataSet.Tables.ContainsKey(dataTable.TableName))
             {
-                throw new InvalidOperationException($"Table {dataTable.TableName} already exists.");
+                throw new KeyDuplicationException($"DataSet contains table with name {dataTable.TableName} already");
             }
 
             dataSet.Tables.Add(dataTable.TableName, dataTable);
