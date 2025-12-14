@@ -1,12 +1,14 @@
 # PocoDataSet
 
+The POCO DataSet documentation is published in the "POCO DataSet" section of **businessprocessprogramming.net** website.
+
 **PocoDataSet** is a lightweight, in-memory `DataSet` / `DataTable` / `DataRow` model built around simple POCOs and interfaces.
 
 It is designed to be:
 
-- **UI-friendly** – works well with Blazor, WPF, WinUI, etc.
-- **POCO-based** – data is represented as plain C# objects, not tied to any specific framework.
-- **Extensible** – core contracts live in `PocoDataSet.IData`, with implementations and helpers in separate projects.
+- **UI-friendly** â€“ works well with Blazor, WPF, WinUI, etc.
+- **POCO-based** â€“ data is represented as plain C# objects, not tied to any specific framework.
+- **Extensible** â€“ core contracts live in `PocoDataSet.IData`, with implementations and helpers in separate projects.
 
 ---
 
@@ -23,9 +25,9 @@ The solution contains four projects:
 
 - **PocoDataSet.Data**  
   Concrete implementations of the interfaces:
-  - `DataSet` – holds a dictionary of named tables and relations
-  - `DataTable` – holds columns and rows
-  - `DataRow` – a dictionary-backed row with helper methods and state (`RowState`, `Selected`)
+  - `DataSet` â€“ holds a dictionary of named tables and relations
+  - `DataTable` â€“ holds columns and rows
+  - `DataRow` â€“ a dictionary-backed row with helper methods and state (`RowState`, `Selected`)
   - `ColumnMetadata`, `DataRelation`, `ForeignKeyData`
 
 - **PocoDataSet.Extensions**  
@@ -42,7 +44,7 @@ The solution contains four projects:
     - `GetDataFieldValue<T>` (with friendly conversion)
     - `CopyFromPoco`, `ToPoco`, `MergeWith`
   - `DataSetFactory`
-    - `CreateDataSet()` – simple factory for `IDataSet`
+    - `CreateDataSet()` â€“ simple factory for `IDataSet`
   - Internal helpers (data type names, default value helpers, type info, etc.)
 
 - **PocoDataSet.Serializer**  
@@ -59,9 +61,9 @@ The `PocoDataSet.SqlServerDataAdapter` project provides a lightweight SQL Server
 - Provide an async-friendly `FillAsync` API that accepts parameter dictionaries to avoid inline concatenation and reduce risk of SQL injection.
 
 ## Key types
-- `PocoDataSet.SqlServerDataAdapter.SqlDataAdapter` — main adapter class used to execute queries and return an `IDataSet`.
-- `PocoDataSet.SqlServerDataAdapter.DataTableCreator` — internal helper used by the adapter to create `DataTable` instances with columns, primary keys and rows.
-- `PocoDataSet.SqlServerDataAdapter.ForeignKeyData` — holds foreign key mapping information used when building `ColumnMetadata`.
+- `PocoDataSet.SqlServerDataAdapter.SqlDataAdapter` â€” main adapter class used to execute queries and return an `IDataSet`.
+- `PocoDataSet.SqlServerDataAdapter.DataTableCreator` â€” internal helper used by the adapter to create `DataTable` instances with columns, primary keys and rows.
+- `PocoDataSet.SqlServerDataAdapter.ForeignKeyData` â€” holds foreign key mapping information used when building `ColumnMetadata`.
 
 ## Notable behaviors
 - `DataTableCreator` reads column schema from `SqlDataReader.GetSchemaTable()` and populates `ColumnMetadata` fields such as `ColumnName`, `DataType`, `MaxLength`, and (when implemented) `IsNullable`. The project also supports loading primary key information and populating `DataTable.PrimaryKey`.
@@ -74,15 +76,15 @@ The `PocoDataSet.SqlServerDataAdapter` project provides a lightweight SQL Server
 
 ## Recommended improvements (already implemented or easy to add)
 - Populate `ColumnMetadata.IsNullable` from `GetSchemaTable()` (`AllowDBNull` / `IsNullable`) when available.
-- Populate `DataTable.PrimaryKey` from key discovery (the adapter already provides hooks to fetch primary key information — call these before finalizing the `DataTable`).
+- Populate `DataTable.PrimaryKey` from key discovery (the adapter already provides hooks to fetch primary key information â€” call these before finalizing the `DataTable`).
 - Ensure the adapter infers nullability conservatively when the provider schema does not include it (for example, treat CLR non-nullable value types as non-nullable).
 
 ## Where to find it in the solution
 - Project folder: `PocoDataSet.SqlServerDataAdapter`
 - Key files:
-  - `SqlDataAdapter.cs` — public adapter API
-  - `DataTableCreator/*.cs` — schema / row building helpers
-  - `ForeignKeyData.cs` — FK metadata model
+  - `SqlDataAdapter.cs` â€” public adapter API
+  - `DataTableCreator/*.cs` â€” schema / row building helpers
+  - `ForeignKeyData.cs` â€” FK metadata model
 
 ---
 
@@ -120,4 +122,5 @@ PocoDataSet.Data
 PocoDataSet.Extensions
 PocoDataSet.Serializer
 PocoDataSet.SqlServerDataAdapter
+
 
