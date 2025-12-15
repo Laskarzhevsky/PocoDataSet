@@ -1,5 +1,7 @@
 # PocoDataSet
 
+The POCO DataSet documentation is published in the "POCO DataSet" section of **businessprocessprogramming.net** website.
+
 **PocoDataSet** is a lightweight, in-memory `DataSet` / `DataTable` / `DataRow` model built around simple POCOs and interfaces.
 
 It is designed to be:

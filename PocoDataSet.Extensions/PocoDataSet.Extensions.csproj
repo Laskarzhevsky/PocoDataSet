@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet extension methods</Description>
+    <Description>POCO DataSet extension methods. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PocoDataSet.Extensions</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

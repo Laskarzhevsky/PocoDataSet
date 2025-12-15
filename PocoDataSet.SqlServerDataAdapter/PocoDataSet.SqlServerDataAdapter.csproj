@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet SQL Server data adapter</Description>
+    <Description>POCO DataSet SQL Server data adapter. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PocoDataSet.SqlServerDataAdapter</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
