@@ -8,7 +8,7 @@ namespace PocoDataSet.Extensions
     /// <summary>
     /// Holds merge options
     /// </summary>
-    public sealed class MergeOptions : IMergeOptions
+    public class MergeOptions : IMergeOptions
     {
         #region Data Fields
         /// <summary>Optional per-table filter that limits pruning/upserts to a scope (e.g., Breadcrumbs == "Libraries").</summary>

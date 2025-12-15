@@ -7,7 +7,7 @@ namespace PocoDataSet.Extensions
     /// <summary>
     /// If the value already matches the underlying target type, just return it.
     /// </summary>
-    public sealed class NoOpExactTypeConverter : IValueConverter
+    public class NoOpExactTypeConverter : IValueConverter
     {
         public bool CanConvert(Type underlyingTargetType)
         {

@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet extension methods. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
+    <Description>POCO DataSet Observable interfaces. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>PocoDataSet.Extensions</PackageId>
+    <PackageId>PocoDataSet.IObservableData</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
     <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
   </ItemGroup>
 </Project>

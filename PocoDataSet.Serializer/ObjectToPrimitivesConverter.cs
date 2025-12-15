@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace PocoDataSet.Serializer
 {
-    public sealed class ObjectToPrimitivesConverter : JsonConverter<object?>
+    public class ObjectToPrimitivesConverter : JsonConverter<object?>
     {
         public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

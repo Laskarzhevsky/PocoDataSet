@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\\SharedBuildSettings.props" />
+  <PropertyGroup>
+    <Description>POCO DataSet Observable components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>PocoDataSet.ObservableData</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="ObservableDataRowComparers\**" />
+    <EmbeddedResource Remove="ObservableDataRowComparers\**" />
+    <None Remove="ObservableDataRowComparers\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ObservableDataRowComparers\CompositeRowComparer.cs" />
+    <Compile Include="ObservableDataRowComparers\DefaultRowComparer.cs" />
+    <Compile Include="ObservableDataRowComparers\SortCompiler.cs" />
+    <Compile Include="ObservableDataRowComparers\SortKey.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
+    <ProjectReference Include="..\PocoDataSet.IObservableData\PocoDataSet.IObservableData.csproj" />
+  </ItemGroup>
+</Project>

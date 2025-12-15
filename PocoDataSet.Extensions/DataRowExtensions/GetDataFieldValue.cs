@@ -26,11 +26,6 @@ namespace PocoDataSet.Extensions
                 return default(T);
             }
 
-            if (columnName == null)
-            {
-                throw new ArgumentNullException(nameof(columnName));
-            }
-
             object? raw;
             bool found = dataRow.TryGetValue(columnName, out raw);
             if (!found)

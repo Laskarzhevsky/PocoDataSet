@@ -8,7 +8,6 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
-    // Must be public and non-sealed so the runtime can subclass it.
     public class InterfaceRowProxy<TInterface> : System.Reflection.DispatchProxy where TInterface : class
     {
         IDataRow _row;
