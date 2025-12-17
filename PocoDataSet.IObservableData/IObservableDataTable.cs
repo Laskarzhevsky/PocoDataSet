@@ -28,8 +28,9 @@ namespace PocoDataSet.IObservableData
         /// <summary>
         /// Adds data row
         /// </summary>
-        /// <param name="dataRow"></param>
-        void AddRow(IDataRow dataRow);
+        /// <param name="dataRow">Data row</param>
+        /// <param name="mergeManager">Merge manager</param>
+        void AddRow(IDataRow dataRow, IMergeManager? mergeManager);
 
         /// <summary>
         /// Removes row at specified index

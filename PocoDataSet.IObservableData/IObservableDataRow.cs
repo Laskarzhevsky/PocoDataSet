@@ -53,11 +53,11 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets key
+        /// Gets or sets key
         /// </summary>
         string Key
         {
-            get;
+            get; set;
         }
         #endregion
     }
