@@ -81,22 +81,22 @@ namespace PocoDataSet.Extensions
                 bool found = _row.TryGetValue(columnName, out raw);
                 if (!found)
                 {
-                    return Defaults.GetDefault(targetMethod.ReturnType);
+                    return RuntimeDefaults.GetDefault(targetMethod.ReturnType);
                 }
                 if (raw == null)
                 {
-                    return Defaults.GetDefault(targetMethod.ReturnType);
+                    return RuntimeDefaults.GetDefault(targetMethod.ReturnType);
                 }
 
                 object? converted;
                 bool ok = CompositeValueConverterFactory.Default.TryConvert(raw, targetMethod.ReturnType, CultureInfo.InvariantCulture, out converted);
                 if (!ok)
                 {
-                    return Defaults.GetDefault(targetMethod.ReturnType);
+                    return RuntimeDefaults.GetDefault(targetMethod.ReturnType);
                 }
                 if (converted == null)
                 {
-                    return Defaults.GetDefault(targetMethod.ReturnType);
+                    return RuntimeDefaults.GetDefault(targetMethod.ReturnType);
                 }
 
                 return converted;

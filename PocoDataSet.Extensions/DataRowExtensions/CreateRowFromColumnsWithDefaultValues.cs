@@ -21,7 +21,7 @@ namespace PocoDataSet.Extensions
             IDataRow dataRow = DataRowFactory.CreateEmpty(columnsMetadata.Count);
             foreach (IColumnMetadata columnMetadata in columnsMetadata)
             {
-                dataRow[columnMetadata.ColumnName] = Defaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                dataRow[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
             return dataRow;

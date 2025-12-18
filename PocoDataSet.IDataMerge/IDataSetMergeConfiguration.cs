@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using PocoDataSet.IData;
+
 namespace PocoDataSet.IDataMerge
 {
     /// <summary>
@@ -8,6 +10,14 @@ namespace PocoDataSet.IDataMerge
     public interface IDataSetMergeConfiguration
     {
         #region Properties
+        /// <summary>
+        /// Gets data type default value provider 
+        /// </summary>
+        IDataTypeDefaultValueProvider DefaultValueProvider
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets or sets default row merge handler.
         /// </summary>

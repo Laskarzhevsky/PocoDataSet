@@ -34,7 +34,7 @@ namespace PocoDataSet.Data
             for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
                 IColumnMetadata columnMetadata = listOfColumnMetadata[i];
-                row[columnMetadata.ColumnName] = Defaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                row[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
             return row;

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using PocoDataSet.Data;
+using PocoDataSet.IData;
 using PocoDataSet.IDataMerge;
 
 namespace PocoDataSet.DataMerge
@@ -20,13 +22,21 @@ namespace PocoDataSet.DataMerge
             OverriddenPrimaryKeyNames = new Dictionary<string, List<string>>();
             TableHandlersByName = new Dictionary<string, ITableMergeHandler>();
             RowHandlersByTableName = new Dictionary<string, IRowMergeHandler>();
-
+            DefaultValueProvider = new MetadataDefaultsProvider();
             DefaultTableMergeHandler = new DefaultTableMergeHandler();
             DefaultRowMergeHandler = new DefaultRowMergeHandler();
         }
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets data type default value provider 
+        /// </summary>
+        public IDataTypeDefaultValueProvider DefaultValueProvider
+        {
+            get; private set;
+        }
+
         /// <summary>
         /// Gets or sets default row merge handler.
         /// IDataSetMergeConfiguration interface implementation

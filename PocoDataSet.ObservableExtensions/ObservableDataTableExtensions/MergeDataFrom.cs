@@ -63,7 +63,7 @@ namespace PocoDataSet.ObservableExtensions
                     IDataRow newDataRow = observableDataTable.InnerDataTable.AddNewRow();
                     foreach (IColumnMetadata columnMetadata in observableDataTable.Columns)
                     {
-                        newDataRow[columnMetadata.ColumnName] = Defaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                        newDataRow[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                     }
 
                     newDataRow.MergeWith(refreshedDataRow, observableDataTable.Columns);

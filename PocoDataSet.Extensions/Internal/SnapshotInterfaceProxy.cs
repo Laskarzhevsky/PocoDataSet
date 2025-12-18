@@ -102,7 +102,7 @@ namespace PocoDataSet.Extensions
                 object? val;
                 if (!ValueReader.TryRead(row, columnName, p.PropertyType, out val))
                 {
-                    val = Defaults.ForType(p.PropertyType); // your default/null helper
+                    val = RuntimeDefaults.ForType(p.PropertyType); // your default/null helper
                 }
 
                 dict[propName] = val;

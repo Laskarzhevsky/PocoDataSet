@@ -42,7 +42,7 @@ namespace PocoDataSet.DataMerge
                         IDataRow newRow = currentTable.AddNewRow();
                         foreach (IColumnMetadata columnMetadata in currentTable.Columns)
                         {
-                            newRow[columnMetadata.ColumnName] = DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                            newRow[columnMetadata.ColumnName] = dataSetContext.Configuration.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                         }
 
                         dataSetContext.Configuration.DefaultRowMergeHandler.MergeRow(currentTable.TableName, newRow, refreshedRow, currentTable.Columns, dataSetContext);
@@ -115,7 +115,7 @@ namespace PocoDataSet.DataMerge
                 IDataRow newDataRow = currentTable.AddNewRow();
                 foreach (IColumnMetadata columnMetadata in currentTable.Columns)
                 {
-                    newDataRow[columnMetadata.ColumnName] = DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                    newDataRow[columnMetadata.ColumnName] = dataSetContext.Configuration.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                 }
 
                 IRowMergeHandler rowHandler = dataSetContext.Configuration.DefaultRowMergeHandler;
