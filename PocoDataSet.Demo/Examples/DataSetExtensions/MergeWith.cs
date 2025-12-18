@@ -1,4 +1,5 @@
-﻿using PocoDataSet.Extensions;
+﻿using PocoDataSet.DataMerge;
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Demo.DataSetExtensions

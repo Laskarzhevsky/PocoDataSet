@@ -27,8 +27,10 @@ namespace PocoDataSet.Extensions
             {
                 dataSet.Tables.Remove(tableName);
             }
-
-            throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
+            else
+            {
+                throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
+            }
         }
         #endregion
     }

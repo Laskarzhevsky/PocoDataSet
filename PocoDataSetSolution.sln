@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36804.6 d17.14
+VisualStudioVersion = 17.14.36804.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IData", "PocoDataSet.IData\PocoDataSet.IData.csproj", "{C6D966B9-90EC-DA99-1771-5DD487B4F711}"
 EndProject
@@ -35,6 +35,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableData", "PocoDataSet.ObservableData\PocoDataSet.ObservableData.csproj", "{872B0109-51F2-4503-BC18-D07581AB088A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableExtensions", "PocoDataSet.ObservableExtensions\PocoDataSet.ObservableExtensions.csproj", "{ADC00825-DDC1-4CFF-862C-429990B9493C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IDataMerge", "PocoDataSet.IDataMerge\PocoDataSet.IDataMerge.csproj", "{4A4955F8-D18D-4327-B147-95934B09B21A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.DataMerge", "PocoDataSet.DataMerge\PocoDataSet.DataMerge.csproj", "{6A195D84-EA7A-4E01-A143-F05823291010}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +90,14 @@ Global
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A4955F8-D18D-4327-B147-95934B09B21A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A4955F8-D18D-4327-B147-95934B09B21A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A4955F8-D18D-4327-B147-95934B09B21A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A4955F8-D18D-4327-B147-95934B09B21A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A195D84-EA7A-4E01-A143-F05823291010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A195D84-EA7A-4E01-A143-F05823291010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A195D84-EA7A-4E01-A143-F05823291010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A195D84-EA7A-4E01-A143-F05823291010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

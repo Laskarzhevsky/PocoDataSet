@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 
 using PocoDataSet.IData;
+using PocoDataSet.IDataMerge;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.DataMerge
 {
-    public class DataSetsMergeResult
+    public class DataSetsMergeResult : IDataSetsMergeResult
     {
         #region Constructors
         /// <summary>
@@ -24,6 +25,7 @@ namespace PocoDataSet.Extensions
         #region Public Properties
         /// <summary>
         /// Gets list of added data rows
+        /// IDataSetsMergeResult interface implementation
         /// </summary>
         public List<IDataRow> ListOfAddedDataRows
         {
@@ -32,6 +34,7 @@ namespace PocoDataSet.Extensions
 
         /// <summary>
         /// Gets list of deleted data rows
+        /// IDataSetsMergeResult interface implementation
         /// </summary>
         public List<IDataRow> ListOfDeletedDataRows
         {
@@ -40,6 +43,7 @@ namespace PocoDataSet.Extensions
 
         /// <summary>
         /// Gets list of updated data rows
+        /// IDataSetsMergeResult interface implementation
         /// </summary>
         public List<IDataRow> ListOfUpdatedDataRows
         {

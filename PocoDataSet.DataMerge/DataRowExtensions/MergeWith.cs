@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.DataMerge
 {
     /// <summary>
     /// Contains data row extension methods
@@ -16,6 +17,7 @@ namespace PocoDataSet.Extensions
         /// <param name="currentDataRow">Current data row</param>
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>True if any value of row sas changed, otherwise false</returns>
         public static bool MergeWith(this IDataRow? currentDataRow, IDataRow? refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
         {
             bool rowValueChanged = false;

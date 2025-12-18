@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using PocoDataSet.Data;
+using PocoDataSet.DataMerge;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
@@ -22,7 +23,7 @@ namespace PocoDataSet.ObservableExtensions
         public static void MergeDataFrom(this IObservableDataTable observableDataTable, IDataTable refreshedDataTable, IMergeOptions? mergeOptions = null)
         {
             List<string> observableDataTablePrimaryKeyColumnNames = observableDataTable.InnerDataTable.GetPrimaryKeyColumnNames(mergeOptions);
-            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(observableDataTablePrimaryKeyColumnNames, null);
+            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(observableDataTablePrimaryKeyColumnNames);
             for (int i = observableDataTable.Rows.Count - 1; i >=0; i--)
             {
                 IObservableDataRow observableDataRow = observableDataTable.Rows[i];

@@ -30,7 +30,7 @@ namespace PocoDataSet.Extensions
             bool found = dataRow.TryGetValue(columnName, out raw);
             if (!found)
             {
-                throw new KeyNotFoundException(nameof(columnName));
+                throw new KeyNotFoundException(columnName);
             }
 
             if (raw == null)

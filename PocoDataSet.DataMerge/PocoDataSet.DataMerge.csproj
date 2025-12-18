@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet Observable extension methods. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
+    <Description>POCO DataSet merge components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>PocoDataSet.ObservableExtensions</PackageId>
+    <PackageId>PocoDataSet.DataMerge</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -15,9 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PocoDataSet.DataMerge\PocoDataSet.DataMerge.csproj" />
     <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
-    <ProjectReference Include="..\PocoDataSet.IObservableData\PocoDataSet.IObservableData.csproj" />
-    <ProjectReference Include="..\PocoDataSet.ObservableData\PocoDataSet.ObservableData.csproj" />
+    <ProjectReference Include="..\PocoDataSet.IDataMerge\PocoDataSet.IDataMerge.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
-﻿using PocoDataSet.IData;
+﻿using PocoDataSet.Extensions;
+using PocoDataSet.IData;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.DataMerge
 {
     /// <summary>
     /// Contains data table extension methods

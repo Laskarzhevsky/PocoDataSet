@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.DataMerge
 {
     /// <summary>
     /// Contains data set extension methods

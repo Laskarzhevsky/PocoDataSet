@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 
 using PocoDataSet.Data;
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.DataMerge
 {
     /// <summary>
     /// Contains data set extension methods
     /// </summary>
-    public static partial class ObservableDataTableExtensions
+    public static partial class DataTableExtensions
     {
         #region Public Methods
         /// <summary>
@@ -25,7 +26,7 @@ namespace PocoDataSet.Extensions
             }
 
             List<string> dataTablePrimaryKeyColumnNames = currentDataTable.GetPrimaryKeyColumnNames(mergeOptions);
-            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(dataTablePrimaryKeyColumnNames, null);
+            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(dataTablePrimaryKeyColumnNames);
             for (int i = currentDataTable.Rows.Count - 1; i >=0; i--)
             {
                 IDataRow dataRow = currentDataTable.Rows[i];
