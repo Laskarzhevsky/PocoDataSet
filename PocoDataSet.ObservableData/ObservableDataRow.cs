@@ -108,12 +108,12 @@ namespace PocoDataSet.ObservableData
 
 
         /// <summary>
-        /// Gets key
+        /// Gets or sets key
         /// IObservableDataRow interface implementation
         /// </summary>
         public string Key
         {
-            get; private set;
+            get; set;
         }
         #endregion
 

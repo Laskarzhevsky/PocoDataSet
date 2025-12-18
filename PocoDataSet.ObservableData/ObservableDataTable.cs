@@ -74,6 +74,19 @@ namespace PocoDataSet.ObservableData
             RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
         }
 
+        public void AddRow(IDataRow dataRow, IMergeManager? mergeManager)
+        {
+            IObservableDataRow observableDataRow = new ObservableDataRow(dataRow);
+            if (mergeManager != null)
+            {
+                mergeManager.HandleMerge(TableName, observableDataRow);
+            }
+
+            observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
+            _observableDataRows.Add(observableDataRow);
+            RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
+        }
+
         /// <summary>
         /// Removes row
         /// IObservableDataTable inteerface implementation

@@ -66,7 +66,7 @@ namespace PocoDataSet.ObservableExtensions
                     }
 
                     newDataRow.MergeWith(refreshedDataRow, observableDataTable.Columns);
-                    observableDataTable.AddRow(newDataRow);
+                    observableDataTable.AddRow(newDataRow, null);
                 }
             }
         }
