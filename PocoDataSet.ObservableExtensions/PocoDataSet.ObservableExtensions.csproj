@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PocoDataSet.DataMerge\PocoDataSet.DataMerge.csproj" />
     <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
     <ProjectReference Include="..\PocoDataSet.IObservableData\PocoDataSet.IObservableData.csproj" />
     <ProjectReference Include="..\PocoDataSet.ObservableData\PocoDataSet.ObservableData.csproj" />

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using PocoDataSet.Extensions;
+
 namespace PocoDataSet.IData
 {
     /// <summary>
@@ -9,6 +11,38 @@ namespace PocoDataSet.IData
     public interface IMergeOptions
     {
         #region Properties
+        /// <summary>
+        /// Gets data set merge result
+        /// </summary>
+        IDataSetMergeResult DataSetMergeResult
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets or sets default row merge handler
+        /// </summary>
+        IRowMergeHandler DefaultRowMergeHandler
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets or sets default table merge handler
+        /// </summary>
+        ITableMergeHandler DefaultTableMergeHandler
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets data type default value provider 
+        /// </summary>
+        public IDataTypeDefaultValueProvider DefaultValueProvider
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// Data in mentioned tables will not be changed during the merge process
@@ -58,6 +92,45 @@ namespace PocoDataSet.IData
         {
             get; set;
         }
+
+        /// <summary>
+        /// Gets row merge handlers
+        /// </summary>
+        IDictionary<string, IRowMergeHandler> RowMergeHandlers
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets table merge handlers
+        /// </summary>
+        IDictionary<string, ITableMergeHandler> TableMergeHandlers
+        {
+            get;
+        }
+        #endregion
+
+        #region Methods
+        /// <summary>
+        /// Gets primary key column names for a given table, applying overrides when configured.
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <returns>Primary key column names</returns>
+        List<string> GetPrimaryKeyColumnNames(IDataTable dataTable);
+
+        /// <summary>
+        /// Gets row merge handler
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <returns>Row merge handler</returns>
+        IRowMergeHandler GetRowMergeHandler(string tableName);
+
+        /// <summary>
+        /// Gets table merge handler
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <returns>Table merge handler</returns>
+        ITableMergeHandler GetTableMergeHandler(string tableName);
         #endregion
     }
 }

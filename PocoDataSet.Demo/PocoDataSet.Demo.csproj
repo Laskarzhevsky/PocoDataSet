@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PocoDataSet.DataMerge\PocoDataSet.DataMerge.csproj" />
+    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
     <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
     <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
   </ItemGroup>

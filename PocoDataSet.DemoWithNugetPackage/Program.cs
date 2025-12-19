@@ -1,8 +1,6 @@
 ﻿using PocoDataSet.Data;
-using PocoDataSet.DataMerge;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
-using PocoDataSet.IDataMerge;
 using PocoDataSet.Serializer;
 using PocoDataSet.SqlServerDataAdapter;
 
@@ -143,9 +141,7 @@ namespace PocoDataSet.DemoWithNugetPackage
             // - Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
             // - Employee table with 1 row: 1, "John", "Doe", 2
             // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
-            IDataSetMergeConfiguration dataSetMergeConfiguration = new DataSetMergeConfiguration();
-            DataSetMergeEngine dataSetMergeEngine = new DataSetMergeEngine();
-            dataSetMergeEngine.Merge(dataSet, copyOfDataSet, dataSetMergeConfiguration);
+            dataSet.MergeWith(copyOfDataSet);
 
             // 12) SQL Server data adapter example of loading data from database into data set
             LoadDataFromDatabase().Wait();

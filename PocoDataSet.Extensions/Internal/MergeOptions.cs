@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
@@ -22,10 +23,52 @@ namespace PocoDataSet.Extensions
         public MergeOptions()
         {
             _getPruneFilter = new Func<string, Func<IDataRow, bool>?>(DefaultGetPruneFilter);
+            DataSetMergeResult = new DataSetMergeResult(new List<IDataRow>(), new List<IDataRow>(), new List<IDataRow>());
+            DefaultRowMergeHandler = new DefaultRowMergeHandler();
+            DefaultTableMergeHandler = new DefaultTableMergeHandler();
+            DefaultValueProvider = new MetadataDefaultsProvider();
+            RowMergeHandlers = new Dictionary<string, IRowMergeHandler>();
+            TableMergeHandlers = new Dictionary<string, ITableMergeHandler>();
         }
         #endregion
 
         #region Public Properties
+        /// <summary>
+        /// Gets data set merge result
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public IDataSetMergeResult DataSetMergeResult
+        {
+            get; private set;
+        }
+
+        /// <summary>
+        /// Gets or sets default row merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public IRowMergeHandler DefaultRowMergeHandler
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets or sets default table merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public ITableMergeHandler DefaultTableMergeHandler
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets data type default value provider 
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public IDataTypeDefaultValueProvider DefaultValueProvider
+        {
+            get; private set;
+        }
+
         /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// IMergeOptions interface implementation
@@ -92,6 +135,23 @@ namespace PocoDataSet.Extensions
         {
             get; set;
         } = true;
+
+        /// <summary>
+        /// Gets row merge handlers
+        /// </summary>
+        public IDictionary<string, IRowMergeHandler> RowMergeHandlers
+        {
+            get; private set;
+        }
+
+        /// <summary>
+        /// Gets table merge handlers
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public IDictionary<string, ITableMergeHandler> TableMergeHandlers
+        {
+            get; private set;
+        }
         #endregion
 
         #region Methods
@@ -103,6 +163,60 @@ namespace PocoDataSet.Extensions
         static Func<IDataRow, bool>? DefaultGetPruneFilter(string tableName)
         {
             return null; // no scope by default
+        }
+
+        /// <summary>
+        /// Gets primary key column names for a given table, applying overrides when configured.
+        /// IMergeContext interface implementation
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <returns>Primary key column names</returns>
+        public List<string> GetPrimaryKeyColumnNames(IDataTable dataTable)
+        {
+            List<string>? overrideKeys;
+            if (OverriddenPrimaryKeyNames.TryGetValue(dataTable.TableName, out overrideKeys))
+            {
+                if (overrideKeys != null && overrideKeys.Count > 0)
+                {
+                    return new List<string>(overrideKeys);
+                }
+            }
+
+            return dataTable.GetPrimaryKeyColumnNames(null);
+        }
+
+        /// <summary>
+        /// Gets row merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <returns>Row merge handler</returns>
+        public IRowMergeHandler GetRowMergeHandler(string tableName)
+        {
+            IRowMergeHandler? rowMergeHandler;
+            if (RowMergeHandlers.TryGetValue(tableName, out rowMergeHandler))
+            {
+                return rowMergeHandler;
+            }
+
+            return DefaultRowMergeHandler;
+        }
+
+        /// <summary>
+        /// Gets table merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <returns>Table merge handler</returns>
+        public ITableMergeHandler GetTableMergeHandler(string tableName)
+        {
+            ITableMergeHandler? tableMergeHandler;
+            if (TableMergeHandlers.TryGetValue(tableName, out tableMergeHandler))
+            {
+                return tableMergeHandler;
+            }
+
+            return DefaultTableMergeHandler;
         }
         #endregion
     }
