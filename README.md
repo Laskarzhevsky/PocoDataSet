@@ -47,6 +47,28 @@ The solution contains four projects:
     - `CreateDataSet()` – simple factory for `IDataSet`
   - Internal helpers (data type names, default value helpers, type info, etc.)
 
+- **PocoDataSet.IDataMerge**  
+  Interfaces and contracts for the merge infrastructure:
+  - `IDataSetMergeEngine` – orchestrates DataSet / DataTable / DataRow merge
+  - `IDataSetMergeConfiguration` – provides merge policies and handlers
+  - `ITableMergeHandler` – table-level merge behavior
+  - `IRowMergeHandler` – row-level merge behavior
+  - `IDataTypeDefaultValueProvider` – pluggable provider for metadata-based default values
+
+  This project contains **no implementation**, only contracts.  
+  It allows applications to customize merge behavior without referencing concrete merge logic.
+
+- **PocoDataSet.DataMerge**  
+  Default implementation of the merge infrastructure:
+  - `DataSetMergeEngine` – handler-based merge engine
+  - `DataSetMergeConfiguration` – default configuration and wiring
+  - `DefaultTableMergeHandler` – primary-key based table merge
+  - `DefaultRowMergeHandler` – value-level row merge
+  - `DataTypeDefaultValueProvider` – default metadata-to-value mapping
+
+  The merge logic was intentionally moved out of `PocoDataSet.Extensions`
+  to avoid growing option-driven `if/else` logic and to keep responsibilities separated.
+
 - **PocoDataSet.Serializer**  
   JSON serialization helpers using `System.Text.Json`:
   - `DataSetSerializer.FromJsonString(string? json) : IDataSet?`

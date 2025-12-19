@@ -1,6 +1,8 @@
 ﻿using PocoDataSet.Data;
+using PocoDataSet.DataMerge;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
+using PocoDataSet.IDataMerge;
 using PocoDataSet.Serializer;
 using PocoDataSet.SqlServerDataAdapter;
 
@@ -48,7 +50,7 @@ namespace PocoDataSet.DemoWithNugetPackage
             IDataTable employmentTypeDataTable = dataSet.AddNewTableFromPocoInterface("EmploymentType", typeof(IEmploymentType));
 
             // 3.a) Create a new row and add it to the table. Use it when field values need to be assigned before adding row to the table
-            IDataRow departmentDataRow = DataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
+            IDataRow departmentDataRow = PocoDataSet.Extensions.DataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
             departmentDataRow.UpdateDataFieldValue("Id", 1);
             departmentDataRow.UpdateDataFieldValue("Name", "Customer Service");
             departmentDataTable.Rows.Add(departmentDataRow);
@@ -64,7 +66,7 @@ namespace PocoDataSet.DemoWithNugetPackage
             employmentTypeDataRow.UpdateDataFieldValue("Description", "Full Time");
 
             // 3.b) Create a new rows and add them to the table via data set. Use it when field values need to be assigned before adding row to the table
-            IDataRow employeeDataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(employeeTable.Columns);
+            IDataRow employeeDataRow = PocoDataSet.Extensions.DataRowExtensions.CreateRowFromColumnsWithDefaultValues(employeeTable.Columns);
             employeeDataRow.UpdateDataFieldValue("Id", 1);
             employeeDataRow.UpdateDataFieldValue("FirstName", "John");
             employeeDataRow.UpdateDataFieldValue("LastName", "Doe");
@@ -141,7 +143,9 @@ namespace PocoDataSet.DemoWithNugetPackage
             // - Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
             // - Employee table with 1 row: 1, "John", "Doe", 2
             // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
-            dataSet.MergeWith(copyOfDataSet!);
+            IDataSetMergeConfiguration dataSetMergeConfiguration = new DataSetMergeConfiguration();
+            DataSetMergeEngine dataSetMergeEngine = new DataSetMergeEngine();
+            dataSetMergeEngine.Merge(dataSet, copyOfDataSet, dataSetMergeConfiguration);
 
             // 12) SQL Server data adapter example of loading data from database into data set
             LoadDataFromDatabase().Wait();
