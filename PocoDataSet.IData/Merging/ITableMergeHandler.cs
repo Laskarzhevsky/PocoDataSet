@@ -5,6 +5,7 @@ namespace PocoDataSet.IData
     /// </summary>
     public interface ITableMergeHandler
     {
+        #region Methods
         /// <summary>
         /// Merges current table with refreshed table.
         /// </summary>
@@ -12,5 +13,6 @@ namespace PocoDataSet.IData
         /// <param name="refreshedTable">Refreshed table</param>
         /// <param name="mergeOptions">Merge options.</param>
         void Merge(IDataTable currentTable, IDataTable refreshedTable, IMergeOptions mergeOptions);
+        #endregion
     }
 }

@@ -1,4 +1,6 @@
-﻿using PocoDataSet.IData;
+﻿using System.Collections.Generic;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -21,12 +23,22 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
+            // Track deletions BEFORE clearing the table
+            List<IDataRow> oldRows = new List<IDataRow>(currentDataTable.Rows);
+
+            // Clear current rows
             currentDataTable.Rows.Clear();
 
             foreach (IDataRow refreshedDataRow in refreshedDataTable.Rows)
             {
                 IDataRow newDataRow = currentDataTable.AddNewRow();
                 DataRowExtensions.MergeWith(newDataRow, refreshedDataRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+
+                mergeOptions.DataSetMergeResult.ListOfAddedDataRows.Add(newDataRow);
+                for (int i = 0; i < oldRows.Count; i++)
+                {
+                    mergeOptions.DataSetMergeResult.ListOfDeletedDataRows.Add(oldRows[i]);
+                }
             }
         }
         #endregion

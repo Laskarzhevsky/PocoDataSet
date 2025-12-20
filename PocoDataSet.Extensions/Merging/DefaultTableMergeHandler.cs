@@ -5,11 +5,17 @@ using PocoDataSet.IData;
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Default table merge handler.
+    /// Provides default table merge handler functionality
     /// </summary>
     public class DefaultTableMergeHandler : ITableMergeHandler
     {
-        /// <inheritdoc/>
+        #region Public Methods
+        /// <summary>
+        /// Merges current table with refreshed table.
+        /// </summary>
+        /// <param name="currentTable">Current table</param>
+        /// <param name="refreshedTable">Refreshed table</param>
+        /// <param name="mergeOptions">Merge options.</param>
         public void Merge(IDataTable currentTable, IDataTable refreshedTable, IMergeOptions mergeOptions)
         {
             if (currentTable == null || refreshedTable == null)
@@ -40,7 +46,7 @@ namespace PocoDataSet.Extensions
                         IDataRow newRow = currentTable.AddNewRow();
                         foreach (IColumnMetadata columnMetadata in currentTable.Columns)
                         {
-                            newRow[columnMetadata.ColumnName] = mergeOptions.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                            newRow[columnMetadata.ColumnName] = mergeOptions.DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                         }
 
                         DataRowExtensions.MergeWith(newRow, refreshedRow, currentTable.TableName, currentTable.Columns, mergeOptions);
@@ -104,12 +110,13 @@ namespace PocoDataSet.Extensions
                 IDataRow newDataRow = currentTable.AddNewRow();
                 foreach (IColumnMetadata columnMetadata in currentTable.Columns)
                 {
-                    newDataRow[columnMetadata.ColumnName] = mergeOptions.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                    newDataRow[columnMetadata.ColumnName] = mergeOptions.DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                 }
 
                 DataRowExtensions.MergeWith(newDataRow, refreshedRow, currentTable.TableName, currentTable.Columns, mergeOptions);
                 mergeOptions.DataSetMergeResult.ListOfAddedDataRows.Add(newDataRow);
             }
         }
+        #endregion
     }
 }

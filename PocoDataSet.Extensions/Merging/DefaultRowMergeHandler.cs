@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Default row merge handler - copies changed field values from refreshed row into current row.
+    /// Provides default row merge handler functionality
     /// </summary>
     public class DefaultRowMergeHandler : IRowMergeHandler
     {
@@ -17,7 +17,7 @@ namespace PocoDataSet.Extensions
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="mergeOptions">Merge options.</param>
-        /// <returns>True if any value of row sas changed, otherwise false</returns>
+        /// <returns>True if any value of row has changed, otherwise false</returns>
         public bool MergeRow(string tableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
             bool rowValueChanged = false;
@@ -41,7 +41,6 @@ namespace PocoDataSet.Extensions
             }
 
             return rowValueChanged;
-//            return currentRow.MergeWith(refreshedRow, columns);
         }
         #endregion
     }

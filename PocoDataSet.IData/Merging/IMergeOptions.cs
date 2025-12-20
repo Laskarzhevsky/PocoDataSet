@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using PocoDataSet.Extensions;
-
 namespace PocoDataSet.IData
 {
     /// <summary>
@@ -11,6 +9,14 @@ namespace PocoDataSet.IData
     public interface IMergeOptions
     {
         #region Properties
+        /// <summary>
+        /// Gets data set merge handlers
+        /// </summary>
+        IDictionary<string, IDataSetMergeHandler> DataSetMergeHandlers
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets data set merge result
         /// </summary>
@@ -46,7 +52,7 @@ namespace PocoDataSet.IData
         /// <summary>
         /// Gets data type default value provider 
         /// </summary>
-        public IDataTypeDefaultValueProvider DefaultValueProvider
+        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
         {
             get;
         }
@@ -69,26 +75,9 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets or sets GetPruneFilter
-        /// </summary>
-        public Func<string, Func<IDataRow, bool>?> GetPruneFilter
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
         /// </summary>
         IDictionary<string, List<string>> OverriddenPrimaryKeyNames
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets names of tables which need to be deleted from the current data set if tables with these names in the refreshed data set have no rows
-        /// </summary>
-        ISet<string> PruneTables
         {
             get;
         }

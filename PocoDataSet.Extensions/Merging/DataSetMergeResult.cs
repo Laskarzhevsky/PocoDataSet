@@ -4,6 +4,9 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
+    /// <summary>
+    /// Provides data set merge result functionality
+    /// </summary>
     public class DataSetMergeResult : IDataSetMergeResult
     {
         #region Constructors

@@ -7,6 +7,7 @@ namespace PocoDataSet.IData
     /// </summary>
     public interface IRowMergeHandler
     {
+        #region Methods
         /// <summary>
         /// Merges current row with refreshed row.
         /// </summary>
@@ -17,5 +18,6 @@ namespace PocoDataSet.IData
         /// <param name="mergeOptions">Merge options.</param>
         /// <returns>True if current row values changed.</returns>
         bool MergeRow(string tableName, IDataRow currentRow, IDataRow refreshedRow, IList<IColumnMetadata> columns, IMergeOptions mergeOptions);
+        #endregion
     }
 }

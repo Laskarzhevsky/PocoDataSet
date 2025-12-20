@@ -4,6 +4,9 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
+    /// <summary>
+    /// Provides default data set merge handler 
+    /// </summary>
     public class DefaultDataSetMergeHandler : IDataSetMergeHandler
     {
         #region Public Methods
@@ -79,7 +82,7 @@ namespace PocoDataSet.Extensions
                     continue;
                 }
 
-                ObservableDataTableExtensions.MergeWith(currentTable, refreshedTable, mergeOptions);
+                DataTableExtensions.MergeWith(currentTable, refreshedTable, mergeOptions);
             }
         }
         #endregion

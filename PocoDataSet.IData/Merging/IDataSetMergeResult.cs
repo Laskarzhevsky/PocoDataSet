@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using PocoDataSet.IData;
-
-namespace PocoDataSet.Extensions
+namespace PocoDataSet.IData
 {
     /// <summary>
     /// Defines data set merge result functionalty

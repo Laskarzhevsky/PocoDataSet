@@ -5,7 +5,7 @@ namespace PocoDataSet.Extensions
     /// <summary>
     /// Contains data set extension methods
     /// </summary>
-    public static partial class ObservableDataTableExtensions
+    public static partial class DataTableExtensions
     {
         #region Public Methods
         /// <summary>
