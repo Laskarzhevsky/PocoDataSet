@@ -61,9 +61,6 @@ The solution contains four projects:
   - `DefaultRowMergeHandler` – value-level row merge
   - `DataTypeDefaultValueProvider` – default metadata-to-value mapping
 
-  The merge logic was intentionally moved out of `PocoDataSet.Extensions`
-  to avoid growing option-driven `if/else` logic and to keep responsibilities separated.
-
 - **PocoDataSet.Serializer**  
   JSON serialization helpers using `System.Text.Json`:
   - `DataSetSerializer.FromJsonString(string? json) : IDataSet?`
@@ -139,6 +136,7 @@ PocoDataSet.Data
 PocoDataSet.Extensions
 PocoDataSet.Serializer
 PocoDataSet.SqlServerDataAdapter
+
 
 
 
