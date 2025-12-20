@@ -22,6 +22,7 @@ The solution contains four projects:
   - `IColumnMetadata`, `IDataRelation`, `IForeignKeyData`
   - `IDataSetValidator`, `IMergeOptions`, `IDataRowFilter`
   - `IValueConverter` (for pluggable value conversion)
+
   Interfaces and contracts for the merge infrastructure:
   - `IDataSetMergeEngine` – orchestrates DataSet / DataTable / DataRow merge
   - `IDataSetMergeConfiguration` – provides merge policies and handlers
@@ -52,6 +53,7 @@ The solution contains four projects:
   - `DataSetFactory`
     - `CreateDataSet()` – simple factory for `IDataSet`
   - Internal helpers (data type names, default value helpers, type info, etc.)
+
   Default implementation of the merge infrastructure:
   - `DataSetMergeEngine` – handler-based merge engine
   - `DataSetMergeConfiguration` – default configuration and wiring
@@ -137,6 +139,7 @@ PocoDataSet.Data
 PocoDataSet.Extensions
 PocoDataSet.Serializer
 PocoDataSet.SqlServerDataAdapter
+
 
 
 
