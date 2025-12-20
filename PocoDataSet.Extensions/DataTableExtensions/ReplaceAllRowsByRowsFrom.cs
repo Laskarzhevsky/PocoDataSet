@@ -1,5 +1,4 @@
-﻿using PocoDataSet.Extensions;
-using PocoDataSet.IData;
+﻿using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -14,7 +13,8 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="currentDataTable">Current data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>
-        public static void ReplaceAllRowsByRowsFrom(this IDataTable? currentDataTable, IDataTable? refreshedDataTable)
+        /// <param name="mergeOptions">Merge options</param>
+        public static void ReplaceAllRowsByRowsFrom(this IDataTable? currentDataTable, IDataTable? refreshedDataTable, IMergeOptions mergeOptions)
         {
             if (currentDataTable == null || refreshedDataTable == null)
             {
@@ -26,7 +26,7 @@ namespace PocoDataSet.Extensions
             foreach (IDataRow refreshedDataRow in refreshedDataTable.Rows)
             {
                 IDataRow newDataRow = currentDataTable.AddNewRow();
-                newDataRow.MergeWith(refreshedDataRow, currentDataTable.Columns);
+                DataRowExtensions.MergeWith(newDataRow, refreshedDataRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
             }
         }
         #endregion

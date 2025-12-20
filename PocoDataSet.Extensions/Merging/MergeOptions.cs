@@ -23,7 +23,9 @@ namespace PocoDataSet.Extensions
         public MergeOptions()
         {
             _getPruneFilter = new Func<string, Func<IDataRow, bool>?>(DefaultGetPruneFilter);
+            DataSetMergeHandlers = new Dictionary<string, IDataSetMergeHandler>();
             DataSetMergeResult = new DataSetMergeResult(new List<IDataRow>(), new List<IDataRow>(), new List<IDataRow>());
+            DefaultDataSetMergeHandler = new DefaultDataSetMergeHandler();
             DefaultRowMergeHandler = new DefaultRowMergeHandler();
             DefaultTableMergeHandler = new DefaultTableMergeHandler();
             DefaultValueProvider = new MetadataDefaultsProvider();
@@ -34,12 +36,29 @@ namespace PocoDataSet.Extensions
 
         #region Public Properties
         /// <summary>
+        /// Gets data set merge handlers
+        /// </summary>
+        public IDictionary<string, IDataSetMergeHandler> DataSetMergeHandlers
+        {
+            get; private set;
+        }
+
+        /// <summary>
         /// Gets data set merge result
         /// IMergeOptions interface implementation
         /// </summary>
         public IDataSetMergeResult DataSetMergeResult
         {
             get; private set;
+        }
+
+        /// <summary>
+        /// Gets or sets default data set merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public IDataSetMergeHandler DefaultDataSetMergeHandler
+        {
+            get; set;
         }
 
         /// <summary>
@@ -163,6 +182,23 @@ namespace PocoDataSet.Extensions
         static Func<IDataRow, bool>? DefaultGetPruneFilter(string tableName)
         {
             return null; // no scope by default
+        }
+
+        /// <summary>
+        /// Gets data set merge handler
+        /// IMergeOptions interface implementation
+        /// </summary>
+        /// <param name="dataSetMergeHandlerKey">Data set merge handler key</param>
+        /// <returns>Data set merge handler</returns>
+        public IDataSetMergeHandler GetDataSetMergeHandler(string? dataSetMergeHandlerKey)
+        {
+            IDataSetMergeHandler? dataSetMergeHandler;
+            if (!string.IsNullOrEmpty(dataSetMergeHandlerKey) && DataSetMergeHandlers.TryGetValue(dataSetMergeHandlerKey, out dataSetMergeHandler))
+            {
+                return dataSetMergeHandler;
+            }
+
+            return DefaultDataSetMergeHandler;
         }
 
         /// <summary>

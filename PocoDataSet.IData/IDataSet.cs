@@ -9,6 +9,14 @@ namespace PocoDataSet.IData
     {
         #region Properties
         /// <summary>
+        /// Gets or sets name
+        /// </summary>
+        string? Name
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets or sets relations
         /// </summary>
         List<IDataRelation> Relations

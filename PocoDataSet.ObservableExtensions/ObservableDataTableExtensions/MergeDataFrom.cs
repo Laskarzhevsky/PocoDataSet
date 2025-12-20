@@ -65,7 +65,8 @@ namespace PocoDataSet.ObservableExtensions
                         newDataRow[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                     }
 
-                    newDataRow.MergeWith(refreshedDataRow, observableDataTable.Columns);
+                    // TODO
+                    DataRowExtensions.MergeWith(newDataRow, refreshedDataRow, observableDataTable.TableName, observableDataTable.Columns, null);
                     observableDataTable.AddRow(newDataRow, null);
                 }
             }

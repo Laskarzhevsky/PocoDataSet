@@ -11,6 +11,15 @@ namespace PocoDataSet.Data
     {
         #region Public Properties
         /// <summary>
+        /// Gets or sets name
+        /// IDataSet interface implementation
+        /// </summary>
+        public string? Name
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets or sets relations
         /// IDataSet interface implementation
         /// </summary>

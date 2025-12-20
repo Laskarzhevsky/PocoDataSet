@@ -28,7 +28,7 @@ namespace PocoDataSet.Extensions
             {
                 if (mergeOptions.ReplaceAllRowsInTableWhenTableHasNoPrimaryKeyDefined)
                 {
-                    currentTable.ReplaceAllRowsByRowsFrom(refreshedTable);
+                    currentTable.ReplaceAllRowsByRowsFrom(refreshedTable, mergeOptions);
                 }
                 else
                 {
@@ -43,9 +43,7 @@ namespace PocoDataSet.Extensions
                             newRow[columnMetadata.ColumnName] = mergeOptions.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                         }
 
-                        IRowMergeHandler rowHandler = mergeOptions.GetRowMergeHandler(currentTable.TableName);
-                        rowHandler.MergeRow(currentTable.TableName, newRow, refreshedRow, currentTable.Columns, mergeOptions);
-
+                        DataRowExtensions.MergeWith(newRow, refreshedRow, currentTable.TableName, currentTable.Columns, mergeOptions);
                         mergeOptions.DataSetMergeResult.ListOfAddedDataRows.Add(newRow);
                     }
                 }
@@ -109,8 +107,7 @@ namespace PocoDataSet.Extensions
                     newDataRow[columnMetadata.ColumnName] = mergeOptions.DefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
                 }
 
-                IRowMergeHandler rowHandler = mergeOptions.GetRowMergeHandler(currentTable.TableName);
-                rowHandler.MergeRow(currentTable.TableName, newDataRow, refreshedRow, currentTable.Columns, mergeOptions);
+                DataRowExtensions.MergeWith(newDataRow, refreshedRow, currentTable.TableName, currentTable.Columns, mergeOptions);
                 mergeOptions.DataSetMergeResult.ListOfAddedDataRows.Add(newDataRow);
             }
         }

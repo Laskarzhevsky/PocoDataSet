@@ -20,6 +20,14 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
+        /// Gets or sets default data set merge handler
+        /// </summary>
+        IDataSetMergeHandler DefaultDataSetMergeHandler
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets or sets default row merge handler
         /// </summary>
         IRowMergeHandler DefaultRowMergeHandler
@@ -111,6 +119,13 @@ namespace PocoDataSet.IData
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Gets data set merge handler
+        /// </summary>
+        /// <param name="dataSetMergeHandlerKey">Data set merge handler key</param>
+        /// <returns>Data set merge handler</returns>
+        IDataSetMergeHandler GetDataSetMergeHandler(string? dataSetMergeHandlerKey);
+
         /// <summary>
         /// Gets primary key column names for a given table, applying overrides when configured.
         /// </summary>
