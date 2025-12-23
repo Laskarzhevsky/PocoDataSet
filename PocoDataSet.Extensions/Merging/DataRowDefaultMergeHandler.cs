@@ -5,14 +5,15 @@ using PocoDataSet.IData;
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Provides default row merge handler functionality
+    /// Provides data row default merge handler functionality
     /// </summary>
-    public class DefaultRowMergeHandler : IRowMergeHandler
+    public class DataRowDefaultMergeHandler : IRowMergeHandler
     {
         #region Public Methods
         /// <summary>
         /// Merges current data row with refreshed data row by copying refreshed values into current data row
         /// </summary>
+        /// <param name="tableName">Table name current data row belongs to</param>
         /// <param name="currentDataRow">Current data row</param>
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
@@ -21,11 +22,6 @@ namespace PocoDataSet.Extensions
         public bool MergeRow(string tableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
             bool rowValueChanged = false;
-            if (currentDataRow == null || refreshedDataRow == null)
-            {
-                return false;
-            }
-
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;

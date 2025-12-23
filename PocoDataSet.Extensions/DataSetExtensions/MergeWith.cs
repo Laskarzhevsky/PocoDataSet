@@ -20,6 +20,10 @@ namespace PocoDataSet.Extensions
             {
                 mergeOptions = new MergeOptions();
             }
+            else
+            {
+                mergeOptions.DataSetMergeResult.Clear();
+            }
 
             if (currentDataSet == null || refreshedDataSet == null)
             {

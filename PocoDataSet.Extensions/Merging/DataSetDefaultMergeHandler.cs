@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 
+using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Provides default data set merge handler 
+    /// Provides data set default merge handler 
     /// </summary>
-    public class DefaultDataSetMergeHandler : IDataSetMergeHandler
+    public class DataSetDefaultMergeHandler : IDataSetMergeHandler
     {
         #region Public Methods
         /// <summary>
@@ -42,7 +43,7 @@ namespace PocoDataSet.Extensions
                     continue;
                 }
 
-                if (mergeOptions != null && mergeOptions.ExcludeTablesFromMerge.Contains(dataTable.TableName))
+                if (mergeOptions.ExcludeTablesFromMerge.Contains(dataTable.TableName))
                 {
                     continue;
                 }
@@ -54,6 +55,10 @@ namespace PocoDataSet.Extensions
                 }
 
                 currentDataSet.AddTable(clonedDataTable);
+                for (int i = 0; i < clonedDataTable.Rows.Count; i++)
+                {
+                    mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(clonedDataTable.TableName, clonedDataTable.Rows[i]));
+                }
             }
         }
 
@@ -68,15 +73,10 @@ namespace PocoDataSet.Extensions
         {
             foreach (IDataTable currentTable in currentDataSet.Tables.Values)
             {
-                if (currentTable == null)
-                {
-                    continue;
-                }
-
                 mergedTableNames.Add(currentTable.TableName);
+
                 IDataTable? refreshedTable;
                 refreshedDataSet.TryGetTable(currentTable.TableName, out refreshedTable);
-
                 if (refreshedTable == null)
                 {
                     continue;

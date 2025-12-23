@@ -80,7 +80,7 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets table name
+        /// Gets view name consisting of concatenation of inner observable data table name with requestor name
         /// </summary>
         string ViewName
         {

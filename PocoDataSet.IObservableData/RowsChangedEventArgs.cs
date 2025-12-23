@@ -11,12 +11,14 @@ namespace PocoDataSet.IObservableData
         /// <summary>
         /// Default constructor
         /// </summary>
+        /// <param name="tableName">Table name</param>
         /// <param name="rowIndex">Row index</param>
         /// <param name="observableDataRow">Observable data row</param>
-        public RowsChangedEventArgs(int rowIndex, IObservableDataRow? observableDataRow)
+        public RowsChangedEventArgs(string tableName, int rowIndex, IObservableDataRow? observableDataRow)
         {
             RowIndex = rowIndex;
             ObservableDataRow = observableDataRow;
+            TableName = tableName;
         }
         #endregion
 
@@ -26,7 +28,7 @@ namespace PocoDataSet.IObservableData
         /// </summary>
         public IObservableDataRow? ObservableDataRow
         {
-            get; set;
+            get; private set;
         }
 
         /// <summary>
@@ -34,7 +36,15 @@ namespace PocoDataSet.IObservableData
         /// </summary>
         public int RowIndex
         {
-            get; set;
+            get; private set;
+        }
+
+        /// <summary>
+        /// Gets table name
+        /// </summary>
+        public string TableName
+        {
+            get; private set;
         }
         #endregion
     }

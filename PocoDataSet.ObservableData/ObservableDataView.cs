@@ -9,7 +9,7 @@ namespace PocoDataSet.ObservableData
     /// <summary>
     /// Provides observable data viewS fuctionality
     /// </summary>
-    public class ObservableDataView : IObservableDataView
+    public class ObservableDataView : AsyncDisposableObject, IObservableDataView
     {
         #region Events
         /// <summary>
@@ -35,12 +35,12 @@ namespace PocoDataSet.ObservableData
         /// <summary>
         /// Holds reference to inner observable data table
         /// </summary>
-        readonly IObservableDataTable _innerObservableDataTable;
+        IObservableDataTable _innerObservableDataTable;
 
         /// <summary>
         /// Holds reference to observable data rows
         /// </summary>
-        readonly List<IObservableDataRow> _observableDataRows = new List<IObservableDataRow>();
+        List<IObservableDataRow> _observableDataRows = new List<IObservableDataRow>();
 
         /// <summary>
         /// Holds reference to rows selector
@@ -69,13 +69,14 @@ namespace PocoDataSet.ObservableData
             _innerObservableDataTable.RowsAdded += _innerObservableDataTable_RowsAdded;
             _innerObservableDataTable.RowsRemoved += _innerObservableDataTable_RowsRemoved;
             RequestorName = requestorName;
+            ViewName = _innerObservableDataTable.TableName + requestorName;
             SetRowFilter(rowFilterString, caseSensitiveRowFilter);
             SetSort(sortString);
             GetObservableRows();
         }
         #endregion
 
-        #region Methods
+        #region Public Methods
         /// <summary>
         /// Adds data row
         /// IObservableDataView interface implementation
@@ -111,7 +112,7 @@ namespace PocoDataSet.ObservableData
             IObservableDataRow observableDataRow = _observableDataRows[rowIndex];
             observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;
             _observableDataRows.Remove(observableDataRow);
-            RaiseRowRemovedEvent(rowIndex);
+            RaiseRowRemovedEvent(rowIndex, observableDataRow);
         }
         #endregion
 
@@ -171,19 +172,16 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
-        /// Gets table name
+        /// Gets view name
         /// IObservableDataView interface implementation
         /// </summary>
         public string ViewName
         {
-            get
-            {
-                return _innerObservableDataTable.TableName;
-            }
+            get; private set;
         }
         #endregion
 
-        #region Methods
+        #region Private Methods
         /// <summary>
         /// Gets observable rows
         /// </summary>
@@ -215,6 +213,7 @@ namespace PocoDataSet.ObservableData
             for (int i = 0; i < selectedRows.Count; i++)
             {
                 IObservableDataRow observableDataRow = selectedRows[i];
+                observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
                 _observableDataRows.Add(observableDataRow);
                 RaiseRowAddedEvent(i, observableDataRow);
             }
@@ -229,7 +228,7 @@ namespace PocoDataSet.ObservableData
         {
             if (RowsAdded != null)
             {
-                RowsAdded(this, new RowsChangedEventArgs(rowIndex, observableDataRow));
+                RowsAdded(this, new RowsChangedEventArgs(this.InnerObservableDataTable.TableName, rowIndex, observableDataRow));
             }
         }
 
@@ -237,12 +236,36 @@ namespace PocoDataSet.ObservableData
         /// Raises RowRemoved event
         /// </summary>
         /// <param name="rowIndex">Row index</param>
-        void RaiseRowRemovedEvent(int rowIndex)
+        /// <param name="observableDataRow">Observable data row</param>
+        void RaiseRowRemovedEvent(int rowIndex, IObservableDataRow observableDataRow)
         {
             if (RowsRemoved != null)
             {
-                RowsRemoved(this, new RowsChangedEventArgs(rowIndex, null));
+                RowsRemoved(this, new RowsChangedEventArgs(this.InnerObservableDataTable.TableName, rowIndex, observableDataRow));
             }
+        }
+
+        /// <summary>
+        /// Release resources
+        /// </summary>
+        protected override void ReleaseResources()
+        {
+            for (int i = 0; i < _observableDataRows.Count; i++)
+            {
+                IObservableDataRow observableDataRow = _observableDataRows[i];
+                observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;
+            }
+
+            _observableDataRows.Clear();
+
+            if (_innerObservableDataTable != null)
+            {
+                _innerObservableDataTable.DataFieldValueChanged -= _innerObservableDataTable_DataFieldValueChanged;
+                _innerObservableDataTable.RowsAdded -= _innerObservableDataTable_RowsAdded;
+                _innerObservableDataTable.RowsRemoved -= _innerObservableDataTable_RowsRemoved;
+            }
+
+            _innerObservableDataTable = default!;
         }
 
         /// <summary>
@@ -291,11 +314,20 @@ namespace PocoDataSet.ObservableData
             }
         }
 
-
-        void _innerObservableDataTable_RowsRemoved(object? sender, RowsChangedEventArgs e)
+        /// <summary>
+        /// Handles _innerObservableDataTable.DataFieldValueChanged event
+        /// </summary>
+        /// <param name="sender">Event source</param>
+        /// <param name="e">Event arguments</param>
+        void _innerObservableDataTable_DataFieldValueChanged(object? sender, DataFieldValueChangedEventArgs e)
         {
         }
 
+        /// <summary>
+        /// Handles _innerObservableDataTable.RowsAdded event
+        /// </summary>
+        /// <param name="sender">Event source</param>
+        /// <param name="e">Event arguments</param>
         void _innerObservableDataTable_RowsAdded(object? sender, RowsChangedEventArgs e)
         {
             if (e.ObservableDataRow != null)
@@ -304,8 +336,29 @@ namespace PocoDataSet.ObservableData
             }
         }
 
-        void _innerObservableDataTable_DataFieldValueChanged(object? sender, DataFieldValueChangedEventArgs e)
+        /// <summary>
+        /// Handles _innerObservableDataTable.RowsRemoved event
+        /// </summary>
+        /// <param name="sender">Event source</param>
+        /// <param name="e">Event arguments</param>
+        void _innerObservableDataTable_RowsRemoved(object? sender, RowsChangedEventArgs e)
         {
+            if (e.ObservableDataRow == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _observableDataRows.Count; i++)
+            {
+                IObservableDataRow observableDataRow = _observableDataRows[i];
+                if (ReferenceEquals(observableDataRow, e.ObservableDataRow))
+                {
+                    observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;
+                    _observableDataRows.RemoveAt(i);
+                    RaiseRowRemovedEvent(i, observableDataRow);
+                    return;
+                }
+            }
         }
         #endregion
     }

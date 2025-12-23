@@ -1,3 +1,4 @@
+
 # PocoDataSet
 
 The POCO DataSet documentation is published in the "POCO DataSet" section of **businessprocessprogramming.net** website.
@@ -14,7 +15,7 @@ It is designed to be:
 
 ## Project structure
 
-The solution contains four projects:
+The solution contains the following projects:
 
 - **PocoDataSet.IData**  
   Interfaces and contracts only:
@@ -22,6 +23,13 @@ The solution contains four projects:
   - `IColumnMetadata`, `IDataRelation`, `IForeignKeyData`
   - `IDataSetValidator`, `IMergeOptions`, `IDataRowFilter`
   - `IValueConverter` (for pluggable value conversion)
+
+  Interfaces and contracts for the merge infrastructure:
+  - `IDataSetMergeEngine` – orchestrates DataSet / DataTable / DataRow merge
+  - `IDataSetMergeConfiguration` – provides merge policies and handlers
+  - `ITableMergeHandler` – table-level merge behavior
+  - `IRowMergeHandler` – row-level merge behavior
+  - `IDataTypeDefaultValueProvider` – pluggable provider for metadata-based default values
 
 - **PocoDataSet.Data**  
   Concrete implementations of the interfaces:
@@ -47,18 +55,6 @@ The solution contains four projects:
     - `CreateDataSet()` – simple factory for `IDataSet`
   - Internal helpers (data type names, default value helpers, type info, etc.)
 
-- **PocoDataSet.IDataMerge**  
-  Interfaces and contracts for the merge infrastructure:
-  - `IDataSetMergeEngine` – orchestrates DataSet / DataTable / DataRow merge
-  - `IDataSetMergeConfiguration` – provides merge policies and handlers
-  - `ITableMergeHandler` – table-level merge behavior
-  - `IRowMergeHandler` – row-level merge behavior
-  - `IDataTypeDefaultValueProvider` – pluggable provider for metadata-based default values
-
-  This project contains **no implementation**, only contracts.  
-  It allows applications to customize merge behavior without referencing concrete merge logic.
-
-- **PocoDataSet.DataMerge**  
   Default implementation of the merge infrastructure:
   - `DataSetMergeEngine` – handler-based merge engine
   - `DataSetMergeConfiguration` – default configuration and wiring
@@ -66,8 +62,29 @@ The solution contains four projects:
   - `DefaultRowMergeHandler` – value-level row merge
   - `DataTypeDefaultValueProvider` – default metadata-to-value mapping
 
-  The merge logic was intentionally moved out of `PocoDataSet.Extensions`
-  to avoid growing option-driven `if/else` logic and to keep responsibilities separated.
+
+- **PocoDataSet.IObservableData**  
+  Interfaces and contracts for the observable layer (UI reactivity support):
+  - `IObservableDataSet`, `IObservableDataTable`, `IObservableDataRow`, `IObservableDataView`
+  - Event args such as `RowsChangedEventArgs` and `DataFieldValueChangedEventArgs`
+
+  This project contains **contracts only** and has no runtime dependencies on UI frameworks.
+
+- **PocoDataSet.ObservableData**  
+  Concrete implementations of the observable contracts:
+  - `ObservableDataSet` – wraps an `IDataSet` and bubbles table / row events
+  - `ObservableDataTable` – wraps an `IDataTable` and tracks observable rows
+  - `ObservableDataRow` – wraps an `IDataRow` and raises `DataFieldValueChanged`
+  - `ObservableDataView` – per-control view over a table (filter/sort) with deterministic disposal
+
+  Notes:
+  - `ObservableDataSet` **owns** created views and disposes them when the source table is removed.
+  - `ObservableDataView` subscribes to table events and maintains its own row list; it unsubscribes on dispose.
+
+- **PocoDataSet.ObservableExtensions**  
+  Convenience extension methods to bridge POCO DataSet and the observable layer:
+  - Create observable wrappers from `IDataSet` / `IDataTable`
+  - Helpers for common UI scenarios (one view per control instance, etc.)
 
 - **PocoDataSet.Serializer**  
   JSON serialization helpers using `System.Text.Json`:
@@ -123,9 +140,26 @@ If you cloned this repo standalone:
   <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
   <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
   <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
-  <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
+  <ProjectReference Include="..\PocoDataSet.IObservableData\PocoDataSet.IObservableData.csproj" />
+<ProjectReference Include="..\PocoDataSet.ObservableData\PocoDataSet.ObservableData.csproj" />
+<ProjectReference Include="..\PocoDataSet.ObservableExtensions\PocoDataSet.ObservableExtensions.csproj" />
+<ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
   <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
 </ItemGroup>
+
+
+## Observable layer (UI reactivity)
+
+If you are building a UI (Blazor/WPF/WinUI/etc.) and want event-driven updates, use the observable layer:
+
+- **Contracts:** `PocoDataSet.IObservableData`
+- **Implementations:** `PocoDataSet.ObservableData`
+- **Helpers:** `PocoDataSet.ObservableExtensions`
+
+Recommended usage pattern (one view per control instance):
+- Call `ObservableDataSet.GetObservableDataView(tableName, filter, caseSensitive, sort, requestorName)`
+- Ensure `requestorName` is **unique per control instance** (the observable layer enforces this)
+- Dispose the view (or remove the table) to unsubscribe event handlers deterministically
 
 ## License
 
@@ -144,5 +178,8 @@ PocoDataSet.Data
 PocoDataSet.Extensions
 PocoDataSet.Serializer
 PocoDataSet.SqlServerDataAdapter
+
+
+
 
 

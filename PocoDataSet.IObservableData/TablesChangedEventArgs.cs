@@ -5,14 +5,14 @@ namespace PocoDataSet.IObservableData
     /// <summary>
     /// Provides TableChanged event arguments functionality
     /// </summary>
-    public class TableChangedEventArgs : EventArgs
+    public class TablesChangedEventArgs : EventArgs
     {
         #region Constructors
         /// <summary>
         /// Default constructor
         /// </summary>
         /// <param name="tableName">Table name</param>
-        public TableChangedEventArgs(string tableName)
+        public TablesChangedEventArgs(string tableName)
         {
             TableName = tableName;
         }

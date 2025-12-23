@@ -13,41 +13,54 @@ namespace PocoDataSet.Extensions
         /// <summary>
         /// Default constructor
         /// </summary>
-        /// <param name="listOfAddedDataRows">List of added data rows</param>
-        /// <param name="listOfDeletedDataRows">List of deleted data rows</param>
-        /// <param name="listOfUpdatedDataRows">List of updated data rows</param>
-        public DataSetMergeResult(List<IDataRow> listOfAddedDataRows, List<IDataRow> listOfDeletedDataRows, List<IDataRow> listOfUpdatedDataRows)
+        /// <param name="addedDataRows">Added data rows</param>
+        /// <param name="deletedDataRows">Deleted data rows</param>
+        /// <param name="updatedDataRows">Updated data rows</param>
+        public DataSetMergeResult(List<IDataSetMergeResultEntry> addedDataRows, List<IDataSetMergeResultEntry> deletedDataRows, List<IDataSetMergeResultEntry> updatedDataRows)
         {
-            ListOfAddedDataRows = listOfAddedDataRows;
-            ListOfDeletedDataRows = listOfDeletedDataRows;
-            ListOfUpdatedDataRows = listOfUpdatedDataRows;
+            AddedDataRows = addedDataRows;
+            DeletedDataRows = deletedDataRows;
+            UpdatedDataRows = updatedDataRows;
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Clears data set merge result
+        /// IDataSetsMergeResult interface implementation
+        /// </summary>
+        public void Clear()
+        {
+            AddedDataRows.Clear();
+            DeletedDataRows.Clear();
+            UpdatedDataRows.Clear();
         }
         #endregion
 
         #region Public Properties
         /// <summary>
-        /// Gets list of added data rows
+        /// Gets added data rows
         /// IDataSetsMergeResult interface implementation
         /// </summary>
-        public List<IDataRow> ListOfAddedDataRows
+        public List<IDataSetMergeResultEntry> AddedDataRows
         {
             get; private set;
         }
 
         /// <summary>
-        /// Gets list of deleted data rows
+        /// Gets deleted data rows
         /// IDataSetsMergeResult interface implementation
         /// </summary>
-        public List<IDataRow> ListOfDeletedDataRows
+        public List<IDataSetMergeResultEntry> DeletedDataRows
         {
             get; private set;
         }
 
         /// <summary>
-        /// Gets list of updated data rows
+        /// Gets updated data rows
         /// IDataSetsMergeResult interface implementation
         /// </summary>
-        public List<IDataRow> ListOfUpdatedDataRows
+        public List<IDataSetMergeResultEntry> UpdatedDataRows
         {
             get; private set;
         }

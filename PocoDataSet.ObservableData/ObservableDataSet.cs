@@ -23,13 +23,25 @@ namespace PocoDataSet.ObservableData
         /// RowsAdded event
         /// IObservableDataTable interface implementation
         /// </summary>
-        public event EventHandler<RowsChangedEventArgs>? RowsAdded;
+        public event EventHandler<RowsChangedEventArgs>? RowAdded;
 
         /// <summary>
         /// RowsRemoved event
         /// IObservableDataTable interface implementation
         /// </summary>
-        public event EventHandler<RowsChangedEventArgs>? RowsRemoved;
+        public event EventHandler<RowsChangedEventArgs>? RowRemoved;
+
+        /// <summary>
+        /// TableAdded event
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        public event EventHandler<TablesChangedEventArgs>? TableAdded;
+
+        /// <summary>
+        /// TableRemoved event
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        public event EventHandler<TablesChangedEventArgs>? TableRemoved;
         #endregion
 
         #region Data Fields
@@ -77,6 +89,27 @@ namespace PocoDataSet.ObservableData
 
         #region Public Methods
         /// <summary>
+        /// Adds observable table
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        /// <param name="dataTable">Data table for addition</param>
+        /// <returns>Added observable data table</returns>
+        public IObservableDataTable AddObservableTable(IDataTable dataTable)
+        {
+            IObservableDataTable? observableDataTable = new ObservableDataTable(dataTable);
+            observableDataTable.DataFieldValueChanged += ObservableDataTable_DataFieldValueChanged;
+            observableDataTable.RowsAdded += ObservableDataTable_RowsAdded;
+            observableDataTable.RowsRemoved += ObservableDataTable_RowsRemoved;
+            _observableDataTables.Add(observableDataTable.TableName, observableDataTable);
+            if (TableAdded != null)
+            {
+                TableAdded(this, new TablesChangedEventArgs(observableDataTable.TableName));
+            }
+
+            return observableDataTable;
+        }
+
+        /// <summary>
         /// Gets observable data view
         /// IObservableDataSet interface implementation
         /// </summary>
@@ -86,28 +119,69 @@ namespace PocoDataSet.ObservableData
         /// <param name="sortString">Sort string</param>
         /// <param name="requestorName">Requestor name</param>
         /// <returns>Observable data table</returns>
-        public IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string? requestorName)
+        public IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string requestorName)
         {
-            if (!string.IsNullOrEmpty(requestorName))
+            string viewKey = tableName + requestorName;
+            if (_observableDataViews.ContainsKey(viewKey))
             {
-                if (_observableDataViews.ContainsKey(tableName + requestorName))
-                {
-                    return _observableDataViews[tableName + requestorName];
-                }
+                return _observableDataViews[viewKey];
             }
 
             if (Tables.ContainsKey(tableName))
             {
                 IObservableDataView? observableDataView = new ObservableDataView(Tables[tableName], rowFilterString, caseSensitiveRowFilter, sortString, requestorName);
-                if (!string.IsNullOrEmpty(requestorName))
-                {
-                    _observableDataViews.Add(observableDataView.ViewName + requestorName, observableDataView);
-                }
+                _observableDataViews.Add(viewKey, observableDataView);
 
                 return observableDataView;
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Removes observable table
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        public void RemoveObservableTable(string tableName)
+        {
+            if (Tables.ContainsKey(tableName))
+            {
+                IObservableDataTable observableDataTable = _observableDataTables[tableName];
+
+                // Remove observable views that point at this table (they subscribe to table events)
+                List<string> keysToRemove = new List<string>();
+                foreach (KeyValuePair<string, IObservableDataView> pair in _observableDataViews)
+                {
+                    IObservableDataTable? innerTable = pair.Value.InnerObservableDataTable;
+                    if (ReferenceEquals(pair.Value.InnerObservableDataTable, observableDataTable))
+                    {
+                        keysToRemove.Add(pair.Key);
+                    }
+                }
+
+                for (int i = 0; i < keysToRemove.Count; i++)
+                {
+                    DisposeObservableDataViewByKey(keysToRemove[i]);
+                }
+
+                // Detach dataset event handlers from table
+                observableDataTable.DataFieldValueChanged -= ObservableDataTable_DataFieldValueChanged;
+                observableDataTable.RowsAdded -= ObservableDataTable_RowsAdded;
+                observableDataTable.RowsRemoved -= ObservableDataTable_RowsRemoved;
+
+                if (TableRemoved != null)
+                {
+                    TableRemoved(this, new TablesChangedEventArgs(tableName));
+                }
+
+                Tables.Remove(tableName);
+
+                // Keep inner dataset consistent
+                if (_innerDataSet.Tables.ContainsKey(tableName))
+                {
+                    _innerDataSet.Tables.Remove(tableName);
+                }
+            }
         }
         #endregion
 
@@ -131,6 +205,15 @@ namespace PocoDataSet.ObservableData
             {
                 return _innerDataSet;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets name
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        public string? Name
+        {
+            get; set;
         }
 
         /// <summary>
@@ -178,11 +261,44 @@ namespace PocoDataSet.ObservableData
         {
             foreach (IDataTable dataTable in _innerDataSet.Tables.Values)
             {
-                IObservableDataTable? observableDataTable = new ObservableDataTable(dataTable);
-                observableDataTable.DataFieldValueChanged += ObservableDataTable_DataFieldValueChanged;
-                observableDataTable.RowsAdded += ObservableDataTable_RowsAdded;
-                observableDataTable.RowsRemoved += ObservableDataTable_RowsRemoved;
-                _observableDataTables.Add(observableDataTable.TableName, observableDataTable);
+                AddObservableTable(dataTable);
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Disposes observable data view by key
+        /// </summary>
+        /// <param name="viewKey">View key</param>
+        private void DisposeObservableDataViewByKey(string viewKey)
+        {
+            if (string.IsNullOrWhiteSpace(viewKey))
+            {
+                return;
+            }
+
+            if (!_observableDataViews.ContainsKey(viewKey))
+            {
+                return;
+            }
+
+            IObservableDataView observableDataView = _observableDataViews[viewKey];
+
+            // Remove first, then dispose (prevents re-entrancy issues if disposal triggers anything)
+            _observableDataViews.Remove(viewKey);
+
+            AsyncDisposableObject? asyncDisposableObject = observableDataView as AsyncDisposableObject;
+            if (asyncDisposableObject != null)
+            {
+                asyncDisposableObject.Dispose();
+                return;
+            }
+
+            IDisposable? disposable = observableDataView as IDisposable;
+            if (disposable != null)
+            {
+                disposable.Dispose();
             }
         }
         #endregion
@@ -208,9 +324,9 @@ namespace PocoDataSet.ObservableData
         /// <param name="e">Event arguments</param>
         void ObservableDataTable_RowsAdded(object? sender, RowsChangedEventArgs e)
         {
-            if (RowsAdded != null)
+            if (RowAdded != null)
             {
-                RowsAdded(sender, e);
+                RowAdded(sender, e);
             }
         }
 
@@ -221,9 +337,9 @@ namespace PocoDataSet.ObservableData
         /// <param name="e">Event arguments</param>
         void ObservableDataTable_RowsRemoved(object? sender, RowsChangedEventArgs e)
         {
-            if (RowsRemoved != null)
+            if (RowRemoved != null)
             {
-                RowsRemoved(sender, e);
+                RowRemoved(sender, e);
             }
         }
         #endregion

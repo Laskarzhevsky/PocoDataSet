@@ -18,10 +18,10 @@ namespace PocoDataSet.Extensions
         public MergeOptions()
         {
             DataSetMergeHandlers = new Dictionary<string, IDataSetMergeHandler>();
-            DataSetMergeResult = new DataSetMergeResult(new List<IDataRow>(), new List<IDataRow>(), new List<IDataRow>());
-            DefaultDataSetMergeHandler = new DefaultDataSetMergeHandler();
-            DefaultRowMergeHandler = new DefaultRowMergeHandler();
-            DefaultTableMergeHandler = new DefaultTableMergeHandler();
+            DataSetMergeResult = new DataSetMergeResult(new List<IDataSetMergeResultEntry>(), new List<IDataSetMergeResultEntry>(), new List<IDataSetMergeResultEntry>());
+            DefaultDataSetMergeHandler = new DataSetDefaultMergeHandler();
+            DefaultRowMergeHandler = new DataRowDefaultMergeHandler();
+            DefaultTableMergeHandler = new DataTableDefaultMergeHandler();
             DataTypeDefaultValueProvider = new MetadataDefaultsProvider();
             RowMergeHandlers = new Dictionary<string, IRowMergeHandler>();
             TableMergeHandlers = new Dictionary<string, ITableMergeHandler>();
@@ -94,6 +94,7 @@ namespace PocoDataSet.Extensions
 
         /// <summary>
         /// Gets list of table names which rows need to be excluded from deletion during the merge process
+        /// IMergeOptions interface implementation
         /// </summary>
         public List<string> ExcludeTablesFromRowDeletion
         {
@@ -110,16 +111,8 @@ namespace PocoDataSet.Extensions
         } = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 
         /// <summary>
-        /// Gets or sets flag indicating whether table needs to be replaced if it has no primary key defined
-        /// IMergeOptions interface implementation
-        /// </summary>
-        public bool ReplaceAllRowsInTableWhenTableHasNoPrimaryKeyDefined
-        {
-            get; set;
-        } = true;
-
-        /// <summary>
         /// Gets row merge handlers
+        /// IMergeOptions interface implementation
         /// </summary>
         public IDictionary<string, IRowMergeHandler> RowMergeHandlers
         {

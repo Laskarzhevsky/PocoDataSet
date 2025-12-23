@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
+    <ProjectReference Include="..\PocoDataSet.ObservableExtensions\PocoDataSet.ObservableExtensions.csproj" />
     <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
     <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
   </ItemGroup>

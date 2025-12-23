@@ -1,7 +1,12 @@
-﻿using PocoDataSet.Data;
+﻿using System.Net.Http.Headers;
+
+using PocoDataSet.Data;
 using PocoDataSet.Demo.DataSetExtensions;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
+using PocoDataSet.IObservableData;
+using PocoDataSet.ObservableData;
+using PocoDataSet.ObservableExtensions;
 using PocoDataSet.Serializer;
 using PocoDataSet.SqlServerDataAdapter;
 
@@ -72,6 +77,13 @@ namespace PocoDataSet.Demo
             employeeDataRow.UpdateDataFieldValue("DepartmentId", 2);
             DataSetExtensionExamples.AddRow(dataSet, "Employee", employeeDataRow);
 
+            employeeDataRow = DataRowExtensionExamples.CreateRowFromColumnsWithDefaultValues(employeeTable.Columns);
+            employeeDataRow.UpdateDataFieldValue("Id", 2);
+            employeeDataRow.UpdateDataFieldValue("FirstName", "Sara");
+            employeeDataRow.UpdateDataFieldValue("LastName", "Gor");
+            employeeDataRow.UpdateDataFieldValue("DepartmentId", 2);
+            DataSetExtensionExamples.AddRow(dataSet, "Employee", employeeDataRow);
+
             // 4.a) Read back a value using data set, expected "John"
             string? firstName = DataSetExtensionExamples.GetFieldValue<string>(dataSet, "Employee", rowIndex: 0, columnName: "FirstName");
 
@@ -116,38 +128,115 @@ namespace PocoDataSet.Demo
             // Create copy of data set from JSON string directly
             IDataSet? copyOfDataSet = DataSetSerializer.FromJsonString(json);
 
+            // Data sets merge example
             // 7. Remove row from table
             DataSetExtensionExamples.RemoveRow(dataSet, "Employee", 0);
 
-            // 8. Remove table from data set
-            DataSetExtensionExamples.RemoveTable(dataSet, "Employee");
-
-            // 9. Clear table
+            // 8. Clear table
             DataSetExtensionExamples.ClearTable(dataSet, "Department");
 
-            // 10) Change information of employment type code in copied data set
+            // 9. Change information of employment type code in copied data set
             copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Id"] = 2;
-            copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Code"] = "ET02";
-            copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Description"] = "Part Time";
+            copyOfDataSet.Tables["EmploymentType"].Rows[0]["Code"] = "ET02";
+            copyOfDataSet.Tables["EmploymentType"].Rows[0]["Description"] = "Part Time";
+
+            // 10. Change information of employee last name in copied data set
+            copyOfDataSet.Tables["Employee"].Rows[1]["LastName"] = "Monk";
 
             // 11) Merge data sets
             // dataSet contains Department table without rows
             // dataSet contains EmploymentType table with 1 row: 1, "ET03", "Full Time"
+            // copyOfDataSet contains Employee table with 1 row: 2, "Sara", "Gor", 2
 
             // copyOfDataSet contains Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
-            // copyOfDataSet contains Employee table with 1 row: 1, "John", "Doe", 2
+            // copyOfDataSet contains Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Sara", "Monk", 2
             // copyOfDataSet contains EmploymentType table with 1 row: 1, "ET01", "Full Time"
 
             // After the merge dataSet will contain:
             // - Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
-            // - Employee table with 1 row: 1, "John", "Doe", 2
+            // - Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Sara", "Monk", 2
             // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
-            DataSetExtensionExamples.MergeWith(dataSet, copyOfDataSet!);
+            IDataSetMergeResult dataSetMergeResult = DataSetExtensionExamples.MergeWith(dataSet, copyOfDataSet);
+
+            // Data set and observable data set merge example
+            // 12. Create observable data set
+            IObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
+            observableDataSet.DataFieldValueChanged += ObservableDataSet_DataFieldValueChanged;
+            observableDataSet.RowAdded += ObservableDataSet_RowsAdded;
+            observableDataSet.RowRemoved += ObservableDataSet_RowsRemoved;
+            observableDataSet.TableAdded += ObservableDataSet_TableAdded;
+            observableDataSet.TableRemoved += ObservableDataSet_TableRemoved;
+
+            // 13. Create copy of previously merged data set
+            string? secondJson = DataSetSerializer.ToJsonString(dataSet);
+            IDataSet? copyOfMergedDataSet = DataSetSerializer.FromJsonString(secondJson);
+
+            // 14. Remove table
+            copyOfMergedDataSet!.Tables.Remove("EmploymentType");
+
+            // 15. Remove row
+            IDataTable copiedDepartmentDataTable = copyOfMergedDataSet.Tables["Department"];
+            IDataRow copiedDepartmentDataRowForRemoval = copiedDepartmentDataTable.Rows[0];
+            copiedDepartmentDataTable.Rows.Remove(copiedDepartmentDataRowForRemoval);
+
+            // 16. Add row
+            IDataRow newCopiedDepartmentDataRow = copiedDepartmentDataTable.AddNewRow();
+            newCopiedDepartmentDataRow["Id"] = 5;
+            newCopiedDepartmentDataRow["Name"] = "HR";
+
+            // 17. Add table
+            IDataTable payrollDataTable = new DataTable();
+            payrollDataTable.TableName = "Payroll";
+            payrollDataTable.AddColumn("Id", DataTypeNames.INT);
+            payrollDataTable.AddColumn("Type", DataTypeNames.STRING);
+            IDataRow payrollDataRow = payrollDataTable.AddNewRow();
+            payrollDataRow["Id"] = "1";
+            payrollDataRow["Type"] = "Monthly";
+            copyOfMergedDataSet.Tables.Add(payrollDataTable.TableName, payrollDataTable);
+
+            // 18. Modify row
+            copyOfMergedDataSet.UpdateFieldValue<string>("Employee", 0, "FirstName", "Martin");
+
+            // 19. Merge data sets
+            // - observable dataSet contains Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
+            // - observable dataSet contains Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Sara", "Monk", 2
+            // - observable dataSet contains EmploymentType table with 1 row: 2, "ET02", "Part Time"
+
+            // copyOfMergedDataSet contains Department table with 2 rows: 2, "Financial" and 5, "HR"
+            // copyOfMergedDataSet contains Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Martin", "Monk", 2
+            // copyOfMergedDataSet contains Payroll table with 1 row: 1, Monthly
+
+            // After the merge observable dataSet will contain:
+            // - Department table with 2 rows: 2, "Financial" and 5, "HR"
+            // - Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Martin", "Monk", 2
+            // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
+            // - Payroll table with 1 row: 1, "Monthly"
+            IObservableDataSetMergeResult observableDataSetMergeResult = observableDataSet.MergeWith(copyOfMergedDataSet);
 
             // 12) SQL Server data adapter example of loading data from database into data set
             LoadDataFromDatabase().Wait();
 
             Console.ReadLine();
+        }
+
+        private static void ObservableDataSet_TableRemoved(object? sender, TablesChangedEventArgs e)
+        {
+        }
+
+        private static void ObservableDataSet_TableAdded(object? sender, TablesChangedEventArgs e)
+        {
+        }
+
+        private static void ObservableDataSet_RowsRemoved(object? sender, RowsChangedEventArgs e)
+        {
+        }
+
+        private static void ObservableDataSet_RowsAdded(object? sender, RowsChangedEventArgs e)
+        {
+        }
+
+        private static void ObservableDataSet_DataFieldValueChanged(object? sender, DataFieldValueChangedEventArgs e)
+        {
         }
 
         /// <summary>

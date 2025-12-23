@@ -18,10 +18,11 @@ namespace PocoDataSet.Extensions
         /// <param name="tableName">Table name</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="mergeOptions">Merge options</param>
-        public static void MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, string tableName, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
+        /// <returns>True if any value of the current data row changed, otherwise false</returns>
+        public static bool MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, string tableName, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
             IRowMergeHandler rowHandler = mergeOptions.GetRowMergeHandler(tableName);
-            rowHandler.MergeRow(tableName, currentDataRow, refreshedDataRow, listOfColumnMetadata, mergeOptions);
+            return rowHandler.MergeRow(tableName, currentDataRow, refreshedDataRow, listOfColumnMetadata, mergeOptions);
         }
         #endregion
     }

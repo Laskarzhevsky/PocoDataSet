@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PocoDataSet" Version="1.0.4" />
+    <PackageReference Include="PocoDataSet" Version="1.0.8" />
   </ItemGroup>
 
   <ItemGroup>

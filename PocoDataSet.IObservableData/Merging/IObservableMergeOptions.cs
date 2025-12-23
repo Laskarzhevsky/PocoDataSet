@@ -1,50 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PocoDataSet.IData
+using PocoDataSet.IData;
+
+namespace PocoDataSet.IObservableData
 {
     /// <summary>
-    /// Defines merge options functionality
+    /// Holds merge options
     /// </summary>
-    public interface IMergeOptions
+    public interface IObservableMergeOptions
     {
         #region Properties
         /// <summary>
-        /// Gets data set merge handlers
+        /// Gets observable data set merge handlers
         /// </summary>
-        IDictionary<string, IDataSetMergeHandler> DataSetMergeHandlers
+        IDictionary<string, IObservableDataSetMergeHandler> ObservableDataSetMergeHandlers
         {
             get;
         }
 
         /// <summary>
-        /// Gets data set merge result
+        /// Gets observable data set merge result
         /// </summary>
-        IDataSetMergeResult DataSetMergeResult
+        IObservableDataSetMergeResult ObservableDataSetMergeResult
         {
             get;
         }
 
         /// <summary>
-        /// Gets or sets default data set merge handler
+        /// Gets or sets default observable data set merge handler
         /// </summary>
-        IDataSetMergeHandler DefaultDataSetMergeHandler
+        IObservableDataSetMergeHandler DefaultObservableDataSetMergeHandler
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets default row merge handler
+        /// Gets or sets default observable row merge handler
         /// </summary>
-        IRowMergeHandler DefaultRowMergeHandler
+        IObservableDataRowMergeHandler DefaultObservableRowMergeHandler
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets default table merge handler
+        /// Gets or sets default observable table merge handler
         /// </summary>
-        ITableMergeHandler DefaultTableMergeHandler
+        IObservableDataTableMergeHandler DefaultObservableTableMergeHandler
         {
             get; set;
         }
@@ -83,17 +85,17 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets row merge handlers
+        /// Gets observable row merge handlers
         /// </summary>
-        IDictionary<string, IRowMergeHandler> RowMergeHandlers
+        IDictionary<string, IObservableDataRowMergeHandler> ObservableRowMergeHandlers
         {
             get;
         }
 
         /// <summary>
-        /// Gets table merge handlers
+        /// Gets observable table merge handlers
         /// </summary>
-        IDictionary<string, ITableMergeHandler> TableMergeHandlers
+        IDictionary<string, IObservableDataTableMergeHandler> ObservableTableMergeHandlers
         {
             get;
         }
@@ -101,32 +103,32 @@ namespace PocoDataSet.IData
 
         #region Methods
         /// <summary>
-        /// Gets data set merge handler
+        /// Gets observable data set merge handler
         /// </summary>
         /// <param name="dataSetMergeHandlerKey">Data set merge handler key</param>
         /// <returns>Data set merge handler</returns>
-        IDataSetMergeHandler GetDataSetMergeHandler(string? dataSetMergeHandlerKey);
+        IObservableDataSetMergeHandler GetObservableDataSetMergeHandler(string? dataSetMergeHandlerKey);
 
         /// <summary>
         /// Gets primary key column names for a given table, applying overrides when configured.
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <returns>Primary key column names</returns>
-        List<string> GetPrimaryKeyColumnNames(IDataTable dataTable);
+        List<string> GetPrimaryKeyColumnNames(IObservableDataTable dataTable);
 
         /// <summary>
-        /// Gets row merge handler
+        /// Gets observable row merge handler
         /// </summary>
         /// <param name="tableName">Table name</param>
         /// <returns>Row merge handler</returns>
-        IRowMergeHandler GetRowMergeHandler(string tableName);
+        IObservableDataRowMergeHandler GetObservableRowMergeHandler(string tableName);
 
         /// <summary>
-        /// Gets table merge handler
+        /// Gets observable table merge handler
         /// </summary>
         /// <param name="tableName">Table name</param>
         /// <returns>Table merge handler</returns>
-        ITableMergeHandler GetTableMergeHandler(string tableName);
+        IObservableDataTableMergeHandler GetObservableTableMergeHandler(string tableName);
         #endregion
     }
 }

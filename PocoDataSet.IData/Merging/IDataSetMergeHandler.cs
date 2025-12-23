@@ -1,5 +1,8 @@
 ﻿namespace PocoDataSet.IData
 {
+    /// <summary>
+    /// Defines data set merge handler functionality
+    /// </summary>
     public interface IDataSetMergeHandler
     {
         #region Methods

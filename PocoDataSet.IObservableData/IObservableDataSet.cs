@@ -17,17 +17,34 @@ namespace PocoDataSet.IObservableData
         event EventHandler<DataFieldValueChangedEventArgs>? DataFieldValueChanged;
 
         /// <summary>
-        /// RowsAdded event
+        /// RowAdded event
         /// </summary>
-        event EventHandler<RowsChangedEventArgs>? RowsAdded;
+        event EventHandler<RowsChangedEventArgs>? RowAdded;
 
         /// <summary>
-        /// RowsRemoved event
+        /// RowRemoved event
         /// </summary>
-        event EventHandler<RowsChangedEventArgs>? RowsRemoved;
+        event EventHandler<RowsChangedEventArgs>? RowRemoved;
+
+        /// <summary>
+        /// TableAdded event
+        /// </summary>
+        event EventHandler<TablesChangedEventArgs>? TableAdded;
+
+        /// <summary>
+        /// TableRemoved event
+        /// </summary>
+        event EventHandler<TablesChangedEventArgs>? TableRemoved;
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Adds observable table
+        /// </summary>
+        /// <param name="dataTable">Data table for addition</param>
+        /// <returns>Added observable data table</returns>
+        IObservableDataTable AddObservableTable(IDataTable dataTable);
+
         /// <summary>
         /// Gets observable data view
         /// </summary>
@@ -37,7 +54,7 @@ namespace PocoDataSet.IObservableData
         /// <param name="sortString">Sort string</param>
         /// <param name="requestorName">Requestor name</param>
         /// <returns>Observable data table</returns>
-        IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string? requestorName);
+        IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string requestorName);
         #endregion
 
         #region Properties
@@ -55,6 +72,14 @@ namespace PocoDataSet.IObservableData
         IDataSet InnerDataSet
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets name
+        /// </summary>
+        string? Name
+        {
+            get; set;
         }
 
         /// <summary>

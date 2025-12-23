@@ -29,14 +29,15 @@ namespace PocoDataSet.IObservableData
         /// Adds data row
         /// </summary>
         /// <param name="dataRow">Data row</param>
-        /// <param name="mergeManager">Merge manager</param>
-        void AddRow(IDataRow dataRow, IMergeManager? mergeManager);
+        /// <returns>Observable data row</returns>
+        IObservableDataRow AddRow(IDataRow dataRow);
 
         /// <summary>
-        /// Removes row at specified index
+        /// Removes row
         /// </summary>
         /// <param name="rowIndex">Row index</param>
-        void RemoveRow(int rowIndex);
+        /// <returns>Removed observable data row </returns>
+        IObservableDataRow RemoveRow(int rowIndex);
         #endregion
 
         #region Properties

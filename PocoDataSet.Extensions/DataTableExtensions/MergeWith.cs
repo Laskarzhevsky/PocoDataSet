@@ -9,7 +9,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Merges current data table with data from refreshed data set
+        /// Merges current data table with data from refreshed data table
         /// </summary>
         /// <param name="currentDataTable">Current data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>

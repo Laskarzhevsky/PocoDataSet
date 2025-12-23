@@ -7,27 +7,34 @@ namespace PocoDataSet.IData
     /// </summary>
     public interface IDataSetMergeResult
     {
+        #region Methods
+        /// <summary>
+        /// Clears data set merge result
+        /// </summary>
+        void Clear();
+        #endregion
+
         #region Properties
         /// <summary>
-        /// Gets list of added data rows
+        /// Gets added data rows
         /// </summary>
-        List<IDataRow> ListOfAddedDataRows
+        List<IDataSetMergeResultEntry> AddedDataRows
         {
             get;
         }
 
         /// <summary>
-        /// Gets list of deleted data rows
+        /// Gets deleted data rows
         /// </summary>
-        List<IDataRow> ListOfDeletedDataRows
+        List<IDataSetMergeResultEntry> DeletedDataRows
         {
             get;
         }
 
         /// <summary>
-        /// Gets list of updated data rows
+        /// Gets updated data rows
         /// </summary>
-        List<IDataRow> ListOfUpdatedDataRows
+        List<IDataSetMergeResultEntry> UpdatedDataRows
         {
             get;
         }
