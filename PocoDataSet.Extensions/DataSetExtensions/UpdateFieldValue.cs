@@ -46,7 +46,9 @@ namespace PocoDataSet.Extensions
             }
 
             IDataRow dataRow = dataTable.Rows[rowIndex];
-            dataRow[columnName] = fieldValue;
+
+            // Use state-aware update (handles Deleted guard, snapshot, and Modified transition)
+            dataRow.UpdateDataFieldValue(columnName, fieldValue);
         }
         #endregion
     }

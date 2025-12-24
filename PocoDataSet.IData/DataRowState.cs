@@ -28,6 +28,6 @@
         /// <summary>
         /// Without modified data
         /// </summary>
-        Uchanged
+        Unchanged
     }
 }

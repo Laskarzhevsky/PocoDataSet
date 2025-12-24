@@ -21,6 +21,7 @@ namespace PocoDataSet.Extensions
             }
 
             IDataRow dataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
+            dataRow.DataRowState = DataRowState.Added;
             dataTable.Rows.Add(dataRow);
 
             return dataRow;

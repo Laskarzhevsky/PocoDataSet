@@ -21,8 +21,8 @@ namespace PocoDataSet.Extensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public static bool MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, string tableName, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
-            IRowMergeHandler rowHandler = mergeOptions.GetRowMergeHandler(tableName);
-            return rowHandler.MergeRow(tableName, currentDataRow, refreshedDataRow, listOfColumnMetadata, mergeOptions);
+            IRowMergeHandler rowMergeHandler = mergeOptions.GetRowMergeHandler(tableName);
+            return rowMergeHandler.MergeRow(tableName, currentDataRow, refreshedDataRow, listOfColumnMetadata, mergeOptions);
         }
         #endregion
     }

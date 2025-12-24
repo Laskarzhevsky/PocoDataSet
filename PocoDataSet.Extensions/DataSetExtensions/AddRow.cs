@@ -29,6 +29,12 @@ namespace PocoDataSet.Extensions
                 throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
+            // If a row is being inserted into a table for the first time, treat it as Added
+            if (dataRow.DataRowState == DataRowState.Detached)
+            {
+                dataRow.DataRowState = DataRowState.Added;
+            }
+
             dataTable.Rows.Add(dataRow);
         }
         #endregion

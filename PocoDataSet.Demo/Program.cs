@@ -156,6 +156,8 @@ namespace PocoDataSet.Demo
             // - Department table with 2 rows: 1, "Customer Service" and 2, "Financial"
             // - Employee table with 2 rows: 1, "John", "Doe", 2 and 2, "Sara", "Monk", 2
             // - EmploymentType table with 1 row: 2, "ET02", "Part Time"
+            dataSet.AcceptChanges();
+            copyOfDataSet.AcceptChanges();
             IDataSetMergeResult dataSetMergeResult = DataSetExtensionExamples.MergeWith(dataSet, copyOfDataSet);
 
             // Data set and observable data set merge example
