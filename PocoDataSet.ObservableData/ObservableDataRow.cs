@@ -17,6 +17,12 @@ namespace PocoDataSet.ObservableData
         /// IObservableDataRow interface implementation
         /// </summary>
         public event EventHandler<DataFieldValueChangedEventArgs>? DataFieldValueChanged;
+
+        /// <summary>
+        /// Row state changed notification
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        public event EventHandler<RowStateChangedEventArgs>? RowStateChanged;
         #endregion
 
         #region DataFields
@@ -71,10 +77,13 @@ namespace PocoDataSet.ObservableData
                 throw new ArgumentException("Column name must be provided.", nameof(columnName));
             }
 
+            DataRowState oldState = _innerDataRow.DataRowState;
             bool dataFieldValueUpdated = _innerDataRow.UpdateDataFieldValue(columnName, value);
             if (dataFieldValueUpdated)
             {
                 RaiseDataFieldValueChangedEvent(columnName, requestor);
+                DataRowState newState = _innerDataRow.DataRowState;
+                RaiseRowStateChangedEvent(oldState, newState, requestor);
             }
 
             return dataFieldValueUpdated;
@@ -94,6 +103,18 @@ namespace PocoDataSet.ObservableData
         #endregion
 
         #region Public Properties
+        /// <summary>
+        /// Gets data row state
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        public DataRowState DataRowState
+        {
+            get
+            {
+                return _innerDataRow.DataRowState;
+            }
+        }
+
         /// <summary>
         /// Gets inner data row
         /// IObservableDataRow interface implementation
@@ -128,6 +149,25 @@ namespace PocoDataSet.ObservableData
             if (DataFieldValueChanged != null)
             {
                 DataFieldValueChanged(this, new DataFieldValueChangedEventArgs(columnName, requestor));
+            }
+        }
+
+        /// <summary>
+        /// Raises RowStateChangedEventIfNeeded event
+        /// </summary>
+        /// <param name="oldState">Old state</param>
+        /// <param name="newState">New state</param>
+        /// <param name="requestor">Object which requests update</param>
+        void RaiseRowStateChangedEvent(DataRowState oldState, DataRowState newState, object? requestor)
+        {
+            if (oldState == newState)
+            {
+                return;
+            }
+
+            if (RowStateChanged != null)
+            {
+                RowStateChanged(this, new RowStateChangedEventArgs(oldState, newState, requestor));
             }
         }
         #endregion

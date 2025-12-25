@@ -12,7 +12,6 @@ namespace PocoDataSet.Extensions
         #region Public Methods
         /// <summary>
         /// Creates a "changeset" dataset that contains only rows in Added/Modified/Deleted states.
-        /// Row state is preserved in the returned dataset.
         /// </summary>
         public static IDataSet? CreateChangeset(this IDataSet? dataSet)
         {

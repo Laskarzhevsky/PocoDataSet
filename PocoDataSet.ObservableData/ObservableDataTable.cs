@@ -29,6 +29,12 @@ namespace PocoDataSet.ObservableData
         /// IObservableDataTable interface implementation
         /// </summary>
         public event EventHandler<RowsChangedEventArgs>? RowsRemoved;
+
+        /// <summary>
+        /// RowStateChanged event
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        public event EventHandler<RowStateChangedEventArgs>? RowStateChanged;
         #endregion
 
         #region Data Fields
@@ -76,6 +82,7 @@ namespace PocoDataSet.ObservableData
 
             IObservableDataRow observableDataRow = new ObservableDataRow(dataRow);
             observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
+            observableDataRow.RowStateChanged += ObservableDataRow_RowStateChanged;
             _observableDataRows.Add(observableDataRow);
             RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
 
@@ -92,6 +99,7 @@ namespace PocoDataSet.ObservableData
         {
             IObservableDataRow observableDataRow = _observableDataRows[rowIndex];
             observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;
+            observableDataRow.RowStateChanged -= ObservableDataRow_RowStateChanged;
 
             // Keep inner table consistent
             if (rowIndex >= 0 && rowIndex < _innerDataTable.Rows.Count)
@@ -176,6 +184,7 @@ namespace PocoDataSet.ObservableData
                 IDataRow dataRow = _innerDataTable.Rows[i];
                 IObservableDataRow observableDataRow = new ObservableDataRow(dataRow);
                 observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
+                observableDataRow.RowStateChanged += ObservableDataRow_RowStateChanged;
                 _observableDataRows.Add(observableDataRow);
 
                 RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
@@ -220,6 +229,19 @@ namespace PocoDataSet.ObservableData
             if (DataFieldValueChanged != null)
             {
                 DataFieldValueChanged(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Handles ObservableDataRow_RowStateChanged event
+        /// </summary>
+        /// <param name="sender">Event sender</param>
+        /// <param name="e">Event arguments</param>
+        private void ObservableDataRow_RowStateChanged(object? sender, RowStateChangedEventArgs e)
+        {
+            if (RowStateChanged != null)
+            {
+                RowStateChanged(sender, e);
             }
         }
         #endregion

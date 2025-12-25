@@ -15,7 +15,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="currentObservableDataTable">Current observable data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
-        public static void MergeWith(this IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions? observableMergeOptions = null)
+        public static void MergeWith(this IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
             IObservableDataTableMergeHandler observableDataTableMergeHandler = observableMergeOptions!.GetObservableTableMergeHandler(currentObservableDataTable.TableName);
             observableDataTableMergeHandler.Merge(currentObservableDataTable, refreshedDataTable, observableMergeOptions);

@@ -16,6 +16,7 @@ namespace PocoDataSet.IObservableData
         public DataFieldValueChangedEventArgs(string columnName, object? requestor)
         {
             ColumnName = columnName;
+            Requestor = requestor;
         }
         #endregion
 

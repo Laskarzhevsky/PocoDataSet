@@ -89,7 +89,7 @@ namespace PocoDataSet.ObservableExtensions
                 }
                 else
                 {
-                    bool changed = observableDataRow.InnerDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.InnerDataTable.Columns, observableMergeOptions);
+                    bool changed = observableDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.InnerDataTable.Columns, observableMergeOptions);
                     if (changed)
                     {
                         observableMergeOptions.ObservableDataSetMergeResult.UpdatedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
@@ -115,14 +115,17 @@ namespace PocoDataSet.ObservableExtensions
             }
 
             // Clear current rows
-            currentObservableDataTable.Rows.Clear();
+            for (int i = currentObservableDataTable.Rows.Count - 1; i >= 0; i--)
+            {
+                currentObservableDataTable.RemoveRow(i);
+            }
 
             // Add all refreshed rows as new rows
             for (int i = 0; i < refreshedDataTable.Rows.Count; i++)
             {
                 IDataRow refreshedDataRow = refreshedDataTable.Rows[i];
                 IDataRow newDataRow = AddNewDataRowWithDefaultValuesToDataTable(currentObservableDataTable, observableMergeOptions);
- 
+
                 newDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.Columns, observableMergeOptions);
                 IObservableDataRow observableDataRow = currentObservableDataTable.AddRow(newDataRow);
                 observableMergeOptions.ObservableDataSetMergeResult.AddedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));

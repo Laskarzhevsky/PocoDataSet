@@ -22,6 +22,11 @@ namespace PocoDataSet.IObservableData
         /// RowsRemoved event
         /// </summary>
         event EventHandler<RowsChangedEventArgs>? RowsRemoved;
+
+        /// <summary>
+        /// RowStateChanged event
+        /// </summary>
+        event EventHandler<RowStateChangedEventArgs>? RowStateChanged;
         #endregion
 
         #region Methods

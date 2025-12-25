@@ -14,6 +14,11 @@ namespace PocoDataSet.IObservableData
         /// Cell changed notification
         /// </summary>
         event EventHandler<DataFieldValueChangedEventArgs>? DataFieldValueChanged;
+
+        /// <summary>
+        /// Row state changed notification
+        /// </summary>
+        event EventHandler<RowStateChangedEventArgs>? RowStateChanged;
         #endregion
 
         #region Methods
@@ -44,6 +49,14 @@ namespace PocoDataSet.IObservableData
         #endregion
 
         #region Public Properties
+        /// <summary>
+        /// Gets data row state
+        /// </summary>
+        public DataRowState DataRowState
+        {
+            get;
+        }
+
         /// <summary>
         /// Gets inner data row
         /// </summary>

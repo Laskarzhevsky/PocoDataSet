@@ -15,7 +15,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="currentObservableDataSet">Current observable data set</param>
         /// <param name="refreshedDataSet">Refreshed data set</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
-        public static IObservableDataSetMergeResult MergeWith(this IObservableDataSet currentObservableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions? observableMergeOptions = null)
+        public static IObservableDataSetMergeResult MergeWith(this IObservableDataSet? currentObservableDataSet, IDataSet? refreshedDataSet, IObservableMergeOptions? observableMergeOptions = null)
         {
             if (observableMergeOptions == null)
             {

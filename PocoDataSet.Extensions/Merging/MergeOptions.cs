@@ -102,16 +102,6 @@ namespace PocoDataSet.Extensions
         } = new List<string>();
 
         /// <summary>
-        /// Gets or sets the merge mode to use when synchronizing data.
-        /// </summary>
-        /// <remarks>The merge mode determines how conflicts are resolved during data synchronization.
-        /// Choose an appropriate value based on whether local or remote changes should take precedence.</remarks>
-        public MergeMode MergeMode
-        {
-            get; set;
-        } = MergeMode.InboundRefresh;
-
-        /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
         /// IMergeOptions interface implementation
         /// </summary>
