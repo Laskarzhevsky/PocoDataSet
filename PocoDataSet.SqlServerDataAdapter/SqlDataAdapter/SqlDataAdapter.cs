@@ -98,6 +98,31 @@ namespace PocoDataSet.SqlServerDataAdapter
         {
             return await ExecuteNonQueryAsync(baseQuery, isStoredProcedure, parameters, connectionString);
         }
+
+		/// <summary>
+		/// Saves data set changes to SQL Server by applying <see cref="PocoDataSet.IData.DataRowState"/>
+		/// of each row (Added/Modified/Deleted). Unchanged/Detached rows are ignored.
+		/// </summary>
+		/// <param name="changeset">Changeset received from UI (typically created by CreateChangeset)</param>
+		/// <param name="options">Save changes options</param>
+		/// <param name="connectionString">Optional connection string override</param>
+		/// <returns>Total affected rows</returns>
+		public async Task<int> SaveChangesAsync(PocoDataSet.IData.IDataSet changeset, SqlServerSaveChangesOptions? options, string? connectionString)
+		{
+			return await SaveChangesInternalAsync(changeset, options, connectionString);
+		}
+
+		/// <summary>
+		/// Saves data set changes to SQL Server by applying <see cref="PocoDataSet.IData.DataRowState"/>
+		/// of each row (Added/Modified/Deleted). Unchanged/Detached rows are ignored.
+		/// </summary>
+		/// <param name="changeset">Changeset received from UI (typically created by CreateChangeset)</param>
+		/// <param name="connectionString">Optional connection string override</param>
+		/// <returns>Total affected rows</returns>
+		public async Task<int> SaveChangesAsync(PocoDataSet.IData.IDataSet changeset, string? connectionString)
+		{
+			return await SaveChangesInternalAsync(changeset, null, connectionString);
+		}
         #endregion
     }
 }

@@ -17,6 +17,14 @@ namespace PocoDataSet.SqlServerDataAdapter
 
         #region Protected Methods
         /// <summary>
+        /// Core async dispose hook
+        /// </summary>
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+            await ReleaseResourcesAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Releases resources
         /// </summary>
         protected virtual void ReleaseResources()
@@ -32,7 +40,20 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
         #endregion
 
-        #region Destructors
+        #region Protected Properties
+        /// <summary>
+        /// Gets flag indicating whether object has been disposed
+        /// </summary>
+        protected bool IsDisposed
+        {
+            get
+            {
+                return _disposed;
+            }
+        }
+        #endregion
+
+        #region IDisposable
         /// <summary>
         /// Disposes object
         /// </summary>
@@ -43,25 +64,15 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return;
             }
 
-            Dispose(true);
-            _disposed = true;
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes object asynchronously
-        /// </summary>
-        public async ValueTask DisposeAsync()
-        {
-            if (_disposed)
+            try
             {
-                return;
+                Dispose(true);
             }
-
-            await ReleaseResourcesAsync();
-            ReleaseResources();
-            _disposed = true;
-            GC.SuppressFinalize(this);
+            finally
+            {
+                _disposed = true;
+                GC.SuppressFinalize(this);
+            }
         }
 
         /// <summary>
@@ -73,6 +84,30 @@ namespace PocoDataSet.SqlServerDataAdapter
             if (disposing)
             {
                 ReleaseResources();
+            }
+        }
+        #endregion
+
+        #region IAsyncDisposable
+        /// <summary>
+        /// Disposes object asynchronously
+        /// </summary>
+        public async ValueTask DisposeAsync()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            try
+            {
+                await DisposeAsyncCore().ConfigureAwait(false);
+                Dispose(false); // ensures derived Dispose(bool) runs in async path too
+            }
+            finally
+            {
+                _disposed = true;
+                GC.SuppressFinalize(this);
             }
         }
         #endregion

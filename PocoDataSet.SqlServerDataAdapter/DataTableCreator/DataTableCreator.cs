@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Data.SqlClient;
 
-using PocoDataSet.Data;
+using PocoDataSet.IData;
 
 namespace PocoDataSet.SqlServerDataAdapter
 {
@@ -76,7 +76,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Gets or sets foreign kes data
         /// </summary>
-        public Dictionary<string, ForeignKeyData>? ForeignKeysData
+        public Dictionary<string, IForeignKeyData>? ForeignKeysData
         {
             get; set;
         }

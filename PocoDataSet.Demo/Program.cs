@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-
-using PocoDataSet.Data;
+﻿using PocoDataSet.Data;
 using PocoDataSet.Demo.DataSetExtensions;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -14,8 +12,9 @@ namespace PocoDataSet.Demo
 {
     internal static class Program
     {
-        private static void Main()
+        private static async Task Main()
         {
+/*
             // 1) Create an empty data set
             IDataSet dataSet = DataSetFactoryExamples.CreateDataSet();
 
@@ -217,7 +216,8 @@ namespace PocoDataSet.Demo
 
             // 12) SQL Server data adapter example of loading data from database into data set
             LoadDataFromDatabase().Wait();
-
+*/
+            await SaveChangesetExample();
             Console.ReadLine();
         }
 
@@ -251,7 +251,7 @@ namespace PocoDataSet.Demo
             returnedTableNames.Add("Department");
 
             IDataSet requestDataSet = DataSetFactoryExamples.CreateDataSet();
-            string connectionString = "Server=localhost;Database=PocoDataSetExamples;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
             SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
 
             // a) Load Department (no parameters)
@@ -266,6 +266,40 @@ namespace PocoDataSet.Demo
             parameters.Add("@DepartmentId", 2);
 
             responseDataSet = await sqlDataAdapter.FillAsync(employeeSql, false, parameters, returnedTableNames, null, responseDataSet);
+        }
+
+        static async Task SaveChangesetExample()
+        {
+            // 1) Create an empty data set
+            IDataSet dataSet = DataSetFactoryExamples.CreateDataSet();
+
+            // 2. Create an empty data table
+            IDataTable departmentDataTable = DataSetExtensionExamples.AddNewTable(dataSet, "Department");
+            DataTableExtensionExamples.AddColumn(departmentDataTable, "Id", DataTypeNames.INT);
+            DataTableExtensionExamples.AddColumn(departmentDataTable, "Name", DataTypeNames.STRING);
+
+            // 3. Create a new row by AddNewRow method on data table
+            IDataRow departmentDataRow = DataTableExtensionExamples.AddNewRow(departmentDataTable);
+            departmentDataRow.UpdateDataFieldValue("Id", 17);
+            departmentDataRow.UpdateDataFieldValue("Name", "Emergency");
+
+            // Make data as Deleted
+            departmentDataRow.AcceptChanges();
+            departmentDataRow.Delete();
+
+            // 4. Create changeset
+            IDataSet? changeset = dataSet.CreateChangeset();
+            if (changeset == null)
+            {
+                return;
+            }
+
+            // 5. Create SqlDataAdapter
+            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
+
+            // Call SaveChangesAsync method
+            await sqlDataAdapter.SaveChangesAsync(changeset, connectionString);
         }
     }
 }

@@ -89,7 +89,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                     }
                 }
 
-                if (ForeignKeysData != null && ForeignKeysData.TryGetValue(columnName, out PocoDataSet.Data.ForeignKeyData? foreignKeyData))
+                if (ForeignKeysData != null && ForeignKeysData.TryGetValue(columnName, out IForeignKeyData? foreignKeyData))
                 {
                     columnMetadata.IsForeignKey = true;
                     columnMetadata.ReferencedTableName = foreignKeyData.ReferencedTableName;
