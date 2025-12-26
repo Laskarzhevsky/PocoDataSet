@@ -15,7 +15,7 @@ namespace PocoDataSet.DemoWithNugetPackage
 
             // 2.a) Create an empty data table using data set extension
             IDataTable departmentDataTable = dataSet.AddNewTable("Department");
-            departmentDataTable.AddColumn("Id", DataTypeNames.INT);
+            departmentDataTable.AddColumn("Id", DataTypeNames.INT32);
             departmentDataTable.AddColumn("Name", DataTypeNames.STRING);
 
             // 2.b) Create an empty data table manually specifying column metadata.
@@ -24,7 +24,7 @@ namespace PocoDataSet.DemoWithNugetPackage
 
             IColumnMetadata columnMetadata = new ColumnMetadata();
             columnMetadata.ColumnName = "Id";
-            columnMetadata.DataType = DataTypeNames.INT;
+            columnMetadata.DataType = DataTypeNames.INT32;
             columnMetadata.IsNullable = false;
             columnMetadata.IsPrimaryKey = true;
             listOfColumnMetadata.Add(columnMetadata);
@@ -42,7 +42,7 @@ namespace PocoDataSet.DemoWithNugetPackage
             IDataTable employeeTable = dataSet.AddNewTable("Employee", listOfColumnMetadata);
 
             // 2.c) Change table schema
-            employeeTable.AddColumn("DepartmentId", DataTypeNames.INT);
+            employeeTable.AddColumn("DepartmentId", DataTypeNames.INT32);
 
             // 2.d) Create an empty data table from POCO interface
             IDataTable employmentTypeDataTable = dataSet.AddNewTableFromPocoInterface("EmploymentType", typeof(IEmploymentType));

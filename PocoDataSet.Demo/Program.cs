@@ -279,7 +279,7 @@ namespace PocoDataSet.Demo
 
             // 2. Create an empty data table
             IDataTable departmentDataTable = DataSetExtensionExamples.AddNewTable(dataSet, "Department");
-            DataTableExtensionExamples.AddColumn(departmentDataTable, "Id", DataTypeNames.INT);
+            DataTableExtensionExamples.AddColumn(departmentDataTable, "Id", DataTypeNames.INT32);
             DataTableExtensionExamples.AddColumn(departmentDataTable, "Name", DataTypeNames.STRING);
 
             // INSERT example

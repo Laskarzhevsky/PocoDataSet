@@ -16,11 +16,6 @@ namespace PocoDataSet.Data
         /// <returns>Default value</returns>
         public object? GetDefaultValue(string? dataType, bool isNullable)
         {
-            if (dataType == null)
-            {
-                return null;
-            }
-
             return MetadataDefaults.GetDefaultValue(dataType, isNullable);
         }
         #endregion

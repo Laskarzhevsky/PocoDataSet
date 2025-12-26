@@ -45,7 +45,7 @@ namespace PocoDataSet.Extensions
 
             ColumnMetadata columnMetadata = new ColumnMetadata();
             columnMetadata.ColumnName = SpecialColumnNames.CLIENT_KEY;
-            columnMetadata.DataType = DataTypeNames.UNIQUE_IDENTIFIER;
+            columnMetadata.DataType = DataTypeNames.GUID;
             columnMetadata.IsNullable = false;
             columnMetadata.IsPrimaryKey = false;
             columnMetadata.DisplayName = null;
