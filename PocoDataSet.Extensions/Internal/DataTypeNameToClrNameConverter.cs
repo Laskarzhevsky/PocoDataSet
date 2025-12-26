@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using PocoDataSet.IData;
+
 namespace PocoDataSet.Extensions
 {
     /// <summary>

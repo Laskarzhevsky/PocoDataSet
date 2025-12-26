@@ -75,6 +75,14 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
+        /// Gets or sets merge mode
+        /// </summary>
+        MergeMode MergeMode
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
         /// </summary>
         IDictionary<string, List<string>> OverriddenPrimaryKeyNames

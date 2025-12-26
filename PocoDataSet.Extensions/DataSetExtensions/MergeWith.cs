@@ -9,11 +9,26 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
+        /// Merges current data set with refreshed data set using a specific merge mode.
+        /// </summary>
+        /// <param name="currentDataSet">Current data set</param>
+        /// <param name="refreshedDataSet">Refreshed data set</param>
+        /// <param name="mergeMode">Merge mode</param>
+        /// <returns>Data set merged result</returns>
+        public static IDataSetMergeResult MergeWith(this IDataSet? currentDataSet, IDataSet? refreshedDataSet, MergeMode mergeMode)
+        {
+            IMergeOptions mergeOptions = new MergeOptions();
+            mergeOptions.MergeMode = mergeMode;
+            return MergeWith(currentDataSet, refreshedDataSet, mergeOptions);
+        }
+
+        /// <summary>
         /// Merges current data set with refreshed data set by copying all changes from refreshed data set
         /// </summary>
         /// <param name="currentDataSet">Current data set</param>
         /// <param name="refreshedDataSet">Refreshed data set</param>
         /// <param name="mergeOptions">Merge options</param>
+        /// <returns>Data set merged result</returns>
         public static IDataSetMergeResult MergeWith(this IDataSet? currentDataSet, IDataSet? refreshedDataSet, IMergeOptions? mergeOptions = null)
         {
             if (mergeOptions == null)

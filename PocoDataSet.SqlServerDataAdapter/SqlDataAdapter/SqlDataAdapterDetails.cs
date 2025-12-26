@@ -7,6 +7,8 @@ using Microsoft.Data.SqlClient;
 using PocoDataSet.Data;
 using PocoDataSet.IData;
 
+using PocoDataRowState = PocoDataSet.IData.DataRowState;
+
 namespace PocoDataSet.SqlServerDataAdapter
 {
     /// <summary>
@@ -15,20 +17,16 @@ namespace PocoDataSet.SqlServerDataAdapter
     public partial class SqlDataAdapter
     {
         #region Methods
-        /// <summary>
-        /// Saves changeset to SQL Server.
-        /// </summary>
-        /// <param name="changeset">Changeset to save</param>
-        /// <param name="options">Save changes options</param>
-        /// <param name="connectionString">Optional connection string override</param>
-        /// <returns>Total affected rows</returns>
-        async Task<int> SaveChangesInternalAsync(IDataSet changeset, SqlServerSaveChangesOptions? options, string? connectionString)
-		{
-			if (options == null)
-			{
-				options = new SqlServerSaveChangesOptions();
-			}
 
+		/// <summary>
+		/// Saves changeset to SQL Server.
+		/// </summary>
+		/// <param name="changeset">Changeset to save</param>
+		/// <param name="options">Save changes options</param>
+		/// <param name="connectionString">Optional connection string override</param>
+		/// <returns>Total affected rows</returns>
+		async Task<int> SaveChangesInternalAsync(IDataSet changeset, string? connectionString)
+		{
 			if (!string.IsNullOrEmpty(connectionString))
 			{
 				ConnectionString = connectionString;
@@ -44,53 +42,43 @@ namespace PocoDataSet.SqlServerDataAdapter
 			SqlConnection = new SqlConnection(ConnectionString);
 			await SqlConnection.OpenAsync().ConfigureAwait(false);
 
-			SqlTransaction? transaction = null;
-			if (options.UseTransaction)
-			{
-				transaction = SqlConnection.BeginTransaction();
-			}
-
+			SqlTransaction transaction = SqlConnection.BeginTransaction();
 			try
 			{
-                Dictionary<string, TableWriteMetadata> metadataCache = new Dictionary<string, TableWriteMetadata>(StringComparer.OrdinalIgnoreCase);
-                List<IDataTable> orderedTables = BuildOrderedTables(changeset, options);
-                for (int i = 0; i < orderedTables.Count; i++)
-                {
-                    IDataTable table = orderedTables[i];
-                    ValidateTableForSave(table);
-                    await GetOrLoadTableWriteMetadataAsync(metadataCache, table.TableName, transaction).ConfigureAwait(false);
-                }
-                
-				affectedRows += await ApplyDeletesAsync(orderedTables, metadataCache, options, transaction).ConfigureAwait(false);
-				affectedRows += await ApplyInsertsAsync(orderedTables, metadataCache, options, transaction).ConfigureAwait(false);
-				affectedRows += await ApplyUpdatesAsync(orderedTables, metadataCache, options, transaction).ConfigureAwait(false);
+				Dictionary<string, TableWriteMetadata> metadataCache = new Dictionary<string, TableWriteMetadata>(StringComparer.OrdinalIgnoreCase);
 
-				if (transaction != null)
+				List<IDataTable> tablesWithChanges = await BuildOrderedTablesWithChangesByForeignKeysAsync(changeset, transaction).ConfigureAwait(false);
+
+				for (int t = 0; t < tablesWithChanges.Count; t++)
 				{
-					transaction.Commit();
+					IDataTable table = tablesWithChanges[t];
+					ValidateTableForSave(table);
+
+					// Load and validate SQL Server schema once per table
+					TableWriteMetadata metadata = await GetOrLoadTableWriteMetadataAsync(metadataCache, table.TableName, transaction).ConfigureAwait(false);
+					ValidateTableExistsInSqlServer(metadata, table.TableName);
 				}
+
+				affectedRows += await ApplyDeletesAsync(tablesWithChanges, metadataCache, transaction).ConfigureAwait(false);
+				affectedRows += await ApplyInsertsAsync(tablesWithChanges, metadataCache, transaction).ConfigureAwait(false);
+				affectedRows += await ApplyUpdatesAsync(tablesWithChanges, metadataCache, transaction).ConfigureAwait(false);
+				transaction.Commit();
 			}
 			catch
 			{
-				if (transaction != null)
+				try
 				{
-					try
-					{
-						transaction.Rollback();
-					}
-					catch
-					{
-						// ignore rollback exceptions
-					}
+					transaction.Rollback();
+				}
+				catch
+				{
+					// ignore rollback exceptions
 				}
 				throw;
 			}
 			finally
 			{
-				if (transaction != null)
-				{
-					await transaction.DisposeAsync().ConfigureAwait(false);
-				}
+				await transaction.DisposeAsync().ConfigureAwait(false);
 				await DisposeAsync().ConfigureAwait(false);
 			}
 
@@ -98,44 +86,264 @@ namespace PocoDataSet.SqlServerDataAdapter
 		}
 
 		/// <summary>
-		/// Builds ordered list of tables based on options.TableSaveOrder.
+		/// Builds ordered list of tables that contain changes, ordered by foreign keys.
 		/// </summary>
-		List<IDataTable> BuildOrderedTables(IDataSet changeset, SqlServerSaveChangesOptions options)
+		
+		/// <summary>
+		/// Builds ordered list of tables that contain changes (Added/Modified/Deleted),
+		/// ordered automatically by SQL Server foreign key relationships.
+		/// </summary>
+		async Task<List<IDataTable>> BuildOrderedTablesWithChangesByForeignKeysAsync(IDataSet changeset, SqlTransaction transaction)
 		{
-			List<IDataTable> orderedTables = new List<IDataTable>();
-			HashSet<string> alreadyAdded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			List<IDataTable> tablesWithChanges = new List<IDataTable>();
+			Dictionary<string, IDataTable> tableByName = new Dictionary<string, IDataTable>(StringComparer.OrdinalIgnoreCase);
 
-			if (options.TableSaveOrder != null && options.TableSaveOrder.Count > 0)
+			foreach (KeyValuePair<string, IDataTable> kvp in changeset.Tables)
 			{
-				for (int i = 0; i < options.TableSaveOrder.Count; i++)
+				IDataTable table = kvp.Value;
+				if (TableHasChanges(table))
 				{
-					string tableName = options.TableSaveOrder[i];
-					if (string.IsNullOrEmpty(tableName))
+					tablesWithChanges.Add(table);
+					if (!tableByName.ContainsKey(table.TableName))
 					{
-						continue;
-					}
-
-					IDataTable? dataTable;
-					changeset.Tables.TryGetValue(tableName, out dataTable);
-					if (dataTable != null)
-					{
-						orderedTables.Add(dataTable);
-						alreadyAdded.Add(tableName);
+						tableByName.Add(table.TableName, table);
 					}
 				}
 			}
 
-			foreach (KeyValuePair<string, IDataTable> kvp in changeset.Tables)
+			if (tablesWithChanges.Count == 0)
 			{
-				if (alreadyAdded.Contains(kvp.Key))
+				return tablesWithChanges;
+			}
+
+			HashSet<string> tableNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			for (int i = 0; i < tablesWithChanges.Count; i++)
+			{
+				tableNames.Add(tablesWithChanges[i].TableName);
+			}
+
+			List<ForeignKeyEdge> edges = await LoadForeignKeyEdgesAsync(tableNames, transaction).ConfigureAwait(false);
+
+			// Build a stable order map based on incoming list order (used as tie-breaker).
+			Dictionary<string, int> orderIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+			for (int i = 0; i < tablesWithChanges.Count; i++)
+			{
+				string name = tablesWithChanges[i].TableName;
+				if (!orderIndex.ContainsKey(name))
 				{
-					continue;
+					orderIndex.Add(name, i);
 				}
-				orderedTables.Add(kvp.Value);
+			}
+
+			List<string> orderedNames = OrderTableNamesByForeignKeys(tableNames, edges, orderIndex);
+
+			List<IDataTable> orderedTables = new List<IDataTable>();
+			for (int i = 0; i < orderedNames.Count; i++)
+			{
+				IDataTable? table;
+				tableByName.TryGetValue(orderedNames[i], out table);
+				if (table != null)
+				{
+					orderedTables.Add(table);
+				}
 			}
 
 			return orderedTables;
 		}
+
+		bool TableHasChanges(IDataTable table)
+		{
+			for (int i = 0; i < table.Rows.Count; i++)
+			{
+				IDataRow row = table.Rows[i];
+				if (row.DataRowState == PocoDataSet.IData.DataRowState.Added ||
+					row.DataRowState == PocoDataSet.IData.DataRowState.Modified ||
+					row.DataRowState == PocoDataSet.IData.DataRowState.Deleted)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		sealed class ForeignKeyEdge
+		{
+			public string ParentTable
+			{
+				get; set;
+			} = string.Empty;
+
+			public string ChildTable
+			{
+				get; set;
+			} = string.Empty;
+
+			public string ForeignKeyName
+			{
+				get; set;
+			} = string.Empty;
+		}
+
+		async Task<List<ForeignKeyEdge>> LoadForeignKeyEdgesAsync(HashSet<string> tableNames, SqlTransaction transaction)
+		{
+			List<ForeignKeyEdge> edges = new List<ForeignKeyEdge>();
+
+			// Load all FK relations between user tables; filter in-memory to our table set.
+			string sql = @"
+SELECT
+	fk.name AS ForeignKeyName,
+	parent.name AS ChildTable,
+	referenced.name AS ParentTable
+FROM sys.foreign_keys fk
+JOIN sys.tables parent ON parent.object_id = fk.parent_object_id
+JOIN sys.tables referenced ON referenced.object_id = fk.referenced_object_id
+WHERE parent.is_ms_shipped = 0
+  AND referenced.is_ms_shipped = 0;";
+
+			using (SqlCommand cmd = new SqlCommand(sql, SqlConnection, transaction))
+			{
+				using (SqlDataReader reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
+				{
+					while (await reader.ReadAsync().ConfigureAwait(false))
+					{
+						string fkName = reader.GetString(0);
+						string child = reader.GetString(1);
+						string parent = reader.GetString(2);
+
+						if (!tableNames.Contains(child))
+						{
+							continue;
+						}
+						if (!tableNames.Contains(parent))
+						{
+							continue;
+						}
+
+						ForeignKeyEdge edge = new ForeignKeyEdge();
+						edge.ForeignKeyName = fkName;
+						edge.ChildTable = child;
+						edge.ParentTable = parent;
+						edges.Add(edge);
+					}
+				}
+			}
+
+			return edges;
+		}
+
+		List<string> OrderTableNamesByForeignKeys(HashSet<string> tableNames, List<ForeignKeyEdge> edges, Dictionary<string, int> orderIndex)
+		{
+			// parent -> children adjacency
+			Dictionary<string, List<string>> adjacency = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+			Dictionary<string, int> indegree = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+			foreach (string name in tableNames)
+			{
+				adjacency[name] = new List<string>();
+				indegree[name] = 0;
+			}
+
+			for (int i = 0; i < edges.Count; i++)
+			{
+				ForeignKeyEdge edge = edges[i];
+
+				// Parent -> Child
+				adjacency[edge.ParentTable].Add(edge.ChildTable);
+				indegree[edge.ChildTable] = indegree[edge.ChildTable] + 1;
+			}
+
+			// Start nodes (indegree 0) - maintain stable order using orderIndex
+			List<string> ready = new List<string>();
+			foreach (KeyValuePair<string, int> kvp in indegree)
+			{
+				if (kvp.Value == 0)
+				{
+					ready.Add(kvp.Key);
+				}
+			}
+
+			SortByIncomingOrder(ready, orderIndex);
+
+			List<string> result = new List<string>();
+
+			while (ready.Count > 0)
+			{
+				string current = ready[0];
+				ready.RemoveAt(0);
+				result.Add(current);
+
+				List<string> children = adjacency[current];
+				for (int i = 0; i < children.Count; i++)
+				{
+					string child = children[i];
+					indegree[child] = indegree[child] - 1;
+					if (indegree[child] == 0)
+					{
+						ready.Add(child);
+					}
+				}
+
+				SortByIncomingOrder(ready, orderIndex);
+			}
+
+			if (result.Count != tableNames.Count)
+			{
+				// cycle detected
+				List<string> remaining = new List<string>();
+				foreach (KeyValuePair<string, int> kvp in indegree)
+				{
+					if (kvp.Value > 0)
+					{
+						remaining.Add(kvp.Key);
+					}
+				}
+				SortByIncomingOrder(remaining, orderIndex);
+
+				throw new InvalidOperationException(
+					"Cannot automatically order tables by foreign keys due to a cycle. Tables in cycle: " + string.Join(", ", remaining));
+			}
+
+			return result;
+		}
+
+		void SortByIncomingOrder(List<string> list, Dictionary<string, int> orderIndex)
+		{
+			// Simple stable insertion sort by orderIndex
+			for (int i = 1; i < list.Count; i++)
+			{
+				string key = list[i];
+				int keyOrder = GetOrderIndex(orderIndex, key);
+
+				int j = i - 1;
+				while (j >= 0 && GetOrderIndex(orderIndex, list[j]) > keyOrder)
+				{
+					list[j + 1] = list[j];
+					j--;
+				}
+
+				list[j + 1] = key;
+			}
+		}
+
+		int GetOrderIndex(Dictionary<string, int> orderIndex, string tableName)
+		{
+			int idx;
+			if (orderIndex.TryGetValue(tableName, out idx))
+			{
+				return idx;
+			}
+			return int.MaxValue;
+		}
+
+
+		void ValidateTableExistsInSqlServer(TableWriteMetadata metadata, string tableName)
+		{
+			if (metadata.ColumnNames.Count == 0)
+			{
+				throw new InvalidOperationException("Table '" + tableName + "' does not exist in SQL Server or is not accessible.");
+			}
+		}
+
 
 
 		sealed class TableWriteMetadata
@@ -211,8 +419,8 @@ WHERE tb.name = @tableName;";
 						bool isIdentity = reader.GetBoolean(1);
 						bool isComputed = reader.GetBoolean(2);
 						string typeName = reader.GetString(3);
-                        int systemTypeId = reader.GetByte(4);
-                        
+						int systemTypeId = reader.GetByte(4);
+
 						metadata.ColumnNames.Add(columnName);
 
 						if (isIdentity)
@@ -234,13 +442,8 @@ WHERE tb.name = @tableName;";
 				}
 			}
 
-            if (metadata.ColumnNames.Count == 0)
-            {
-                throw new InvalidOperationException("Table '" + tableName + "' does not exist in database schema.");
-            }
-
-            // 2) Primary key columns
-            string pkSql = @"
+			// 2) Primary key columns
+			string pkSql = @"
 SELECT c.name AS ColumnName
 FROM sys.indexes i
 JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
@@ -282,12 +485,12 @@ ORDER BY ic.key_ordinal;";
 			return metadata;
 		}
 
-		HashSet<string> BuildExcludedColumns(IDataTable table, TableWriteMetadata metadata, SqlServerSaveChangesOptions options)
+		HashSet<string> BuildExcludedColumns(IDataTable table, TableWriteMetadata metadata)
 		{
-			HashSet<string> excluded = GetExcludedColumns(table.TableName, options);
+            HashSet<string> excluded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-			// Always exclude computed and rowversion
-			foreach (string col in metadata.ComputedColumns)
+            // Always exclude computed and rowversion
+            foreach (string col in metadata.ComputedColumns)
 			{
 				excluded.Add(col);
 			}
@@ -306,72 +509,301 @@ ORDER BY ic.key_ordinal;";
 		}
 
 
-		async Task<int> ApplyDeletesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+
+		List<string> BuildInsertOutputColumns(TableWriteMetadata metadata)
+		{
+			List<string> outputColumns = new List<string>();
+
+			List<string> identityColumns = new List<string>(metadata.IdentityColumns);
+			identityColumns.Sort(StringComparer.OrdinalIgnoreCase);
+			for (int i = 0; i < identityColumns.Count; i++)
+			{
+				outputColumns.Add(identityColumns[i]);
+			}
+
+			List<string> rvColumns = new List<string>(metadata.RowVersionColumns);
+			rvColumns.Sort(StringComparer.OrdinalIgnoreCase);
+			for (int i = 0; i < rvColumns.Count; i++)
+			{
+				outputColumns.Add(rvColumns[i]);
+			}
+
+			return outputColumns;
+		}
+
+		List<string> BuildUpdateOutputColumns(TableWriteMetadata metadata)
+		{
+			List<string> outputColumns = new List<string>();
+
+			List<string> rvColumns = new List<string>(metadata.RowVersionColumns);
+			rvColumns.Sort(StringComparer.OrdinalIgnoreCase);
+			for (int i = 0; i < rvColumns.Count; i++)
+			{
+				outputColumns.Add(rvColumns[i]);
+			}
+
+			return outputColumns;
+		}
+
+		void ApplyOutputValuesToRow(IDataRow row, List<string> outputColumns, SqlDataReader reader)
+		{
+			for (int i = 0; i < outputColumns.Count; i++)
+			{
+				object value = reader.GetValue(i);
+				if (value == DBNull.Value)
+				{
+					row[outputColumns[i]] = null;
+				}
+				else
+				{
+					row[outputColumns[i]] = value;
+				}
+			}
+		}
+
+		string BuildPrimaryKeyText(TableWriteMetadata metadata, IDataRow row)
+		{
+			List<string> parts = new List<string>();
+
+			for (int i = 0; i < metadata.PrimaryKeyColumns.Count; i++)
+			{
+				string pk = metadata.PrimaryKeyColumns[i];
+				object? value;
+				row.TryGetValue(pk, out value);
+
+				string text;
+				if (value == null)
+				{
+					text = pk + "=null";
+				}
+				else
+				{
+					text = pk + "=" + value.ToString();
+				}
+
+				parts.Add(text);
+			}
+
+			return string.Join(", ", parts);
+		}
+
+		void AddRowVersionConcurrencyIfPossible(TableWriteMetadata metadata, IDataRow row, List<string> whereClauses, List<SqlParameter> sqlParameters)
+		{
+			if (metadata.RowVersionColumns.Count != 1)
+			{
+				return;
+			}
+
+			string rvColumn = null!;
+			foreach (string col in metadata.RowVersionColumns)
+			{
+				rvColumn = col;
+				break;
+			}
+
+			if (!row.HasOriginalValues)
+			{
+				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues snapshot is missing.");
+			}
+
+			object? origValue;
+			if (!row.OriginalValues.TryGetValue(rvColumn, out origValue))
+			{
+				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues does not contain rowversion column '" + rvColumn + "'.");
+			}
+
+			string parameterName = "@oc_rv";
+			whereClauses.Add(EscapeIdentifier(rvColumn) + " = " + parameterName);
+			sqlParameters.Add(CreateSqlParameter(parameterName, origValue));
+		}
+
+		void AddOriginalValuesConcurrencyClauses(IDataTable table, TableWriteMetadata metadata, IDataRow row, List<string> whereClauses, List<SqlParameter> sqlParameters)
+		{
+			if (!row.HasOriginalValues)
+			{
+				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues snapshot is missing.");
+			}
+
+			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata);
+
+			List<string> autoColumns = new List<string>();
+			for (int i = 0; i < table.Columns.Count; i++)
+			{
+				string columnName = table.Columns[i].ColumnName;
+				if (!metadata.ColumnNames.Contains(columnName))
+				{
+					continue;
+				}
+				if (metadata.PrimaryKeys.Contains(columnName))
+				{
+					continue;
+				}
+				if (excludedColumns.Contains(columnName))
+				{
+					continue;
+				}
+				autoColumns.Add(columnName);
+			}
+			autoColumns.Sort(StringComparer.OrdinalIgnoreCase);
+
+			for (int i = 0; i < autoColumns.Count; i++)
+			{
+				AddSingleOriginalValueConcurrencyClause(autoColumns[i], row, whereClauses, sqlParameters);
+			}
+		}
+
+		void AddSingleOriginalValueConcurrencyClause(string columnName, IDataRow row, List<string> whereClauses, List<SqlParameter> sqlParameters)
+		{
+			object? origValue;
+			if (!row.OriginalValues.TryGetValue(columnName, out origValue))
+			{
+				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues does not contain column '" + columnName + "'.");
+			}
+
+			string parameterName = "@oc" + sqlParameters.Count;
+			string escaped = EscapeIdentifier(columnName);
+			whereClauses.Add("(" + escaped + " = " + parameterName + " OR (" + escaped + " IS NULL AND " + parameterName + " IS NULL))");
+			sqlParameters.Add(CreateSqlParameter(parameterName, origValue));
+		}
+
+
+		async Task<int> ApplyDeletesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlTransaction? transaction)
 		{
 			int affected = 0;
+
 			for (int t = orderedTables.Count - 1; t >= 0; t--)
 			{
 				IDataTable table = orderedTables[t];
 				TableWriteMetadata metadata = metadataCache[table.TableName];
-                for (int i = 0; i < table.Rows.Count; i++)
+
+				for (int i = 0; i < table.Rows.Count; i++)
 				{
 					IDataRow row = table.Rows[i];
-					if (row.DataRowState != DataRowState.Deleted)
+					if (row.DataRowState == PocoDataRowState.Detached)
+					{
+						continue;
+					}
+					if (row.DataRowState != PocoDataRowState.Deleted)
 					{
 						continue;
 					}
 
-					using SqlCommand sqlCommand = BuildDeleteCommand(table, metadata, row, options, transaction);
-					affected += await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+					using SqlCommand sqlCommand = BuildDeleteCommand(table, metadata, row, transaction);
+					int localAffected = await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+					if (localAffected == 0)
+					{
+						throw new PocoConcurrencyException(table.TableName, "DELETE", BuildPrimaryKeyText(metadata, row));
+					}
+
+					affected += localAffected;
 				}
 			}
+
 			return affected;
 		}
 
-		async Task<int> ApplyInsertsAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+		async Task<int> ApplyInsertsAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlTransaction? transaction)
 		{
 			int affected = 0;
+
 			for (int t = 0; t < orderedTables.Count; t++)
 			{
 				IDataTable table = orderedTables[t];
-                TableWriteMetadata metadata = metadataCache[table.TableName];
-                for (int i = 0; i < table.Rows.Count; i++)
+				TableWriteMetadata metadata = metadataCache[table.TableName];
+
+				List<string> outputColumnsForTable = BuildInsertOutputColumns(metadata);
+
+				for (int i = 0; i < table.Rows.Count; i++)
 				{
 					IDataRow row = table.Rows[i];
-					if (row.DataRowState != DataRowState.Added)
+					if (row.DataRowState == PocoDataRowState.Detached)
+					{
+						continue;
+					}
+					if (row.DataRowState != PocoDataRowState.Added)
 					{
 						continue;
 					}
 
-					using SqlCommand sqlCommand = BuildInsertCommand(table, metadata, row, options, transaction);
-					affected += await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+					using SqlCommand sqlCommand = BuildInsertCommand(table, metadata, row, transaction, outputColumnsForTable);
+
+					if (outputColumnsForTable.Count == 0)
+					{
+						affected += await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+						continue;
+					}
+
+					using (SqlDataReader reader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+					{
+						if (await reader.ReadAsync().ConfigureAwait(false))
+						{
+							ApplyOutputValuesToRow(row, outputColumnsForTable, reader);
+							affected += 1;
+						}
+						else
+						{
+							throw new InvalidOperationException("INSERT did not return output values for table '" + table.TableName + "'.");
+						}
+					}
 				}
 			}
+
 			return affected;
 		}
 
-		async Task<int> ApplyUpdatesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+		async Task<int> ApplyUpdatesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> metadataCache, SqlTransaction? transaction)
 		{
 			int affected = 0;
+
 			for (int t = 0; t < orderedTables.Count; t++)
 			{
 				IDataTable table = orderedTables[t];
-                TableWriteMetadata metadata = metadataCache[table.TableName];
-                for (int i = 0; i < table.Rows.Count; i++)
+				TableWriteMetadata metadata = metadataCache[table.TableName];
+
+				List<string> outputColumnsForTable = BuildUpdateOutputColumns(metadata);
+
+				for (int i = 0; i < table.Rows.Count; i++)
 				{
 					IDataRow row = table.Rows[i];
-					if (row.DataRowState != DataRowState.Modified)
+					if (row.DataRowState == PocoDataRowState.Detached)
+					{
+						continue;
+					}
+					if (row.DataRowState != PocoDataRowState.Modified)
 					{
 						continue;
 					}
 
-					using SqlCommand sqlCommand = BuildUpdateCommand(table, metadata, row, options, transaction);
+					using SqlCommand sqlCommand = BuildUpdateCommand(table, metadata, row, transaction, outputColumnsForTable);
 					if (sqlCommand.CommandText.Length == 0)
 					{
 						continue;
 					}
 
-					affected += await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+					if (outputColumnsForTable.Count == 0)
+					{
+						int localAffected = await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+						if (localAffected == 0)
+						{
+							throw new PocoConcurrencyException(table.TableName, "UPDATE", BuildPrimaryKeyText(metadata, row));
+						}
+
+						affected += localAffected;
+						continue;
+					}
+
+					using (SqlDataReader reader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+					{
+						if (await reader.ReadAsync().ConfigureAwait(false))
+						{
+							ApplyOutputValuesToRow(row, outputColumnsForTable, reader);
+							affected += 1;
+						}
+						else
+						{
+							throw new PocoConcurrencyException(table.TableName, "UPDATE", BuildPrimaryKeyText(metadata, row));
+						}
+					}
 				}
 			}
 
@@ -380,6 +812,11 @@ ORDER BY ic.key_ordinal;";
 
 		void ValidateTableForSave(IDataTable table)
 		{
+			if (table == null)
+			{
+				throw new ArgumentNullException(nameof(table));
+			}
+
 			if (string.IsNullOrEmpty(table.TableName))
 			{
 				throw new InvalidOperationException("TableName is not specified.");
@@ -396,14 +833,16 @@ ORDER BY ic.key_ordinal;";
 			}
 		}
 
-		SqlCommand BuildInsertCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+
+		SqlCommand BuildInsertCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? transaction, List<string> outputColumns)
 		{
 			List<string> columnNames = new List<string>();
 			List<string> parameterNames = new List<string>();
 			List<SqlParameter> sqlParameters = new List<SqlParameter>();
 
-			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata, options);
+			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata);
 			int parameterIndex = 0;
+
 			for (int i = 0; i < table.Columns.Count; i++)
 			{
 				string columnName = table.Columns[i].ColumnName;
@@ -422,18 +861,31 @@ ORDER BY ic.key_ordinal;";
 
 				columnNames.Add(EscapeIdentifier(columnName));
 				parameterNames.Add(parameterName);
+
 				object? value;
 				row.TryGetValue(columnName, out value);
 				sqlParameters.Add(CreateSqlParameter(parameterName, value));
 			}
 
-            if (columnNames.Count == 0)
-            {
-                throw new InvalidOperationException("Cannot INSERT into table '" + table.TableName + "': no writable columns found.");
-            }
+			if (columnNames.Count == 0)
+			{
+				throw new InvalidOperationException("Cannot INSERT into table '" + table.TableName + "': no writable columns found.");
+			}
 
-            string sql = "INSERT INTO " + EscapeIdentifier(table.TableName) + " (" + string.Join(",", columnNames) + ") VALUES (" + string.Join(",", parameterNames) + ")";
+			string outputClause = string.Empty;
+			if (outputColumns != null && outputColumns.Count > 0)
+			{
+				List<string> outputParts = new List<string>();
+				for (int i = 0; i < outputColumns.Count; i++)
+				{
+					outputParts.Add("INSERTED." + EscapeIdentifier(outputColumns[i]));
+				}
+				outputClause = " OUTPUT " + string.Join(", ", outputParts) + " ";
+			}
+
+			string sql = "INSERT INTO " + EscapeIdentifier(table.TableName) + " (" + string.Join(",", columnNames) + ")" + outputClause + "VALUES (" + string.Join(",", parameterNames) + ")";
 			SqlCommand sqlCommand = new SqlCommand(sql, SqlConnection, transaction);
+
 			for (int i = 0; i < sqlParameters.Count; i++)
 			{
 				sqlCommand.Parameters.Add(sqlParameters[i]);
@@ -442,11 +894,13 @@ ORDER BY ic.key_ordinal;";
 			return sqlCommand;
 		}
 
-		SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+
+
+		SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? transaction, List<string> outputColumns)
 		{
 			EnsurePrimaryKeys(metadata, table.TableName);
 
-			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata, options);
+			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata);
 
 			List<string> setClauses = new List<string>();
 			List<SqlParameter> sqlParameters = new List<SqlParameter>();
@@ -470,7 +924,9 @@ ORDER BY ic.key_ordinal;";
 
 				string parameterName = "@p" + parameterIndex;
 				parameterIndex++;
+
 				setClauses.Add(EscapeIdentifier(columnName) + " = " + parameterName);
+
 				object? value;
 				row.TryGetValue(columnName, out value);
 				sqlParameters.Add(CreateSqlParameter(parameterName, value));
@@ -486,45 +942,88 @@ ORDER BY ic.key_ordinal;";
 			{
 				string pkColumnName = metadata.PrimaryKeyColumns[i];
 				string parameterName = "@pk" + i;
+
 				whereClauses.Add(EscapeIdentifier(pkColumnName) + " = " + parameterName);
+
 				object? pkValue;
 				row.TryGetValue(pkColumnName, out pkValue);
 				sqlParameters.Add(CreateSqlParameter(parameterName, pkValue));
 			}
 
-			string sql = "UPDATE " + EscapeIdentifier(table.TableName) + " SET " + string.Join(", ", setClauses) + " WHERE " + string.Join(" AND ", whereClauses);
+			if (metadata.RowVersionColumns.Count == 1)
+			{
+				AddRowVersionConcurrencyIfPossible(metadata, row, whereClauses, sqlParameters);
+			}
+			else
+			{
+				AddOriginalValuesConcurrencyClauses(table, metadata, row, whereClauses, sqlParameters);
+			}
+
+			string outputClause = string.Empty;
+			if (outputColumns != null && outputColumns.Count > 0)
+			{
+				List<string> outputParts = new List<string>();
+				for (int i = 0; i < outputColumns.Count; i++)
+				{
+					outputParts.Add("INSERTED." + EscapeIdentifier(outputColumns[i]));
+				}
+				outputClause = " OUTPUT " + string.Join(", ", outputParts) + " ";
+			}
+
+			string sql = "UPDATE " + EscapeIdentifier(table.TableName) + " SET " + string.Join(", ", setClauses) + outputClause + "WHERE " + string.Join(" AND ", whereClauses);
 			SqlCommand sqlCommand = new SqlCommand(sql, SqlConnection, transaction);
+
 			for (int i = 0; i < sqlParameters.Count; i++)
 			{
 				sqlCommand.Parameters.Add(sqlParameters[i]);
 			}
+
 			return sqlCommand;
 		}
 
-		SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlServerSaveChangesOptions options, SqlTransaction? transaction)
+
+
+		SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? transaction)
 		{
 			EnsurePrimaryKeys(metadata, table.TableName);
 
 			List<string> whereClauses = new List<string>();
 			List<SqlParameter> sqlParameters = new List<SqlParameter>();
+
 			for (int i = 0; i < metadata.PrimaryKeyColumns.Count; i++)
 			{
 				string pkColumnName = metadata.PrimaryKeyColumns[i];
 				string parameterName = "@pk" + i;
+
 				whereClauses.Add(EscapeIdentifier(pkColumnName) + " = " + parameterName);
+
 				object? pkValue;
 				row.TryGetValue(pkColumnName, out pkValue);
 				sqlParameters.Add(CreateSqlParameter(parameterName, pkValue));
 			}
 
+			HashSet<string> excludedColumns = BuildExcludedColumns(table, metadata);
+
+			if (metadata.RowVersionColumns.Count == 1)
+			{
+				AddRowVersionConcurrencyIfPossible(metadata, row, whereClauses, sqlParameters);
+			}
+			else
+			{
+				AddOriginalValuesConcurrencyClauses(table, metadata, row, whereClauses, sqlParameters);
+			}
+
 			string sql = "DELETE FROM " + EscapeIdentifier(table.TableName) + " WHERE " + string.Join(" AND ", whereClauses);
 			SqlCommand sqlCommand = new SqlCommand(sql, SqlConnection, transaction);
+
 			for (int i = 0; i < sqlParameters.Count; i++)
 			{
 				sqlCommand.Parameters.Add(sqlParameters[i]);
 			}
+
 			return sqlCommand;
 		}
+
 
 		void EnsurePrimaryKeys(TableWriteMetadata metadata, string tableName)
 		{
@@ -532,29 +1031,6 @@ ORDER BY ic.key_ordinal;";
 			{
 				throw new InvalidOperationException("Table '" + tableName + "' has no primary keys in SQL Server.");
 			}
-		}
-
-		HashSet<string> GetExcludedColumns(string tableName, SqlServerSaveChangesOptions options)
-		{
-			HashSet<string> excludedColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-			if (options.ExcludedColumnsByTable == null)
-			{
-				return excludedColumns;
-			}
-
-			HashSet<string>? configured;
-			options.ExcludedColumnsByTable.TryGetValue(tableName, out configured);
-			if (configured == null)
-			{
-				return excludedColumns;
-			}
-
-			foreach (string col in configured)
-			{
-				excludedColumns.Add(col);
-			}
-
-			return excludedColumns;
 		}
 
 		SqlParameter CreateSqlParameter(string parameterName, object? value)

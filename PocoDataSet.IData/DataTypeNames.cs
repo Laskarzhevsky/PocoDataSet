@@ -1,4 +1,4 @@
-﻿namespace PocoDataSet.Extensions
+﻿namespace PocoDataSet.IData
 {
     /// <summary>
     /// Defines data type names

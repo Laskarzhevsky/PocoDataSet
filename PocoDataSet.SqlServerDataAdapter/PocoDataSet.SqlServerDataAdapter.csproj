@@ -22,9 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Internals\" />
+    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
   </ItemGroup>
 </Project>

@@ -270,7 +270,11 @@ namespace PocoDataSet.Demo
 
         static async Task SaveChangesetExample()
         {
-            // 1) Create an empty data set
+            // Create SqlDataAdapter
+            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
+
+            // 1. Create an empty data set
             IDataSet dataSet = DataSetFactoryExamples.CreateDataSet();
 
             // 2. Create an empty data table
@@ -278,14 +282,10 @@ namespace PocoDataSet.Demo
             DataTableExtensionExamples.AddColumn(departmentDataTable, "Id", DataTypeNames.INT);
             DataTableExtensionExamples.AddColumn(departmentDataTable, "Name", DataTypeNames.STRING);
 
-            // 3. Create a new row by AddNewRow method on data table
+            // INSERT example
+            // Create a new row by AddNewRow method on data table
             IDataRow departmentDataRow = DataTableExtensionExamples.AddNewRow(departmentDataTable);
-            departmentDataRow.UpdateDataFieldValue("Id", 17);
             departmentDataRow.UpdateDataFieldValue("Name", "Emergency");
-
-            // Make data as Deleted
-            departmentDataRow.AcceptChanges();
-            departmentDataRow.Delete();
 
             // 4. Create changeset
             IDataSet? changeset = dataSet.CreateChangeset();
@@ -294,12 +294,14 @@ namespace PocoDataSet.Demo
                 return;
             }
 
-            // 5. Create SqlDataAdapter
-            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
-            SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
-
             // Call SaveChangesAsync method
-            await sqlDataAdapter.SaveChangesAsync(changeset, connectionString);
+            await sqlDataAdapter.SaveChangesAsync(changeset);
+            dataSet.MergeWith(changeset, MergeMode.PostSave);
+            /*
+                        // Make data as Deleted
+                        departmentDataRow.AcceptChanges();
+                        departmentDataRow.Delete();
+            */
         }
     }
 }

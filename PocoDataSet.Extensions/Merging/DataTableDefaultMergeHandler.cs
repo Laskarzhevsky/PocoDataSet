@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using PocoDataSet.Data;
@@ -19,6 +20,12 @@ namespace PocoDataSet.Extensions
         /// <param name="mergeOptions">Merge options</param>
         public void Merge(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
+            if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.PostSave)
+            {
+                MergePostSave(currentDataTable, refreshedDataTable, mergeOptions);
+                return;
+            }
+
             List<string> currentDataTablePrimaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
             if (currentDataTablePrimaryKeyColumnNames.Count == 0)
             {
@@ -33,6 +40,203 @@ namespace PocoDataSet.Extensions
 
                 MergeCurrentDataTableRows(currentDataTable, refreshedDataTable, mergeOptions, currentDataTablePrimaryKeyColumnNames, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);
                 MergeNonProcessedDataRowsFromRefreshedDataTable(currentDataTable, refreshedDataTable, mergeOptions, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);
+            }
+        }
+        #endregion
+
+        #region PostSave Merge
+        void MergePostSave(IDataTable currentDataTable, IDataTable changesetDataTable, IMergeOptions mergeOptions)
+        {
+            List<string> primaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
+
+            Dictionary<string, IDataRow> currentRowsByPrimaryKey = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
+            if (primaryKeyColumnNames.Count > 0)
+            {
+                for (int i = 0; i < currentDataTable.Rows.Count; i++)
+                {
+                    IDataRow currentRow = currentDataTable.Rows[i];
+                    string pkValue = currentRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
+                    if (string.IsNullOrEmpty(pkValue))
+                    {
+                        continue;
+                    }
+                    if (!currentRowsByPrimaryKey.ContainsKey(pkValue))
+                    {
+                        currentRowsByPrimaryKey.Add(pkValue, currentRow);
+                    }
+                }
+            }
+
+            Dictionary<Guid, IDataRow> currentRowsByClientKey = BuildClientKeyIndex(currentDataTable);
+
+            for (int i = 0; i < changesetDataTable.Rows.Count; i++)
+            {
+                IDataRow changesetRow = changesetDataTable.Rows[i];
+
+                if (changesetRow.DataRowState == DataRowState.Added)
+                {
+                    ApplyPostSaveRow(currentDataTable, changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, mergeOptions);
+                    continue;
+                }
+
+                if (changesetRow.DataRowState == DataRowState.Modified)
+                {
+                    ApplyPostSaveRow(currentDataTable, changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, mergeOptions);
+                    continue;
+                }
+
+                if (changesetRow.DataRowState == DataRowState.Deleted)
+                {
+                    ApplyPostSaveDelete(currentDataTable, changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, mergeOptions);
+                    continue;
+                }
+            }
+        }
+
+        static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IDataTable dataTable)
+        {
+            Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
+            for (int i = 0; i < dataTable.Rows.Count; i++)
+            {
+                IDataRow row = dataTable.Rows[i];
+                Guid clientKey;
+                if (TryGetClientKey(row, out clientKey))
+                {
+                    if (!index.ContainsKey(clientKey))
+                    {
+                        index.Add(clientKey, row);
+                    }
+                }
+            }
+            return index;
+        }
+
+        static bool TryGetClientKey(IDataRow row, out Guid clientKey)
+        {
+            clientKey = Guid.Empty;
+
+            if (!row.ContainsKey(SpecialColumnNames.CLIENT_KEY))
+            {
+                return false;
+            }
+
+            object? value = row[SpecialColumnNames.CLIENT_KEY];
+            if (value == null)
+            {
+                return false;
+            }
+
+            if (value is Guid)
+            {
+                clientKey = (Guid)value;
+                return clientKey != Guid.Empty;
+            }
+
+            return false;
+        }
+
+        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IList<IColumnMetadata> targetColumns)
+        {
+            for (int c = 0; c < targetColumns.Count; c++)
+            {
+                string columnName = targetColumns[c].ColumnName;
+                if (!sourceRow.ContainsKey(columnName))
+                {
+                    continue;
+                }
+                targetRow[columnName] = sourceRow[columnName];
+            }
+        }
+
+        void ApplyPostSaveRow(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
+            Dictionary<string, IDataRow> currentRowsByPrimaryKey,
+            Dictionary<Guid, IDataRow> currentRowsByClientKey,
+            IMergeOptions mergeOptions)
+        {
+            IDataRow? targetRow = null;
+
+            // 1) Try match by primary key (works for updates, and for inserts if PK is already present in UI).
+            if (primaryKeyColumnNames.Count > 0)
+            {
+                string pkValue = changesetRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
+                if (!string.IsNullOrEmpty(pkValue))
+                {
+                    currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
+                }
+            }
+
+            // 2) Fallback: match by client key (identity inserts across the wire).
+            if (targetRow == null)
+            {
+                Guid clientKey;
+                if (TryGetClientKey(changesetRow, out clientKey))
+                {
+                    currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
+                }
+            }
+
+            bool isNewRowAddedToCurrent = false;
+            if (targetRow == null)
+            {
+                // Current table did not contain the row; add it.
+                IDataRow newRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable, mergeOptions);
+                targetRow = newRow;
+                isNewRowAddedToCurrent = true;
+            }
+
+            CopyAllValues(targetRow, changesetRow, currentDataTable.Columns);
+
+            // Server-confirmed baseline
+            targetRow.AcceptChanges();
+
+            if (isNewRowAddedToCurrent)
+            {
+                mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, targetRow));
+            }
+            else
+            {
+                mergeOptions.DataSetMergeResult.UpdatedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, targetRow));
+            }
+        }
+
+        void ApplyPostSaveDelete(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
+            Dictionary<string, IDataRow> currentRowsByPrimaryKey,
+            Dictionary<Guid, IDataRow> currentRowsByClientKey,
+            IMergeOptions mergeOptions)
+        {
+            IDataRow? targetRow = null;
+
+            if (primaryKeyColumnNames.Count > 0)
+            {
+                string pkValue = changesetRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
+                if (!string.IsNullOrEmpty(pkValue))
+                {
+                    currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
+                }
+            }
+
+            if (targetRow == null)
+            {
+                Guid clientKey;
+                if (TryGetClientKey(changesetRow, out clientKey))
+                {
+                    currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
+                }
+            }
+
+            if (targetRow == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < currentDataTable.Rows.Count; i++)
+            {
+                if (ReferenceEquals(currentDataTable.Rows[i], targetRow))
+                {
+                    currentDataTable.Rows.RemoveAt(i);
+                    mergeOptions.DataSetMergeResult.DeletedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, targetRow));
+                    return;
+                }
             }
         }
         #endregion
@@ -188,6 +392,7 @@ namespace PocoDataSet.Extensions
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newDataRow));
             }
         }
+
         #endregion
     }
 }

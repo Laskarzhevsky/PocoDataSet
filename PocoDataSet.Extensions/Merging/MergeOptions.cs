@@ -23,6 +23,7 @@ namespace PocoDataSet.Extensions
             DefaultRowMergeHandler = new DataRowDefaultMergeHandler();
             DefaultTableMergeHandler = new DataTableDefaultMergeHandler();
             DataTypeDefaultValueProvider = new MetadataDefaultsProvider();
+            MergeMode = MergeMode.Refresh;
             RowMergeHandlers = new Dictionary<string, IRowMergeHandler>();
             TableMergeHandlers = new Dictionary<string, ITableMergeHandler>();
         }
@@ -100,6 +101,15 @@ namespace PocoDataSet.Extensions
         {
             get;
         } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets merge mode.
+        /// IMergeOptions interface implementation
+        /// </summary>
+        public MergeMode MergeMode
+        {
+            get; set;
+        }
 
         /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
