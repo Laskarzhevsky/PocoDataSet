@@ -9,6 +9,7 @@ namespace PocoDataSet.Extensions
     /// </summary>
     public static partial class DataTableExtensions
     {
+        #region Public Methods
         /// <summary>
         /// Removes row from data table using state-aware semantics.
         /// </summary>
@@ -48,7 +49,7 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            if (!dataTable.Rows.Contains(dataRow))
+            if (!dataTable.ContainsRow(dataRow))
             {
                 return;
             }
@@ -56,8 +57,7 @@ namespace PocoDataSet.Extensions
             // Case 1: New row → undo creation
             if (dataRow.DataRowState == DataRowState.Added)
             {
-                dataTable.Rows.Remove(dataRow);
-                dataRow.DataRowState = DataRowState.Detached;
+                dataTable.RemoveRow(dataRow);
                 return;
             }
 
@@ -71,5 +71,6 @@ namespace PocoDataSet.Extensions
 
             // Case 3: Deleted / Detached → nothing to do
         }
+        #endregion
     }
 }

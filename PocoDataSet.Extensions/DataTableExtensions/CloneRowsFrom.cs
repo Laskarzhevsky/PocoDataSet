@@ -26,10 +26,10 @@ namespace PocoDataSet.Extensions
 
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
-                IDictionary<string, object?> sourceRow = dataTable.Rows[i];
+                IDataRow sourceRow = dataTable.Rows[i];
                 IDataRow targetRow = CreateEmptyRowFrom(sourceRow);
                 FillTargetRowFromSourceRow(sourceRow, targetRow);
-                clonedDataTable.Rows.Add(targetRow);
+                clonedDataTable.AddRow(targetRow);
             }
         }
         #endregion
@@ -40,15 +40,13 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="sourceRow">Source row</param>
         /// <returns>Created empty row from source row</returns>
-        static IDataRow CreateEmptyRowFrom(IDictionary<string, object?> sourceRow)
+        static IDataRow CreateEmptyRowFrom(IDataRow sourceRow)
         {
-            IDataRow newRow = DataRowFactory.CreateEmpty(sourceRow.Count);
-            foreach (KeyValuePair<string, object?> keyValuePair in sourceRow)
+            int count = sourceRow.Values.Count;
+            IDataRow newRow = DataRowFactory.CreateEmpty(count);
+            foreach (KeyValuePair<string, object?> pair in sourceRow.Values)
             {
-                if (!newRow.ContainsKey(keyValuePair.Key))
-                {
-                    newRow.Add(keyValuePair.Key, null);
-                }
+                newRow[pair.Key] = null;
             }
 
             return newRow;
@@ -57,11 +55,11 @@ namespace PocoDataSet.Extensions
         /// <summary>
         /// Fill target row from source row
         /// </summary>
-        /// <param name="sourceRow"></param>
-        /// <param name="targetRow"></param>
-        static void FillTargetRowFromSourceRow(IDictionary<string, object?> sourceRow, IDataRow targetRow)
+        /// <param name="sourceRow">Source row</param>
+        /// <param name="targetRow">Target row</param>
+        static void FillTargetRowFromSourceRow(IDataRow sourceRow, IDataRow targetRow)
         {
-            foreach (KeyValuePair<string, object?> kv in sourceRow)
+            foreach (KeyValuePair<string, object?> kv in sourceRow.Values)
             {
                 object? value = kv.Value;
                 object? cloned;
@@ -71,14 +69,7 @@ namespace PocoDataSet.Extensions
                     cloned = value;
                 }
 
-                if (targetRow.ContainsKey(kv.Key))
-                {
-                    targetRow[kv.Key] = cloned;
-                }
-                else
-                {
-                    targetRow.Add(kv.Key, cloned);
-                }
+                targetRow[kv.Key] = cloned;
             }
         }
 

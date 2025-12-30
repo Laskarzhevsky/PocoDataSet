@@ -23,6 +23,13 @@ namespace PocoDataSet.Extensions
             }
 
             dataTable.Columns = listOfColumnMetadata;
+
+            // Reuse the same invariant logic as AddColumn
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
+            {
+                string columnName = listOfColumnMetadata[i].ColumnName;
+                EnsureExistingRowsHaveColumn(dataTable, columnName);
+            }
         }
         #endregion
     }

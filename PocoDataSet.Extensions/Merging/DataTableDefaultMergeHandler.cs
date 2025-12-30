@@ -233,7 +233,7 @@ namespace PocoDataSet.Extensions
             {
                 if (ReferenceEquals(currentDataTable.Rows[i], targetRow))
                 {
-                    currentDataTable.Rows.RemoveAt(i);
+                    currentDataTable.RemoveRowAt(i);
                     mergeOptions.DataSetMergeResult.DeletedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, targetRow));
                     return;
                 }
@@ -254,10 +254,10 @@ namespace PocoDataSet.Extensions
             IDataRow newDataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
 
             // Add to table (still Detached)
-            dataTable.Rows.Add(newDataRow);
+            dataTable.AddRow(newDataRow);
 
             // This row represents server data, not a user "Added" row
-            newDataRow.DataRowState = DataRowState.Unchanged;
+            newDataRow.SetDataRowState(DataRowState.Unchanged);
 
             return newDataRow;
         }
@@ -283,13 +283,29 @@ namespace PocoDataSet.Extensions
                 refreshedDataTableDataRowIndex.TryGetValue(primaryKeyValue, out refreshedDataRow);
                 if (refreshedDataRow == null)
                 {
-                    if (mergeOptions.ExcludeTablesFromRowDeletion.Contains(currentDataTable.TableName))
+                    bool shouldPreserveRow = false;
+
+                    if (mergeOptions.MergeMode == MergeMode.Refresh)
+                    {
+                        // In refresh mode, preserve local client-side changes that have not been saved yet.
+                        // Typical cases: Added row (new record), Modified row (edited record), Deleted row (pending delete).
+                        if (currentDataRow.DataRowState != DataRowState.Unchanged)
+                        {
+                            shouldPreserveRow = true;
+                        }
+                    }
+
+                    if (shouldPreserveRow)
+                    {
+                        // Keep current row intact
+                    }
+                    else if (mergeOptions.ExcludeTablesFromRowDeletion.Contains(currentDataTable.TableName))
                     {
                         // Keep current row intact
                     }
                     else
                     {
-                        currentDataTable.Rows.RemoveAt(i);
+                        currentDataTable.RemoveRowAt(i);
                         mergeOptions.DataSetMergeResult.DeletedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, currentDataRow));
                     }
                 }
@@ -315,6 +331,12 @@ namespace PocoDataSet.Extensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         private static bool MergeDataRowFromRefreshedDataRow(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
         {
+            if (currentDataRow.DataRowState == DataRowState.Deleted)
+            {
+                // Keep local delete during Refresh merge; do not attempt to overwrite or AcceptChanges.
+                return false;
+            }
+
             bool changed = false;
             for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
@@ -354,7 +376,7 @@ namespace PocoDataSet.Extensions
             }
 
             // Clear current rows
-            currentDataTable.Rows.Clear();
+            currentDataTable.RemoveAllRows();
 
             // Add all refreshed rows as new rows
             for (int i = 0; i < refreshedDataTable.Rows.Count; i++)

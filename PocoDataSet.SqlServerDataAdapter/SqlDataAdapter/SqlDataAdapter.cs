@@ -67,6 +67,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             catch (Exception exception) 
             {
                 string errorMessage = exception.Message;
+                throw;
             }
             finally
             {

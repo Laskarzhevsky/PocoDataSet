@@ -78,7 +78,16 @@ namespace PocoDataSet.ObservableData
             }
 
             DataRowState oldState = _innerDataRow.DataRowState;
-            bool dataFieldValueUpdated = _innerDataRow.UpdateDataFieldValue(columnName, value);
+            _innerDataRow[columnName] = value;
+
+            bool dataFieldValueUpdated = false;
+            object ? originalValue;
+            _innerDataRow.TryGetOriginalValue(columnName, out originalValue);
+            if (originalValue != value)
+            {
+                dataFieldValueUpdated = true;
+            }
+
             if (dataFieldValueUpdated)
             {
                 RaiseDataFieldValueChangedEvent(columnName, requestor);

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
 using PocoDataSet.Data;
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.SqlServerDataAdapter
@@ -167,7 +168,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                     row[columnName] = value;
                 }
 
-                DataTable!.Rows.Add(row);
+                DataTable!.AddLoadedRow(row);
             }
         }
 

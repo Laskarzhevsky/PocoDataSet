@@ -75,9 +75,9 @@ namespace PocoDataSet.ObservableData
         public IObservableDataRow AddRow(IDataRow dataRow)
         {
             // Keep inner table consistent
-            if (!_innerDataTable.Rows.Contains(dataRow))
+            if (!_innerDataTable.ContainsRow(dataRow))
             {
-                _innerDataTable.Rows.Add(dataRow);
+                _innerDataTable.AddRow(dataRow);
             }
 
             IObservableDataRow observableDataRow = new ObservableDataRow(dataRow);
@@ -104,7 +104,7 @@ namespace PocoDataSet.ObservableData
             // Keep inner table consistent
             if (rowIndex >= 0 && rowIndex < _innerDataTable.Rows.Count)
             {
-                _innerDataTable.Rows.RemoveAt(rowIndex);
+                _innerDataTable.RemoveRowAt(rowIndex);
             }
 
             _observableDataRows.RemoveAt(rowIndex);

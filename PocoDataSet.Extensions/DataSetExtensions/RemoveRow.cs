@@ -31,13 +31,7 @@ namespace PocoDataSet.Extensions
                 throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
-            if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(rowIndex));
-            }
-
-            IDataRow dataRow = dataTable.Rows[rowIndex];
-            RemoveRow(dataSet, tableName, dataRow);
+            dataTable.RemoveRow(rowIndex);
         }
 
         /// <summary>
@@ -64,28 +58,7 @@ namespace PocoDataSet.Extensions
                 throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
-            if (!dataTable.Rows.Contains(dataRow))
-            {
-                return;
-            }
-
-            // New row → undo creation (physical removal)
-            if (dataRow.DataRowState == DataRowState.Added)
-            {
-                dataTable.Rows.Remove(dataRow);
-                dataRow.DataRowState = DataRowState.Detached;
-                return;
-            }
-
-            // Existing row → soft delete (undoable)
-            if (dataRow.DataRowState == DataRowState.Unchanged ||
-                dataRow.DataRowState == DataRowState.Modified)
-            {
-                dataRow.Delete();
-                return;
-            }
-
-            // Deleted / Detached → nothing to do
+            dataTable.RemoveRow(dataRow);
         }
         #endregion
     }

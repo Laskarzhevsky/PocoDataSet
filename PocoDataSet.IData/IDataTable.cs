@@ -17,11 +17,11 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets or sets rows
+        /// Gets rows
         /// </summary>
-        List<IDataRow> Rows
+        IReadOnlyList<IDataRow> Rows
         {
-            get; set;
+            get;
         }
 
         /// <summary>
@@ -39,6 +39,47 @@ namespace PocoDataSet.IData
         {
             get; set;
         }
+        #endregion
+
+        #region Methods
+        /// <summary>
+        /// Adds loaded row from data storage
+        /// </summary>
+        /// <param name="dataTable">Data table</param>
+        /// <param name="dataRow">Data row</param>
+        /// <exception cref="InvalidOperationException">Exception is thrown if row in Deleted state</exception>
+        void AddLoadedRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Adds row
+        /// </summary>
+        /// <param name="dataRow">Data row</param>
+        void AddRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Gets flag indicating whether table contains specified row
+        /// </summary>
+        /// <param name="dataRow">Data row</param>
+        /// <returns>True if table contains specified row, otherwise false</returns>
+        bool ContainsRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Removes all rows
+        /// </summary>
+        void RemoveAllRows();
+
+        /// <summary>
+        /// Removes row
+        /// </summary>
+        /// <param name="dataRow">Data row</param>
+        /// <returns>True if row was removed, otherwise false</returns>
+        bool RemoveRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Removes row at position specified by row index
+        /// </summary>
+        /// <param name="rowIndex">Row index</param>
+        void RemoveRowAt(int rowIndex);
         #endregion
     }
 }

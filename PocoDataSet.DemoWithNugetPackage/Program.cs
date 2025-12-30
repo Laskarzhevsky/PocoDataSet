@@ -49,26 +49,26 @@ namespace PocoDataSet.DemoWithNugetPackage
 
             // 3.a) Create a new row and add it to the table. Use it when field values need to be assigned before adding row to the table
             IDataRow departmentDataRow = PocoDataSet.Extensions.DataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
-            departmentDataRow.UpdateDataFieldValue("Id", 1);
-            departmentDataRow.UpdateDataFieldValue("Name", "Customer Service");
-            departmentDataTable.Rows.Add(departmentDataRow);
+            departmentDataRow["Id"] = 1;
+            departmentDataRow["Name"] = "Customer Service";
+            departmentDataTable.AddRow(departmentDataRow);
 
             // 3.b) More convenient way to create a new row is to call AddNewRow method on data table
             departmentDataRow = departmentDataTable.AddNewRow();
-            departmentDataRow.UpdateDataFieldValue("Id", 2);
-            departmentDataRow.UpdateDataFieldValue("Name", "Financial");
+            departmentDataRow["Id"] = 2;
+            departmentDataRow["Name"] ="Financial";
 
             IDataRow employmentTypeDataRow = employmentTypeDataTable.AddNewRow();
-            employmentTypeDataRow.UpdateDataFieldValue("Id", 1);
-            employmentTypeDataRow.UpdateDataFieldValue("Code", "ET01");
-            employmentTypeDataRow.UpdateDataFieldValue("Description", "Full Time");
+            employmentTypeDataRow["Id"] = 1;
+            employmentTypeDataRow["Code"] = "ET01";
+            employmentTypeDataRow["Description"] = "Full Time";
 
             // 3.b) Create a new rows and add them to the table via data set. Use it when field values need to be assigned before adding row to the table
             IDataRow employeeDataRow = PocoDataSet.Extensions.DataRowExtensions.CreateRowFromColumnsWithDefaultValues(employeeTable.Columns);
-            employeeDataRow.UpdateDataFieldValue("Id", 1);
-            employeeDataRow.UpdateDataFieldValue("FirstName", "John");
-            employeeDataRow.UpdateDataFieldValue("LastName", "Doe");
-            employeeDataRow.UpdateDataFieldValue("DepartmentId", 2);
+            employeeDataRow["Id"] = 1;
+            employeeDataRow["FirstName"] = "John";
+            employeeDataRow["LastName"] = "Doe";
+            employeeDataRow["DepartmentId"] = 2;
             dataSet.AddRow("Employee", employeeDataRow);
 
             // 4.a) Read back a value using data set, expected "John"
@@ -122,7 +122,7 @@ namespace PocoDataSet.DemoWithNugetPackage
             dataSet.RemoveTable("Employee");
 
             // 9. Clear table
-            dataSet.ClearTable("Department");
+            dataSet.Tables["Department"].RemoveAllRows();
 
             // 10) Change information of employment type code in copied data set
             copyOfDataSet!.Tables["EmploymentType"].Rows[0]["Id"] = 2;

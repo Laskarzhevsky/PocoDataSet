@@ -13,7 +13,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
     <TargetFramework>net9.0</TargetFramework>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -21,13 +21,13 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="PocoDataSet.Data" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.IData" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.10" />
-    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.10" />
+    <PackageReference Include="PocoDataSet.Data" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.IData" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.11" />
+    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.11" />
   </ItemGroup>
 </Project>

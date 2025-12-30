@@ -65,10 +65,20 @@ namespace PocoDataSet.Extensions
                         }
                     }
 
-                    // Preserve state
-                    targetRow.DataRowState = sourceRow.DataRowState;
-
-                    targetTable.Rows.Add(targetRow);
+                    // IMPORTANT:
+                    // DataTable.AddRow(IDataRow) disallows adding a row in Deleted state.
+                    // For Deleted rows we add as Loaded/Unchanged first, then mark Deleted via DeleteRow.
+                    if (sourceRow.DataRowState == DataRowState.Deleted)
+                    {
+                        targetTable.AddLoadedRow(targetRow);
+                        targetTable.DeleteRow(targetRow);
+                    }
+                    else
+                    {
+                        // Added or Modified: preserve state explicitly, then add
+                        targetRow.SetDataRowState(sourceRow.DataRowState);
+                        targetTable.AddRow(targetRow);
+                    }
                 }
             }
 

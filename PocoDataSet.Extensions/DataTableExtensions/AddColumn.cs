@@ -115,6 +115,7 @@ namespace PocoDataSet.Extensions
             }
 
             dataTable.Columns.Add(columnMetadata);
+            EnsureExistingRowsHaveColumn(dataTable, columnName);
         }
         #endregion
     }

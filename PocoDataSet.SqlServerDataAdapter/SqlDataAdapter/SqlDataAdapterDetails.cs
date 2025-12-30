@@ -27,7 +27,29 @@ namespace PocoDataSet.SqlServerDataAdapter
 		/// <returns>Total affected rows</returns>
 		async Task<int> SaveChangesInternalAsync(IDataSet changeset, string? connectionString)
 		{
-			if (!string.IsNullOrEmpty(connectionString))
+            // No-op for empty changeset (no DB work, no ConnectionString required).
+            if (changeset.Tables == null || changeset.Tables.Count == 0)
+            {
+                return 0;
+            }
+
+            bool hasAnyRows = false;
+            foreach (KeyValuePair<string, IDataTable> kv in changeset.Tables)
+            {
+                IDataTable table = kv.Value;
+                if (table != null && table.Rows != null && table.Rows.Count > 0)
+                {
+                    hasAnyRows = true;
+                    break;
+                }
+            }
+
+            if (!hasAnyRows)
+            {
+                return 0;
+            }
+
+            if (!string.IsNullOrEmpty(connectionString))
 			{
 				ConnectionString = connectionString;
 			}

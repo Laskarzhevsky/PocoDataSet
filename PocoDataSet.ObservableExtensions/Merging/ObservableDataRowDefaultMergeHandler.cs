@@ -35,7 +35,7 @@ namespace PocoDataSet.ObservableExtensions
                     continue;
                 }
 
-                currentDataRow.UpdateDataFieldValue(columnName, newValue);
+                currentDataRow[columnName] = newValue;
                 rowValueChanged = true;
             }
 

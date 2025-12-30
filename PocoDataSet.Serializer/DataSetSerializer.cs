@@ -34,6 +34,7 @@ namespace PocoDataSet.Serializer
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IForeignKeyData, ForeignKeyData>());
 
             DataSet? deserializedDataSet = System.Text.Json.JsonSerializer.Deserialize<DataSet>(serializedDataSet, jsonSerializerOptions);
+            DataSetTypeNormalizer.NormalizeDataSet(deserializedDataSet);
             return deserializedDataSet;
         }
 

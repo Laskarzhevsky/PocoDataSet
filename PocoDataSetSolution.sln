@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableData"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableExtensions", "PocoDataSet.ObservableExtensions\PocoDataSet.ObservableExtensions.csproj", "{ADC00825-DDC1-4CFF-862C-429990B9493C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Tests", "PocoDataSet.Tests\PocoDataSet.Tests.csproj", "{86663168-FBAA-4D9A-85DC-E16914002167}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADC00825-DDC1-4CFF-862C-429990B9493C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86663168-FBAA-4D9A-85DC-E16914002167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86663168-FBAA-4D9A-85DC-E16914002167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86663168-FBAA-4D9A-85DC-E16914002167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86663168-FBAA-4D9A-85DC-E16914002167}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

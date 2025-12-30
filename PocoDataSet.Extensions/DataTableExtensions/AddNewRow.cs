@@ -27,8 +27,8 @@ namespace PocoDataSet.Extensions
 
             IDataRow dataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
             dataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
-            dataRow.DataRowState = DataRowState.Added;
-            dataTable.Rows.Add(dataRow);
+            dataRow.SetDataRowState(DataRowState.Added);
+            dataTable.AddRow(dataRow);
 
             return dataRow;
         }

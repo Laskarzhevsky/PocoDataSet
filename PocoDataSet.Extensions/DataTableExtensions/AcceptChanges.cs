@@ -10,6 +10,8 @@ namespace PocoDataSet.Extensions
         #region Public Methods
         /// <summary>
         /// Accepts changes
+        /// If a caller calls AcceptChanges() on unsaved changes that include Deleted rows then Deleted rows will be removed from table.
+        /// The caller must understand and accept the consequences.
         /// </summary>
         /// <param name="dataTable">Data table</param>
         public static void AcceptChanges(this IDataTable? dataTable)
@@ -19,9 +21,27 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            for (int i = 0; i < dataTable.Rows.Count; i++)
+            for (int i = dataTable.Rows.Count - 1; i >= 0; i--)
             {
-                dataTable.Rows[i].AcceptChanges();
+                IDataRow row = dataTable.Rows[i];
+
+                switch (row.DataRowState)
+                {
+                    case DataRowState.Deleted:
+                        // Commit deletion: row must disappear
+                        dataTable.RemoveRowAt(i);
+                        break;
+
+                    case DataRowState.Added:
+                    case DataRowState.Modified:
+                        row.AcceptChanges();
+                        break;
+
+                    case DataRowState.Unchanged:
+                    case DataRowState.Detached:
+                    default:
+                        break;
+                }
             }
         }
         #endregion

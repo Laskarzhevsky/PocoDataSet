@@ -32,10 +32,10 @@ namespace PocoDataSet.Extensions
             // If a row is being inserted into a table for the first time, treat it as Added
             if (dataRow.DataRowState == DataRowState.Detached)
             {
-                dataRow.DataRowState = DataRowState.Added;
+                dataRow.SetDataRowState(DataRowState.Added);
             }
 
-            dataTable.Rows.Add(dataRow);
+            dataTable.AddRow(dataRow);
         }
         #endregion
     }

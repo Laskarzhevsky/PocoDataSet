@@ -33,14 +33,7 @@ namespace PocoDataSet.Extensions
                 }
 
                 object? propertyValue = propertyInfo.GetValue(poco);
-                if (dataRow.ContainsKey(propertyInfo.Name))
-                {
-                    dataRow[propertyInfo.Name] = propertyValue;
-                }
-                else
-                {
-                    dataRow.Add(propertyInfo.Name, propertyValue);
-                }
+                dataRow[propertyInfo.Name] = propertyValue;
             }
         }
         #endregion
