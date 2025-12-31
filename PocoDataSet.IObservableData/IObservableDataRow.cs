@@ -37,6 +37,8 @@ namespace PocoDataSet.IObservableData
         /// <param name="value">Value for setting into data row</param>
         /// <param name="requestor">Object which requests update</param>
         /// <returns>Flag indicating whether value was set</returns>
+        [Obsolete("Use the indexer (observableDataRow[columnName]) which raises observable events.", false)]
+
         bool UpdateDataFieldValue(string columnName, object? value, object? requestor);
 
         /// <summary>
@@ -63,6 +65,19 @@ namespace PocoDataSet.IObservableData
         IDataRow InnerDataRow
         {
             get;
+        }
+
+
+        /// <summary>
+        /// Gets or sets a data field value by column name.
+        /// The setter must raise observable events.
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        /// <returns>Data field value</returns>
+        object? this[string columnName]
+        {
+            get;
+            set;
         }
 
         /// <summary>

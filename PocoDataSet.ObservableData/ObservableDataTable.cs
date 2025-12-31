@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
@@ -68,7 +69,20 @@ namespace PocoDataSet.ObservableData
 
         #region Public Methods
         /// <summary>
+        /// Creates a new row in the inner table and adds it to the observable table,
+        /// raising RowsAdded and wiring row change events.
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        /// <returns>Observable data row</returns>
+        public IObservableDataRow AddNewRow()
+        {
+            IDataRow dataRow = _innerDataTable.AddNewRow();
+            return AddRow(dataRow);
+        }
+
+        /// <summary>
         /// Adds data row
+        /// IObservableDataTable interface implementation
         /// </summary>
         /// <param name="dataRow">Data row</param>
         /// <returns>Observable data row</returns>

@@ -121,7 +121,7 @@ namespace PocoDataSet.ObservableData
         /// <returns>Observable data table</returns>
         public IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string requestorName)
         {
-            string viewKey = tableName + requestorName;
+            string viewKey = BuildObservableDataViewKey(tableName, requestorName);
             if (_observableDataViews.ContainsKey(viewKey))
             {
                 return _observableDataViews[viewKey];
@@ -137,6 +137,64 @@ namespace PocoDataSet.ObservableData
 
             return null;
         }
+
+        /// <summary>
+        /// Removes observable data view from cache and disposes it
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <param name="requestorName">Requestor name</param>
+        /// <returns>Flag indicating whether view was removed</returns>
+        public bool RemoveObservableDataView(string tableName, string requestorName)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(requestorName))
+            {
+                return false;
+            }
+
+            string viewKey = BuildObservableDataViewKey(tableName, requestorName);
+            if (!_observableDataViews.ContainsKey(viewKey))
+            {
+                return false;
+            }
+
+            DisposeObservableDataViewByKey(viewKey);
+            return true;
+        }
+
+        /// <summary>
+        /// Removes all observable data views for the specified requestor and disposes them
+        /// </summary>
+        /// <param name="requestorName">Requestor name</param>
+        /// <returns>Number of removed views</returns>
+        public int RemoveObservableDataViewsForRequestor(string requestorName)
+        {
+            if (string.IsNullOrWhiteSpace(requestorName))
+            {
+                return 0;
+            }
+
+            List<string> keysToRemove = new List<string>();
+            foreach (KeyValuePair<string, IObservableDataView> pair in _observableDataViews)
+            {
+                if (pair.Key.EndsWith("|" + requestorName, StringComparison.Ordinal))
+                {
+                    keysToRemove.Add(pair.Key);
+                }
+            }
+
+            for (int i = 0; i < keysToRemove.Count; i++)
+            {
+                DisposeObservableDataViewByKey(keysToRemove[i]);
+            }
+
+            return keysToRemove.Count;
+        }
+
 
         /// <summary>
         /// Removes observable table
@@ -254,6 +312,17 @@ namespace PocoDataSet.ObservableData
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Builds observable data view key
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <param name="requestorName">Requestor name</param>
+        /// <returns>View key</returns>
+        static string BuildObservableDataViewKey(string tableName, string requestorName)
+        {
+            return tableName + "|" + requestorName;
+        }
+
         /// <summary>
         /// Creates observable tables
         /// </summary>

@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.IObservableData
 {
-    public interface IObservableDataView
+    public interface IObservableDataView : IDisposable, IAsyncDisposable
     {
         #region Events
         /// <summary>

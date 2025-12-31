@@ -249,7 +249,7 @@ namespace PocoDataSet.Demo
             returnedTableNames.Add("Department");
 
             IDataSet requestDataSet = DataSetFactory.CreateDataSet();
-            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            string connectionString = "Server=localhost;Database=PocoDataSetExamples;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
             SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
 
             // a) Load Department (no parameters)
@@ -269,7 +269,7 @@ namespace PocoDataSet.Demo
         static async Task SaveChangesetExample()
         {
             // Create SqlDataAdapter
-            string connectionString = "Server=localhost;Database=BlazorCoffeeShop;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
+            string connectionString = "Server=localhost;Database=PocoDataSetExamples;Trusted_Connection=True;Encrypt=Optional;MultipleActiveResultSets=True;Connection Timeout=300";
             SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(connectionString);
 
             // 1. Create an empty data set

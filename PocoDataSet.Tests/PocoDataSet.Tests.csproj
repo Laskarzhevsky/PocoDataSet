@@ -2,15 +2,8 @@
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
-    <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
-    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
-    <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
-    <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
@@ -19,5 +12,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
+    <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
+    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
+    <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
+    <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
   </ItemGroup>
 </Project>

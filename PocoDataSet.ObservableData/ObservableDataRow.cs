@@ -70,11 +70,22 @@ namespace PocoDataSet.ObservableData
         /// <param name="value">Value for data field</param>
         /// <param name="requestor">Object which requests update</param>
         /// <returns>Flag indicating whether value was set</returns>
+        [Obsolete("Use the indexer (observableDataRow[columnName]) which raises observable events.", false)]
+
         public bool UpdateDataFieldValue(string columnName, object? value, object? requestor)
         {
             if (string.IsNullOrWhiteSpace(columnName))
             {
                 throw new ArgumentException("Column name must be provided.", nameof(columnName));
+            }
+
+            // If the value is not changing, do nothing.
+            // NOTE: Previously, this method only compared against the *original* value, which could
+            // raise duplicate events if the same value was assigned repeatedly.
+            object? currentValue = _innerDataRow[columnName];
+            if (object.Equals(currentValue, value))
+            {
+                return false;
             }
 
             DataRowState oldState = _innerDataRow.DataRowState;
@@ -83,7 +94,7 @@ namespace PocoDataSet.ObservableData
             bool dataFieldValueUpdated = false;
             object ? originalValue;
             _innerDataRow.TryGetOriginalValue(columnName, out originalValue);
-            if (originalValue != value)
+            if (!object.Equals(originalValue, value))
             {
                 dataFieldValueUpdated = true;
             }
@@ -136,6 +147,24 @@ namespace PocoDataSet.ObservableData
             }
         }
 
+
+
+        /// <summary>
+        /// Gets or sets a data field value by column name.
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        /// <returns>Data field value</returns>
+        public object? this[string columnName]
+        {
+            get
+            {
+                return _innerDataRow[columnName];
+            }
+            set
+            {
+                UpdateDataFieldValue(columnName, value, null);
+            }
+        }
 
         /// <summary>
         /// Gets or sets key

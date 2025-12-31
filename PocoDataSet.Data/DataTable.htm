@@ -1,0 +1,126 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="../../../BusinessProcessProgramming.css">
+    <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+    <meta name=Generator content="Microsoft Word 15 (filtered)">
+    <title>Business Process Programming - POCO DataSet - DataTable Class</title>
+
+</head>
+
+<body lang=EN-CA style='word-wrap:break-word'>
+
+    <div class=WordSection1>
+
+        <p class=title>DataTable Class</p>
+
+        <h1>Overview</h1>
+
+        <p>
+            The <code>DataTable</code> class is the concrete implementation of <code>IDataTable</code>
+            in the POCO DataSet framework. It represents a single table of data, including its
+            schema (columns), rows, table name, and primary key definition.
+        </p>
+
+        <p>
+            A <code>DataTable</code> owns its rows and is responsible for attaching rows,
+            initializing missing column values, and managing row state transitions when
+            rows are added or loaded from persistent storage.
+        </p>
+
+        <h1>Namespace and Assembly</h1>
+
+        <p>
+            Namespace: PocoDataSet.Data<br>
+            Assembly: PocoDataSet.Data.dll
+        </p>
+
+        <h1>Declaration</h1>
+
+        <p class=CodeSnippet>
+            public class DataTable : IDataTable<br />
+            {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public List&lt;IColumnMetadata&gt; Columns { get; set; }<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public IReadOnlyList&lt;IDataRow&gt; Rows { get; }<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;public List&lt;IDataRow&gt; RowsJson { get; }<br />
+
+            &nbsp;&nbsp;&nbsp;&nbsp;public List&lt;string&gt; PrimaryKeys { get; set; }<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public string TableName { get; set; }<br />
+            <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public void AddLoadedRow(IDataRow dataRow);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public void AddRow(IDataRow dataRow);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public bool ContainsRow(IDataRow dataRow);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public void RemoveAllRows();<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public bool RemoveRow(IDataRow dataRow);<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;public void RemoveRowAt(int rowIndex);<br />
+            }<br />
+        </p>
+
+        <h1>Usage Notes</h1>
+        <ul>
+            <li>
+                Rows are exposed as a read-only list; modification of row membership is
+                performed through table methods.
+            </li>
+            <li>
+                <code>AddRow</code> is used for client-created rows and may set the row state
+                to <code>Added</code>.
+            </li>
+            <li>
+                <code>AddLoadedRow</code> is used when loading data from storage and normalizes
+                row state to <code>Unchanged</code>.
+            </li>
+            <li>
+                The table configures loaded rows with primary key metadata so the row
+                implementation can protect key values.
+            </li>
+        </ul>
+
+        <h1>Usage Example</h1>
+
+        <p class=CodeSnippet>
+            // 1. Create an empty data set and table<br />
+            IDataSet dataSet = DataSetFactory.CreateDataSet();<br />
+            IDataTable departmentDataTable = dataSet.AddNewTable("Department");<br />
+            departmentDataTable.AddColumn("Id", DataTypeNames.INT32);<br />
+            departmentDataTable.AddColumn("Name", DataTypeNames.STRING);<br />
+            departmentDataTable.PrimaryKeys.Add("Id");<br />
+            <br />
+            // 2. Add a new client-side row<br />
+            IDataRow row = departmentDataTable.AddNewRow();<br />
+            row["Name"] = "Emergency";<br />
+            <br />
+            // 3. Accept changes to normalize the row state for this new row<br />
+            row.AcceptChanges();<br />
+            <br />
+            // 4. Remove all rows from the table<br />
+            departmentDataTable.RemoveAllRows();
+        </p>
+
+        <p class=MsoNormal style='line-height:11.75pt'><span style='color:black'>&nbsp;</span></p>
+        <ul>
+            <li><a class=MsoNormal href="./DataTable/Columns.htm">Columns Property</a></li>
+            <li><a class=MsoNormal href="./DataTable/PrimaryKeys.htm">PrimaryKeys Property</a></li>
+            <li><a class=MsoNormal href="./DataTable/Rows.htm">Rows Property</a></li>
+            <li><a class=MsoNormal href="./DataTable/RowsJson.htm">RowsJson Property</a></li>
+            <li><a class=MsoNormal href="./DataTable/TableName.htm">TableName Property</a></li>
+        </ul>
+        <ul>
+            <li><a class=MsoNormal href="./DataTable/AddLoadedRow.htm">AddLoadedRow Method</a></li>
+            <li><a class=MsoNormal href="./DataTable/AddRow.htm">AddRow Method</a></li>
+            <li><a class=MsoNormal href="./DataTable/ContainsRow.htm">ContainsRow Method</a></li>
+            <li><a class=MsoNormal href="./DataTable/RemoveAllRows.htm">RemoveAllRows Method</a></li>
+            <li><a class=MsoNormal href="./DataTable/RemoveRow.htm">RemoveRow Method</a></li>
+            <li><a class=MsoNormal href="./DataTable/RemoveRowAt.htm">RemoveRowAt Method</a></li>
+        </ul>
+
+        <p class=MsoNormal style='line-height:11.75pt'><span style='color:black'>&nbsp;</span></p>
+
+        <a class="BPPButton" href="../../../Index.html">Table of Content</a>
+        <a class="BPPButton" href="../../../PocoDataSet.htm">POCO DataSet</a>
+        <a class="BPPButton" href="../PocoDataSet_Data.htm">PocoDataSet.Data</a>
+    </div>
+
+</body>
+
+</html>

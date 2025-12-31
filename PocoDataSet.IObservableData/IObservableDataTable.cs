@@ -31,6 +31,13 @@ namespace PocoDataSet.IObservableData
 
         #region Methods
         /// <summary>
+        /// Creates a new row in the inner table and adds it to the observable table,
+        /// raising RowsAdded and wiring row change events.
+        /// </summary>
+        /// <returns>Observable data row</returns>
+        IObservableDataRow AddNewRow();
+
+        /// <summary>
         /// Adds data row
         /// </summary>
         /// <param name="dataRow">Data row</param>

@@ -66,7 +66,7 @@ namespace PocoDataSet.ObservableExtensions
                     continue;
                 }
 
-                currentObservableDataRow.UpdateDataFieldValue(columnName, newValue, requestor: null);
+                currentObservableDataRow[columnName] = newValue;
                 rowValueChanged = true;
             }
 

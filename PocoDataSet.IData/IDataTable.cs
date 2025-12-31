@@ -17,6 +17,14 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
+        /// Gets or sets List of primary keys
+        /// </summary>
+        List<string> PrimaryKeys
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets rows
         /// </summary>
         IReadOnlyList<IDataRow> Rows
@@ -28,14 +36,6 @@ namespace PocoDataSet.IData
         /// Gets or sets table name
         /// </summary>
         string TableName
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets or sets List of primary keys
-        /// </summary>
-        List<string> PrimaryKeys
         {
             get; set;
         }

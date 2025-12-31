@@ -29,6 +29,15 @@ namespace PocoDataSet.Data
         } = new();
 
         /// <summary>
+        /// Gets or sets primary key
+        /// IDataTable interface implementation
+        /// </summary>
+        public List<string> PrimaryKeys
+        {
+            get; set;
+        } = new();
+
+        /// <summary>
         /// Gets rows
         /// IDataTable interface implementation
         /// </summary>
@@ -76,15 +85,6 @@ namespace PocoDataSet.Data
         {
             get; set;
         } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets primary key
-        /// IDataTable interface implementation
-        /// </summary>
-        public List<string> PrimaryKeys
-        {
-            get; set;
-        } = new();
         #endregion
 
         #region Methods

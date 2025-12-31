@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\SharedBuildSettings.props" />
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.7.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocoDataSet.IObservableData\PocoDataSet.IObservableData.csproj" />
+    <ProjectReference Include="..\PocoDataSet.ObservableData\PocoDataSet.ObservableData.csproj" />
+    <ProjectReference Include="..\PocoDataSet.ObservableExtensions\PocoDataSet.ObservableExtensions.csproj" />
+    <ProjectReference Include="..\PocoDataSet.Data\PocoDataSet.Data.csproj" />
+    <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
+    <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
+  </ItemGroup>
+</Project>

@@ -55,7 +55,24 @@ namespace PocoDataSet.IObservableData
         /// <param name="requestorName">Requestor name</param>
         /// <returns>Observable data table</returns>
         IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string requestorName);
-        #endregion
+        
+
+        /// <summary>
+        /// Removes observable data view from cache and disposes it
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <param name="requestorName">Requestor name</param>
+        /// <returns>Flag indicating whether view was removed</returns>
+        bool RemoveObservableDataView(string tableName, string requestorName);
+
+        /// <summary>
+        /// Removes all observable data views for the specified requestor and disposes them
+        /// </summary>
+        /// <param name="requestorName">Requestor name</param>
+        /// <returns>Number of removed views</returns>
+        int RemoveObservableDataViewsForRequestor(string requestorName);
+
+#endregion
 
         #region Properties
         /// <summary>

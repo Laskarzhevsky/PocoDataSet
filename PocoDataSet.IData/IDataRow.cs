@@ -53,6 +53,8 @@ namespace PocoDataSet.IData
         /// <summary>
         /// Gets or sets value by column name
         /// </summary>
+        /// <param name="columnName">Column name</param>
+        /// <returns></returns>
         object? this[string columnName]
         {
             get; set;
