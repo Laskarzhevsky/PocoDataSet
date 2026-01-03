@@ -19,4 +19,9 @@
     <ProjectReference Include="..\PocoDataSet.Extensions\PocoDataSet.Extensions.csproj" />
     <ProjectReference Include="..\PocoDataSet.IData\PocoDataSet.IData.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ExtensionMethodsTests\ObservableDataSetExtensions\" />
+    <Folder Include="ExtensionMethodsTests\ObservableDataTableExtensions\" />
+  </ItemGroup>
 </Project>

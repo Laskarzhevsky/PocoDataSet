@@ -77,11 +77,6 @@ namespace PocoDataSet.ObservableData
         /// <param name="dataSet">Data set</param>
         public ObservableDataSet(IDataSet dataSet)
         {
-            if (dataSet == null)
-            {
-                throw new ArgumentNullException(nameof(dataSet));
-            }
-
             _innerDataSet = dataSet;
             CreateObservableTables();
         }

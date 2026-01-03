@@ -20,13 +20,6 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            ObservableDataRow? concreteRow = observableDataRow as ObservableDataRow;
-            if (concreteRow != null)
-            {
-                concreteRow.RejectChanges();
-                return;
-            }
-
             observableDataRow.InnerDataRow.RejectChanges();
         }
         #endregion

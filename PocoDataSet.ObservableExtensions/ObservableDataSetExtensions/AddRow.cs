@@ -1,4 +1,3 @@
-using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
@@ -11,19 +10,20 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds row to a table in observable data set (delegates to inner data set)
+        /// Adds data row to observable data table in observable data set by wrapping it into observable data row
         /// </summary>
         /// <param name="observableDataSet">Observable data set</param>
         /// <param name="tableName">Table name</param>
         /// <param name="dataRow">Data row</param>
-        public static void AddRow(this IObservableDataSet? observableDataSet, string tableName, IDataRow dataRow)
+        /// <returns>Added observable data row</returns>
+        public static IObservableDataRow AddRow(this IObservableDataSet? observableDataSet, string tableName, IDataRow dataRow)
         {
             if (observableDataSet == null)
             {
-                return;
+                return default!;
             }
 
-            observableDataSet.InnerDataSet.AddRow(tableName, dataRow);
+            return observableDataSet.Tables[tableName].AddRow(dataRow);
         }
         #endregion
     }

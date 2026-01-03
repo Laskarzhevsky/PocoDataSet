@@ -1,5 +1,4 @@
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -17,13 +16,6 @@ namespace PocoDataSet.ObservableExtensions
         {
             if (observableDataRow == null)
             {
-                return;
-            }
-
-            ObservableDataRow? concreteRow = observableDataRow as ObservableDataRow;
-            if (concreteRow != null)
-            {
-                concreteRow.AcceptChanges();
                 return;
             }
 

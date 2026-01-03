@@ -32,19 +32,10 @@ namespace PocoDataSet.ObservableExtensions
 
         #region Public Properties
         /// <summary>
-        /// Gets observable data set merge handlers
+        /// Gets data type default value provider 
         /// IObservableMergeOptions interface implementation
         /// </summary>
-        public IDictionary<string, IObservableDataSetMergeHandler> ObservableDataSetMergeHandlers
-        {
-            get; private set;
-        }
-
-        /// <summary>
-        /// Gets observable data set merge result
-        /// IObservableMergeOptions interface implementation
-        /// </summary>
-        public IObservableDataSetMergeResult ObservableDataSetMergeResult
+        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
         {
             get; private set;
         }
@@ -77,15 +68,6 @@ namespace PocoDataSet.ObservableExtensions
         }
 
         /// <summary>
-        /// Gets data type default value provider 
-        /// IObservableMergeOptions interface implementation
-        /// </summary>
-        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
-        {
-            get; private set;
-        }
-
-        /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// IObservableMergeOptions interface implementation
         /// </summary>
@@ -102,6 +84,33 @@ namespace PocoDataSet.ObservableExtensions
         {
             get;
         } = new List<string>();
+
+        /// <summary>
+        /// Gets merge mode
+        /// IObservableMergeOptions interface implementation
+        /// </summary>
+        public MergeMode MergeMode
+        {
+            get; set;
+        } = MergeMode.Refresh;
+
+        /// <summary>
+        /// Gets observable data set merge handlers
+        /// IObservableMergeOptions interface implementation
+        /// </summary>
+        public IDictionary<string, IObservableDataSetMergeHandler> ObservableDataSetMergeHandlers
+        {
+            get; private set;
+        }
+
+        /// <summary>
+        /// Gets observable data set merge result
+        /// IObservableMergeOptions interface implementation
+        /// </summary>
+        public IObservableDataSetMergeResult ObservableDataSetMergeResult
+        {
+            get; private set;
+        }
 
         /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema

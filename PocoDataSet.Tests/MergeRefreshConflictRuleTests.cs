@@ -10,7 +10,7 @@ namespace PocoDataSet.Tests
     public sealed class MergeRefreshConflictRuleTests
     {
         [Fact]
-        public void Merge_Refresh_Overwrites_LocalModifiedRow_WhenServerAlsoChangedRow()
+        public void Merge_Refresh_DoesNotOverwrite_LocalModifiedRow_WhenServerAlsoChangedRow()
         {
             // Arrange
             IDataSet current = DataSetFactory.CreateDataSet();
@@ -43,9 +43,10 @@ namespace PocoDataSet.Tests
             // Act
             current.MergeWith(refreshed, MergeMode.Refresh);
 
-            // Assert: refreshed snapshot overwrites local change
-            Assert.Equal("ServerNew", row["Name"]);
-            Assert.Equal(DataRowState.Unchanged, row.DataRowState);
+            // Assert: local edit is preserved
+            Assert.Equal("LocalEdit", row["Name"]);
+            Assert.Equal(DataRowState.Modified, row.DataRowState);
         }
     }
 }
+

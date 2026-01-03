@@ -73,6 +73,11 @@ namespace PocoDataSet.Extensions
         {
             foreach (IDataTable currentTable in currentDataSet.Tables.Values)
             {
+                if (mergeOptions.ExcludeTablesFromMerge.Contains(currentTable.TableName))
+                {
+                    continue;
+                }
+
                 mergedTableNames.Add(currentTable.TableName);
 
                 IDataTable? refreshedTable;

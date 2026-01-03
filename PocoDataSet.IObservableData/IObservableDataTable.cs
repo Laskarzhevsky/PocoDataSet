@@ -38,7 +38,14 @@ namespace PocoDataSet.IObservableData
         IObservableDataRow AddNewRow();
 
         /// <summary>
-        /// Adds data row
+        /// Adds observable data row
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        /// <returns>Added observable data row</returns>
+        IObservableDataRow AddObservableDataRow(IObservableDataRow observableDataRow);
+
+        /// <summary>
+        /// Adds data row by wrapping it into observable data row
         /// </summary>
         /// <param name="dataRow">Data row</param>
         /// <returns>Observable data row</returns>

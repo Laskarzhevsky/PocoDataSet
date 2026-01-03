@@ -31,8 +31,14 @@ namespace PocoDataSet.Extensions
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;
-                object? oldValue = currentDataRow.GetDataFieldValue<object?>(columnName);
-                object? newValue = refreshedDataRow.GetDataFieldValue<object?>(columnName);
+
+                // Be tolerant to schema evolution / special columns (e.g., __ClientKey) that may not exist on older rows yet.
+                object? oldValue;
+                currentDataRow.TryGetValue(columnName, out oldValue);
+
+                object? newValue;
+                refreshedDataRow.TryGetValue(columnName, out newValue);
+
                 if (DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
                 {
                     continue;
@@ -49,7 +55,7 @@ namespace PocoDataSet.Extensions
             }
 
             return rowValueChanged;
-        }        
+        }
         #endregion
     }
 }

@@ -81,6 +81,22 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// Adds observable data row
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        /// <returns>Added observable data row</returns>
+        public IObservableDataRow AddObservableDataRow(IObservableDataRow observableDataRow)
+        {
+            observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
+            observableDataRow.RowStateChanged += ObservableDataRow_RowStateChanged;
+            _observableDataRows.Add(observableDataRow);
+            RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
+
+            return observableDataRow;
+        }
+
+        /// <summary>
         /// Adds data row
         /// IObservableDataTable interface implementation
         /// </summary>
@@ -95,12 +111,8 @@ namespace PocoDataSet.ObservableData
             }
 
             IObservableDataRow observableDataRow = new ObservableDataRow(dataRow);
-            observableDataRow.DataFieldValueChanged += ObservableDataRow_DataFieldValueChanged;
-            observableDataRow.RowStateChanged += ObservableDataRow_RowStateChanged;
-            _observableDataRows.Add(observableDataRow);
-            RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
 
-            return observableDataRow;
+            return AddObservableDataRow(observableDataRow);
         }
 
         /// <summary>

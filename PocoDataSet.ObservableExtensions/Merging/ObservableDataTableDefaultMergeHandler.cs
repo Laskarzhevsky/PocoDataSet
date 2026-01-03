@@ -153,6 +153,10 @@ namespace PocoDataSet.ObservableExtensions
 
                 IDataRow refreshedDataRow = keyValuePair.Value;
                 IDataRow newDataRow = AddNewDataRowWithDefaultValuesToDataTable(currentObservableDataTable, observableMergeOptions);
+                if (observableMergeOptions.MergeMode == MergeMode.Refresh)
+                {
+                    newDataRow.AcceptChanges();
+                }
 
                 newDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.Columns, observableMergeOptions);
                 IObservableDataRow observableDataRow = currentObservableDataTable.AddRow(newDataRow);

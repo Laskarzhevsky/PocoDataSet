@@ -11,18 +11,21 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds a table to observable data set (delegates to inner data set)
+        /// Adds data table to observable data set by wrapping it into observable data table
         /// </summary>
         /// <param name="observableDataSet">Observable data set</param>
         /// <param name="dataTable">Data table</param>
-        public static void AddTable(this IObservableDataSet? observableDataSet, IDataTable dataTable)
+        /// <returns>Observable table added to observable data set</returns>
+        public static IObservableDataTable AddTable(this IObservableDataSet? observableDataSet, IDataTable dataTable)
         {
             if (observableDataSet == null)
             {
-                return;
+                return default!;
             }
 
             observableDataSet.InnerDataSet.AddTable(dataTable);
+            IObservableDataTable observableDataTable = observableDataSet.AddObservableTable(dataTable);
+            return observableDataTable;
         }
         #endregion
     }

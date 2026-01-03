@@ -21,13 +21,6 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            ObservableDataSet? concreteDataSet = observableDataSet as ObservableDataSet;
-            if (concreteDataSet != null)
-            {
-                concreteDataSet.AcceptChanges();
-                return;
-            }
-
             observableDataSet.InnerDataSet.AcceptChanges();
         }
         #endregion

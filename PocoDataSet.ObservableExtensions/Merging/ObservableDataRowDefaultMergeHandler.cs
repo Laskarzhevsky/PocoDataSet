@@ -24,6 +24,27 @@ namespace PocoDataSet.ObservableExtensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
+            PocoDataSet.IData.DataRowState dataRowState = currentDataRow.DataRowState;
+            switch (observableMergeOptions.MergeMode)
+            {
+                case MergeMode.Refresh:
+                    // Never overwrite user edits
+                    if (dataRowState != DataRowState.Unchanged)
+                    {
+                        return false;
+                    }
+
+                    break;
+                case MergeMode.PostSave:
+                    // Allow updates for Added / Modified, but not Deleted
+                    if (dataRowState == DataRowState.Deleted)
+                    {
+                        return false;
+                    }
+
+                    break;
+            }
+
             bool rowValueChanged = false;
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
@@ -54,8 +75,28 @@ namespace PocoDataSet.ObservableExtensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
-            bool rowValueChanged = false;
+            PocoDataSet.IData.DataRowState dataRowState = currentObservableDataRow.InnerDataRow.DataRowState;
+            switch (observableMergeOptions.MergeMode)
+            {
+                case MergeMode.Refresh:
+                    // Never overwrite user edits
+                    if (dataRowState != DataRowState.Unchanged)
+                    {
+                        return false;
+                    }
 
+                    break;
+                case MergeMode.PostSave:
+                    // Allow updates for Added / Modified, but not Deleted
+                    if (dataRowState == DataRowState.Deleted)
+                    {
+                        return false;
+                    }
+
+                    break;
+            }
+
+            bool rowValueChanged = false;
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;

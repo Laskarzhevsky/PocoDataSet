@@ -12,17 +12,9 @@ namespace PocoDataSet.IObservableData
     {
         #region Properties
         /// <summary>
-        /// Gets observable data set merge handlers
+        /// Gets data type default value provider 
         /// </summary>
-        IDictionary<string, IObservableDataSetMergeHandler> ObservableDataSetMergeHandlers
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets observable data set merge result
-        /// </summary>
-        IObservableDataSetMergeResult ObservableDataSetMergeResult
+        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
         {
             get;
         }
@@ -52,14 +44,6 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets data type default value provider 
-        /// </summary>
-        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// Data in mentioned tables will not be changed during the merge process
         /// </summary>
@@ -77,9 +61,25 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets overridden primary key names to replace primary keys defined by table schema
+        /// Gets merge mode
         /// </summary>
-        IDictionary<string, List<string>> OverriddenPrimaryKeyNames
+        MergeMode MergeMode
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets observable data set merge handlers
+        /// </summary>
+        IDictionary<string, IObservableDataSetMergeHandler> ObservableDataSetMergeHandlers
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets observable data set merge result
+        /// </summary>
+        IObservableDataSetMergeResult ObservableDataSetMergeResult
         {
             get;
         }
@@ -96,6 +96,14 @@ namespace PocoDataSet.IObservableData
         /// Gets observable table merge handlers
         /// </summary>
         IDictionary<string, IObservableDataTableMergeHandler> ObservableTableMergeHandlers
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets overridden primary key names to replace primary keys defined by table schema
+        /// </summary>
+        IDictionary<string, List<string>> OverriddenPrimaryKeyNames
         {
             get;
         }

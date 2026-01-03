@@ -1,4 +1,6 @@
-﻿using PocoDataSet.Data;
+﻿using System.Data;
+
+using PocoDataSet.Data;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
@@ -13,6 +15,24 @@ namespace PocoDataSet.Demo
     {
         private static async Task Main()
         {
+            // 1. Create an observable data set
+            IObservableDataSet observableDataSet = new ObservableDataSet();
+
+            // 2. Create observable empty data table
+            IObservableDataTable departmentDataTable = observableDataSet.AddNewTable("Department");
+            departmentDataTable.AddColumn("Id", DataTypeNames.INT32);
+            departmentDataTable.AddColumn("Name", DataTypeNames.STRING);
+
+            // 3. Create a detached row from the table schema and populate it before insertion
+            IObservableDataRow departmentObservableDataRow = ObservableDataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
+            departmentObservableDataRow.UpdateDataFieldValue("Id", 1);
+            departmentObservableDataRow.UpdateDataFieldValue("Name", "Customer Service");
+
+            departmentDataTable.AddObservableDataRow(departmentObservableDataRow);
+
+            // 4. Insert the populated row into the table
+//            observableDataSet.InnerDataSet.AddRow("Department", departmentDataRow);
+            int i = 0;
             /*
                         // 1) Create an empty data set
                         IDataSet dataSet = DataSetFactory.CreateDataSet();
@@ -218,7 +238,7 @@ namespace PocoDataSet.Demo
 
                         await SaveChangesetExample();
             */
-
+/*
             // A. Create data set to simulate data set received from SQL Server Data Adater
             // 1. Create an empty data set
             IDataSet dataSet = DataSetFactory.CreateDataSet();
@@ -269,7 +289,7 @@ namespace PocoDataSet.Demo
             // 7. Delete one row from Department table to have one row in Deleted state
             IObservableDataRow departmentDbservableDataRow = observableDataSet.Tables["Department"].Rows[0];
 //            departmentDbservableDataRow.Delete();
-
+*/
             // 7. 
             Console.ReadLine();
         }

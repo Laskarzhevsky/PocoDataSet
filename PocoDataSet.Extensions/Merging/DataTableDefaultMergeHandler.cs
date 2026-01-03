@@ -261,7 +261,7 @@ namespace PocoDataSet.Extensions
 
             return newDataRow;
         }
-        
+
         /// <summary>
         /// Merges current data table rows
         /// </summary>
@@ -311,7 +311,7 @@ namespace PocoDataSet.Extensions
                 }
                 else
                 {
-                    bool changed = MergeDataRowFromRefreshedDataRow(currentDataRow, refreshedDataRow, currentDataTable.Columns);
+                    bool changed = currentDataRow.MergeWith(refreshedDataRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
                     if (changed)
                     {
                         mergeOptions.DataSetMergeResult.UpdatedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, currentDataRow));
@@ -329,8 +329,17 @@ namespace PocoDataSet.Extensions
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        private static bool MergeDataRowFromRefreshedDataRow(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        private static bool MergeDataRowFromRefreshedDataRow(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
+            // Refresh must never overwrite local edits.
+            if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.Refresh)
+            {
+                if (currentDataRow.DataRowState != DataRowState.Unchanged)
+                {
+                    return false;
+                }
+            }
+
             if (currentDataRow.DataRowState == DataRowState.Deleted)
             {
                 // Keep local delete during Refresh merge; do not attempt to overwrite or AcceptChanges.
@@ -384,7 +393,7 @@ namespace PocoDataSet.Extensions
                 IDataRow refreshedRow = refreshedDataTable.Rows[i];
                 IDataRow newDataRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable, mergeOptions);
 
-                MergeDataRowFromRefreshedDataRow(newDataRow, refreshedRow, currentDataTable.Columns);
+                MergeDataRowFromRefreshedDataRow(newDataRow, refreshedRow, currentDataTable.Columns, mergeOptions);
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newDataRow));
             }
         }
