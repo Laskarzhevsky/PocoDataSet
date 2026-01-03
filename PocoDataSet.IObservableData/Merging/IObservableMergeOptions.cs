@@ -65,7 +65,7 @@ namespace PocoDataSet.IObservableData
         /// </summary>
         MergeMode MergeMode
         {
-            get;
+            get; set;
         }
 
         /// <summary>

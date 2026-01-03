@@ -24,11 +24,14 @@ namespace PocoDataSet.ObservableExtensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
-            PocoDataSet.IData.DataRowState dataRowState = currentDataRow.DataRowState;
+            DataRowState dataRowState = currentDataRow.DataRowState;
+
+            // Apply the same policy as the non-observable merge:
+            // - Refresh: update only Unchanged rows (never overwrite user edits).
+            // - PostSave: allow updating Added/Modified/Unchanged, but never Deleted.
             switch (observableMergeOptions.MergeMode)
             {
                 case MergeMode.Refresh:
-                    // Never overwrite user edits
                     if (dataRowState != DataRowState.Unchanged)
                     {
                         return false;
@@ -36,7 +39,6 @@ namespace PocoDataSet.ObservableExtensions
 
                     break;
                 case MergeMode.PostSave:
-                    // Allow updates for Added / Modified, but not Deleted
                     if (dataRowState == DataRowState.Deleted)
                     {
                         return false;
@@ -49,8 +51,14 @@ namespace PocoDataSet.ObservableExtensions
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;
-                object? oldValue = currentDataRow.GetDataFieldValue<object?>(columnName);
-                object? newValue = refreshedDataRow.GetDataFieldValue<object?>(columnName);
+
+                // Be tolerant to schema evolution / special columns (e.g., __ClientKey) that may not exist yet on older rows.
+                object? oldValue;
+                currentDataRow.TryGetValue(columnName, out oldValue);
+
+                object? newValue;
+                refreshedDataRow.TryGetValue(columnName, out newValue);
+
                 if (DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
                 {
                     continue;
@@ -58,6 +66,13 @@ namespace PocoDataSet.ObservableExtensions
 
                 currentDataRow[columnName] = newValue;
                 rowValueChanged = true;
+            }
+
+            // In both Refresh and PostSave, the server snapshot becomes baseline.
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave)
+            {
+                // AcceptChanges on an Unchanged row is a no-op; on Added/Modified it commits the post-save baseline.
+                currentDataRow.AcceptChanges();
             }
 
             return rowValueChanged;
@@ -75,11 +90,10 @@ namespace PocoDataSet.ObservableExtensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
-            PocoDataSet.IData.DataRowState dataRowState = currentObservableDataRow.InnerDataRow.DataRowState;
+            DataRowState dataRowState = currentObservableDataRow.InnerDataRow.DataRowState;
             switch (observableMergeOptions.MergeMode)
             {
                 case MergeMode.Refresh:
-                    // Never overwrite user edits
                     if (dataRowState != DataRowState.Unchanged)
                     {
                         return false;
@@ -87,7 +101,6 @@ namespace PocoDataSet.ObservableExtensions
 
                     break;
                 case MergeMode.PostSave:
-                    // Allow updates for Added / Modified, but not Deleted
                     if (dataRowState == DataRowState.Deleted)
                     {
                         return false;
@@ -100,15 +113,27 @@ namespace PocoDataSet.ObservableExtensions
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;
-                object? oldValue = currentObservableDataRow.InnerDataRow.GetDataFieldValue<object?>(columnName);
-                object? newValue = refreshedDataRow.GetDataFieldValue<object?>(columnName);
+
+                object? oldValue;
+                currentObservableDataRow.InnerDataRow.TryGetValue(columnName, out oldValue);
+
+                object? newValue;
+                refreshedDataRow.TryGetValue(columnName, out newValue);
+
                 if (DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
                 {
                     continue;
                 }
 
+                // Use observable indexer so events fire.
                 currentObservableDataRow[columnName] = newValue;
                 rowValueChanged = true;
+            }
+
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave)
+            {
+                // Commit baseline (also clears Modified/Added after a successful post-save reconciliation).
+                currentObservableDataRow.AcceptChanges();
             }
 
             return rowValueChanged;
