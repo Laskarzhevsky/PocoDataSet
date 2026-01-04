@@ -40,6 +40,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.Tests", "PocoDa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableTests", "PocoDataSet.ObservableTests\PocoDataSet.ObservableTests.csproj", "{1825E7DE-F962-9B06-7C0E-C54F042A8D74}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.EfCoreBridge", "PocoDataSet.EfCoreBridge\PocoDataSet.EfCoreBridge.csproj", "{1D7EF950-81A0-F9E2-8836-1B9713619F47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.EfCoreBridge.Tests", "PocoDataSet.EfCoreBridge.Tests\PocoDataSet.EfCoreBridge.Tests.csproj", "{BCC47AF4-6E2C-51D5-2ADF-1110892AD2FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SerializerTests", "PocoDataSet.SerializerTests\PocoDataSet.SerializerTests.csproj", "{5273D337-FE36-4492-B667-D63E66BFA4F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAdapterTests", "PocoDataSet.SqlServerDataAdapterTests\PocoDataSet.SqlServerDataAdapterTests.csproj", "{2DEECFF9-A824-4193-A6AF-E26A916CA97F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +106,22 @@ Global
 		{1825E7DE-F962-9B06-7C0E-C54F042A8D74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1825E7DE-F962-9B06-7C0E-C54F042A8D74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1825E7DE-F962-9B06-7C0E-C54F042A8D74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D7EF950-81A0-F9E2-8836-1B9713619F47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D7EF950-81A0-F9E2-8836-1B9713619F47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D7EF950-81A0-F9E2-8836-1B9713619F47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D7EF950-81A0-F9E2-8836-1B9713619F47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCC47AF4-6E2C-51D5-2ADF-1110892AD2FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCC47AF4-6E2C-51D5-2ADF-1110892AD2FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCC47AF4-6E2C-51D5-2ADF-1110892AD2FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCC47AF4-6E2C-51D5-2ADF-1110892AD2FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5273D337-FE36-4492-B667-D63E66BFA4F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5273D337-FE36-4492-B667-D63E66BFA4F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5273D337-FE36-4492-B667-D63E66BFA4F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5273D337-FE36-4492-B667-D63E66BFA4F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DEECFF9-A824-4193-A6AF-E26A916CA97F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DEECFF9-A824-4193-A6AF-E26A916CA97F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DEECFF9-A824-4193-A6AF-E26A916CA97F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DEECFF9-A824-4193-A6AF-E26A916CA97F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.Serializer;
 
-namespace PocoDataSet.Tests
+namespace PocoDataSet.SerializerTests
 {
     public sealed class SerializationTypeTests
     {

@@ -1,5 +1,3 @@
-using System;
-
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using Xunit;

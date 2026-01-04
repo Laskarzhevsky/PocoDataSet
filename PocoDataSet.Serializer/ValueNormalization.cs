@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 using PocoDataSet.Data;
 using PocoDataSet.IData;
@@ -137,14 +138,35 @@ namespace PocoDataSet.Serializer
             {
                 if (value is DateTime)
                     return value;
-                if (value is string s && DateTime.TryParse(s, out DateTime dt))
-                    return dt;
+
+                if (value is string s)
+                {
+                    DateTime dt;
+                    if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out dt))
+                    {
+                        return dt;
+                    }
+
+                    // Fallback to current culture for non-ISO strings.
+                    if (DateTime.TryParse(s, CultureInfo.CurrentCulture, DateTimeStyles.None, out dt))
+                    {
+                        return dt;
+                    }
+                }
             }
             else if (dataType == DataTypeNames.STRING)
             {
                 if (value is string)
                     return value;
                 return value.ToString();
+            }
+            else if (dataType == DataTypeNames.BINARY)
+            {
+                if (value is byte[])
+                    return value;
+
+                if (value is string s)
+                    return Convert.FromBase64String(s);
             }
 
             // If we can't convert safely, keep original

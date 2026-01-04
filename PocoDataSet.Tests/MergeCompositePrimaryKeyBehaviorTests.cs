@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-using PocoDataSet.Data;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 

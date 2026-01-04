@@ -5,11 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
 using Xunit;
-using Xunit.Sdk;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
-using PocoDataSet.SqlServerDataAdapter;
 
 namespace PocoDataSet.Tests
 {

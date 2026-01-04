@@ -3,7 +3,7 @@ using PocoDataSet.IData;
 using PocoDataSet.Serializer;
 using Xunit;
 
-namespace PocoDataSet.Tests
+namespace PocoDataSet.SerializerTests
 {
     public sealed class SerializationRoundTripTests
     {

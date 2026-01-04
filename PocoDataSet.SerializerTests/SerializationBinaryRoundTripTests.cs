@@ -6,7 +6,7 @@ using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.Serializer;
 
-namespace PocoDataSet.Tests
+namespace PocoDataSet.SerializerTests
 {
     public sealed class SerializationBinaryRoundTripTests
     {
@@ -44,17 +44,15 @@ namespace PocoDataSet.Tests
 
             Assert.NotNull(value);
 
-            // Current serializer represents binary as Base64 string.
-            Assert.IsType<string>(value);
+            Assert.IsType<byte[]>(value);
 
-            string base64 = (string)value!;
-            byte[] decoded = Convert.FromBase64String(base64);
+            byte[] restored = (byte[])value!;
 
-            Assert.Equal(original.Length, decoded.Length);
+            Assert.Equal(original.Length, restored.Length);
 
             for (int i = 0; i < original.Length; i++)
             {
-                Assert.Equal(original[i], decoded[i]);
+                Assert.Equal(original[i], restored[i]);
             }
         }
     }

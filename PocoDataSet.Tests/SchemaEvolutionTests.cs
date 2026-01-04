@@ -1,5 +1,4 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using PocoDataSet.IData;
 
@@ -48,6 +48,18 @@ namespace PocoDataSet.Extensions
                 // Create target table with same schema
                 IDataTable targetTable = changeset.AddNewTable(tableName);
                 targetTable.AddColumns(sourceTable.Columns);
+
+                // Copy PrimaryKeys metadata (single or composite)
+                if (sourceTable.PrimaryKeys != null && sourceTable.PrimaryKeys.Count > 0)
+                {
+                    List<string> primaryKeys = new List<string>();
+                    for (int i = 0; i < sourceTable.PrimaryKeys.Count; i++)
+                    {
+                        primaryKeys.Add(sourceTable.PrimaryKeys[i]);
+                    }
+
+                    targetTable.PrimaryKeys = primaryKeys;
+                }
 
                 // Copy rows
                 for (int i = 0; i < changedRows.Count; i++)

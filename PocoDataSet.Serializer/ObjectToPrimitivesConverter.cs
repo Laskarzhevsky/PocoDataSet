@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -31,18 +30,6 @@ namespace PocoDataSet.Serializer
 
                 case JsonTokenType.String:
                     string? s = reader.GetString();
-                    if (s is null)
-                        return null;
-
-                    // common strong types you use
-                    if (Guid.TryParse(s, out var g))
-                        return g;
-
-                    // Round-trip ISO 8601 (the default JsonSerializer writes)
-                    if (DateTime.TryParse(s, CultureInfo.InvariantCulture,
-                            DateTimeStyles.RoundtripKind, out var dt))
-                        return dt;
-
                     return s;
 
                 case JsonTokenType.StartArray:

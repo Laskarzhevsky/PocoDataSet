@@ -7,7 +7,6 @@ using Xunit;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
-using PocoDataSet.SqlServerDataAdapter;
 
 namespace PocoDataSet.Tests
 {

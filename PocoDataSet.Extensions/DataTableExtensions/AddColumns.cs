@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using PocoDataSet.IData;
 
@@ -29,6 +30,37 @@ namespace PocoDataSet.Extensions
             {
                 string columnName = listOfColumnMetadata[i].ColumnName;
                 EnsureExistingRowsHaveColumn(dataTable, columnName);
+            }
+
+
+            // If PrimaryKeys list was not provided, rebuild it from column metadata.
+            if (dataTable.PrimaryKeys == null || dataTable.PrimaryKeys.Count == 0)
+            {
+                List<string> primaryKeys = new List<string>();
+
+                for (int i = 0; i < listOfColumnMetadata.Count; i++)
+                {
+                    IColumnMetadata column = listOfColumnMetadata[i];
+                    if (column != null && column.IsPrimaryKey)
+                    {
+                        bool exists = false;
+                        for (int k = 0; k < primaryKeys.Count; k++)
+                        {
+                            if (string.Equals(primaryKeys[k], column.ColumnName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+
+                        if (!exists)
+                        {
+                            primaryKeys.Add(column.ColumnName);
+                        }
+                    }
+                }
+
+                dataTable.PrimaryKeys = primaryKeys;
             }
         }
         #endregion
