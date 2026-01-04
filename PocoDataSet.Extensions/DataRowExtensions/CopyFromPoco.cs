@@ -12,28 +12,52 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Copies public readable properties from POCO object into data row
+        /// Copies public readable properties from a POCO into a data row.
+        /// Matching between property names and existing row keys is case-insensitive.
+        /// If a matching key exists (ignoring case), the existing key is updated to avoid duplicates.
+        /// If no matching key exists, a new key is added using the property name.
         /// </summary>
-        /// <typeparam name="T">POCO type</typeparam>
-        /// <param name="dataRow">Data row</param>
-        /// <param name="poco">POCO</param>
-        public static void CopyFromPoco<T>(this IDataRow? dataRow, T poco)
+        /// <typeparam name="T">POCO type.</typeparam>
+        /// <param name="dataRow">Target data row.</param>
+        /// <param name="poco">Source POCO instance.</param>
+        public static void CopyFromPoco<T>(this IDataRow? dataRow, T? poco)
         {
             if (dataRow == null)
             {
                 return;
             }
 
-            Type pocoObjectType = typeof(T);
-            foreach (PropertyInfo propertyInfo in pocoObjectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            if (poco == null)
             {
-                if (!propertyInfo.CanRead)
+                return;
+            }
+
+            Type sourceType = typeof(T);
+            PropertyInfo[] properties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            for (int i = 0; i < properties.Length; i++)
+            {
+                PropertyInfo property = properties[i];
+
+                if (!property.CanRead)
                 {
                     continue;
                 }
 
-                object? propertyValue = propertyInfo.GetValue(poco);
-                dataRow[propertyInfo.Name] = propertyValue;
+                string propertyName = property.Name;
+
+                object? propertyValue = property.GetValue(poco);
+
+                // Prefer an existing key ignoring case to avoid duplicates (e.g., "name" vs "Name")
+                string existingKey;
+                if (TryGetExistingKeyIgnoreCase(dataRow, propertyName, out existingKey))
+                {
+                    dataRow[existingKey] = propertyValue;
+                }
+                else
+                {
+                    dataRow[propertyName] = propertyValue;
+                }
             }
         }
         #endregion
