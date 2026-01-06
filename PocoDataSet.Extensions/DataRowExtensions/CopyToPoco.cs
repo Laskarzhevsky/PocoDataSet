@@ -46,7 +46,7 @@ namespace PocoDataSet.Extensions
                 string propertyName = property.Name;
 
                 object? value;
-                if (!TryGetValueIgnoreCase(dataRow, propertyName, out value))
+                if (!TryGetValue(dataRow, propertyName, out value))
                 {
                     continue;
                 }

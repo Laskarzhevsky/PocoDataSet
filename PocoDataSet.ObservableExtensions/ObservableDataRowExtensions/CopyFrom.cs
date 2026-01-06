@@ -13,23 +13,23 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Copies column values from the source data row into the target observable data row
+        /// Copies field values from data row into observable data row
         /// using the provided column metadata list.
         /// Missing columns are ignored; extra target columns are left untouched.
         /// </summary>
         /// <param name="observableDataRow">Observable data row</param>
-        /// <param name="dataRow">Source data row</param>
-        /// <param name="sourceColumns">Source column metadata</param>
-        public static void CopyFrom(this IObservableDataRow? observableDataRow, IDataRow dataRow, IList<IColumnMetadata> sourceColumns)
+        /// <param name="dataRow">Data row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public static void CopyFrom(this IObservableDataRow? observableDataRow, IDataRow dataRow, IList<IColumnMetadata> listOfColumnMetadata)
         {
             if (observableDataRow == null)
             {
                 return;
             }
 
-            for (int i = 0; i < sourceColumns.Count; i++)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                string columnName = sourceColumns[i].ColumnName;
+                string columnName = listOfColumnMetadata[i].ColumnName;
 
                 object? value;
                 if (dataRow.TryGetValue(columnName, out value))

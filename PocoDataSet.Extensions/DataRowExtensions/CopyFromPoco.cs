@@ -50,7 +50,7 @@ namespace PocoDataSet.Extensions
 
                 // Prefer an existing key ignoring case to avoid duplicates (e.g., "name" vs "Name")
                 string existingKey;
-                if (TryGetExistingKeyIgnoreCase(dataRow, propertyName, out existingKey))
+                if (dataRow.TryGetFieldKeyByColumnName(propertyName, out existingKey))
                 {
                     dataRow[existingKey] = propertyValue;
                 }

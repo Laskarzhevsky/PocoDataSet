@@ -15,7 +15,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <typeparam name="T">Value type</typeparam>
         /// <param name="observableDataRow">Observable data row</param>
         /// <param name="columnName">Column name</param>
-        /// <returns>Value</returns>
+        /// <returns>Data field value</returns>
         public static T? GetDataFieldValue<T>(this IObservableDataRow? observableDataRow, string columnName)
         {
             if (observableDataRow == null)

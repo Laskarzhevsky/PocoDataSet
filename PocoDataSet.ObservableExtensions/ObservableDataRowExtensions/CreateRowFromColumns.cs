@@ -14,14 +14,14 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Creates observable row from columns
+        /// Creates detached observable row without any values from columns metadata
         /// </summary>
-        /// <param name="columnsMetadata">Columns metadata</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>Created row</returns>
-        public static IObservableDataRow CreateRowFromColumns(IList<IColumnMetadata> columnsMetadata)
+        public static IObservableDataRow CreateRowFromColumns(IList<IColumnMetadata> listOfColumnMetadata)
         {
-            IDataRow dataRow = DataRowFactory.CreateEmpty(columnsMetadata.Count);
-            foreach (IColumnMetadata column in columnsMetadata)
+            IDataRow dataRow = DataRowFactory.CreateEmpty(listOfColumnMetadata.Count);
+            foreach (IColumnMetadata column in listOfColumnMetadata)
             {
                 dataRow[column.ColumnName] = null;
             }

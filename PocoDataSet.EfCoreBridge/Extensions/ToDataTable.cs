@@ -15,60 +15,39 @@ namespace PocoDataSet.EfCoreBridge
     /// </summary>
     public static class EfCoreBridgeExtensions
     {
+        #region Public Methods
+        /// <summary>
+        /// Projects an EF Core query into a PocoDataSet table, building column metadata from the EF Core model.
+        /// </summary>
+        /// <typeparam name="T">POCO/entity type.</typeparam>
+        /// <param name="efQuery">EF Core query.</param>
+        /// <param name="dbContext">DbContext used to obtain EF model metadata.</param>
+        /// <param name="dataSet">Target data set.</param>
+        /// <param name="tableName">Target table name.</param>
+        /// <returns>Created and populated table.</returns>
+        public static IDataTable ToDataTable<T>(this IQueryable<T> efQuery, DbContext dbContext, IDataSet dataSet, string tableName) where T : class
+        {
+            List<IColumnMetadata> lisOfColumnMetadata = EfColumnMetadataBuilder.Build<T>(dbContext);
 
-/// <summary>
-/// Projects an EF Core query into a PocoDataSet table, building column metadata from the EF Core model.
-/// </summary>
-/// <typeparam name="T">POCO/entity type.</typeparam>
-/// <param name="query">EF Core query.</param>
-/// <param name="dbContext">DbContext used to obtain EF model metadata.</param>
-/// <param name="dataSet">Target data set.</param>
-/// <param name="tableName">Target table name.</param>
-/// <returns>Created and populated table.</returns>
-public static IDataTable ToDataTable<T>(
-    this IQueryable<T> query,
-    DbContext dbContext,
-    IDataSet dataSet,
-    string tableName)
-    where T : class
-{
-    if (dbContext == null)
-    {
-        throw new System.ArgumentNullException(nameof(dbContext));
-    }
+            return efQuery.ToDataTable(dataSet, tableName, lisOfColumnMetadata);
+        }
 
-    List<IColumnMetadata> schema = EfColumnMetadataBuilder.Build<T>(dbContext);
+        /// <summary>
+        /// Projects an EF Core query into a PocoDataSet table, building column metadata from the EF Core model.
+        /// </summary>
+        /// <typeparam name="T">POCO/entity type.</typeparam>
+        /// <param name="efQuery">EF Core query.</param>
+        /// <param name="dbContext">DbContext used to obtain EF model metadata.</param>
+        /// <param name="dataSet">Target data set.</param>
+        /// <param name="tableName">Target table name.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Created and populated table.</returns>
+        public static async Task<IDataTable> ToDataTableAsync<T>(this IQueryable<T> efQuery, DbContext dbContext, IDataSet dataSet, string tableName, CancellationToken cancellationToken = default) where T : class
+        {
+            List<IColumnMetadata> lisOfColumnMetadata = EfColumnMetadataBuilder.Build<T>(dbContext);
 
-    return query.ToDataTable(dataSet, tableName, schema);
-}
-
-/// <summary>
-/// Projects an EF Core query into a PocoDataSet table, building column metadata from the EF Core model.
-/// </summary>
-/// <typeparam name="T">POCO/entity type.</typeparam>
-/// <param name="query">EF Core query.</param>
-/// <param name="dbContext">DbContext used to obtain EF model metadata.</param>
-/// <param name="dataSet">Target data set.</param>
-/// <param name="tableName">Target table name.</param>
-/// <param name="cancellationToken">Cancellation token.</param>
-/// <returns>Created and populated table.</returns>
-public static async Task<IDataTable> ToDataTableAsync<T>(
-    this IQueryable<T> query,
-    DbContext dbContext,
-    IDataSet dataSet,
-    string tableName,
-    CancellationToken cancellationToken = default)
-    where T : class
-{
-    if (dbContext == null)
-    {
-        throw new System.ArgumentNullException(nameof(dbContext));
-    }
-
-    List<IColumnMetadata> schema = EfColumnMetadataBuilder.Build<T>(dbContext);
-
-    return await query.ToDataTableAsync(dataSet, tableName, schema, cancellationToken).ConfigureAwait(false);
-}
+            return await efQuery.ToDataTableAsync(dataSet, tableName, lisOfColumnMetadata, cancellationToken).ConfigureAwait(false);
+        }
 
 
         /// <summary>
@@ -76,14 +55,14 @@ public static async Task<IDataTable> ToDataTableAsync<T>(
         /// table rows from the returned POCO list using PocoDataSet.Extensions mapping helpers.
         /// </summary>
         /// <typeparam name="T">POCO/entity type.</typeparam>
-        /// <param name="query">EF Core query.</param>
+        /// <param name="efQuery">EF Core query.</param>
         /// <param name="dataSet">Target data set.</param>
         /// <param name="tableName">Target table name.</param>
         /// <param name="listOfColumnMetadata">Column schema to create on the table.</param>
         /// <returns>Created and populated table.</returns>
-        public static IDataTable ToDataTable<T>(this IQueryable<T> query, IDataSet dataSet, string tableName, List<IColumnMetadata> listOfColumnMetadata)
+        public static IDataTable ToDataTable<T>(this IQueryable<T> efQuery, IDataSet dataSet, string tableName, List<IColumnMetadata> listOfColumnMetadata)
         {
-            List<T> items = query.ToList();
+            List<T> items = efQuery.ToList();
             return dataSet.PocoListToDataTable(tableName, items, listOfColumnMetadata);
         }
 
@@ -92,16 +71,17 @@ public static async Task<IDataTable> ToDataTableAsync<T>(
         /// table rows from the returned POCO list using PocoDataSet.Extensions mapping helpers.
         /// </summary>
         /// <typeparam name="T">POCO/entity type.</typeparam>
-        /// <param name="query">EF Core query.</param>
+        /// <param name="efQuery">EF Core query.</param>
         /// <param name="dataSet">Target data set.</param>
         /// <param name="tableName">Target table name.</param>
         /// <param name="listOfColumnMetadata">Column schema to create on the table.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Created and populated table.</returns>
-        public static async Task<IDataTable> ToDataTableAsync<T>(this IQueryable<T> query, IDataSet dataSet, string tableName, List<IColumnMetadata> listOfColumnMetadata, CancellationToken cancellationToken = default)
+        public static async Task<IDataTable> ToDataTableAsync<T>(this IQueryable<T> efQuery, IDataSet dataSet, string tableName, List<IColumnMetadata> listOfColumnMetadata, CancellationToken cancellationToken = default)
         {
-            List<T> items = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+            List<T> items = await efQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
             return dataSet.PocoListToDataTable(tableName, items, listOfColumnMetadata);
         }
+        #endregion
     }
 }
