@@ -16,19 +16,24 @@ namespace PocoDataSet.Demo
             // 1. Create observable data set
             IObservableDataSet observableDataSet = new ObservableDataSet();
 
-            // 2. Create Department table
+            // 2. Create Department observable data table with one row
             IObservableDataTable departmentObservableDataTable = observableDataSet.AddNewTable("Department");
             departmentObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
             departmentObservableDataTable.AddColumn("Name", DataTypeNames.STRING);
 
-            // 3. Create a row
-            IObservableDataRow departmentObservableDataRow = ObservableDataRowExtensions.CreateRowFromColumns(departmentObservableDataTable.Columns);
+            IObservableDataRow departmentObservableDataRow = departmentObservableDataTable.AddNewRow();
+            departmentObservableDataRow["Id"] = 1;
+            departmentObservableDataRow["Name"] = "Reception";
 
-            // 4. Update field value
-            bool changed = departmentObservableDataRow.UpdateDataFieldValue("Name", "Customer Service");
+            // 3. Call GetFieldValue method and observe "Reception" as a name
+            string? deprtmentName = observableDataSet.GetFieldValue<string>("Department", 0, "Name");
 
-            // 5. Read back value (expected "Customer Service")
-            string? name = departmentObservableDataRow.GetDataFieldValue<string>("Name");
+            // 4. Call UpdateFieldValue method and verify that vauls changed
+            observableDataSet.UpdateFieldValue<string>("Department", 0, "Name", "Emergency");
+
+            // 5. Call GetFieldValue method and observe "Emergency" as a name
+            deprtmentName = observableDataSet.GetFieldValue<string>("Department", 0, "Name");
+
             int i = 0;
             /*
                         // 1) Create an empty data set

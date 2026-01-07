@@ -55,7 +55,12 @@ namespace PocoDataSet.IObservableData
         /// <param name="requestorName">Requestor name</param>
         /// <returns>Observable data table</returns>
         IObservableDataView? GetObservableDataView(string tableName, string? rowFilterString, bool caseSensitiveRowFilter, string? sortString, string requestorName);
-        
+
+        /// <summary>
+        /// Removes observable table
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        void RemoveObservableTable(string tableName);
 
         /// <summary>
         /// Removes observable data view from cache and disposes it
@@ -110,7 +115,7 @@ namespace PocoDataSet.IObservableData
         /// <summary>
         /// Gets or sets tables
         /// </summary>
-        IDictionary<string, IObservableDataTable> Tables
+        IReadOnlyDictionary<string, IObservableDataTable> Tables
         {
             get;
         }

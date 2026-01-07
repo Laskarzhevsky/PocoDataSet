@@ -29,7 +29,7 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            IDataTable? dataTable = dataSet.GetTable(tableName);
+            IDataTable? dataTable = dataSet.Tables[tableName];
             if (dataTable == null)
             {
                 throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");

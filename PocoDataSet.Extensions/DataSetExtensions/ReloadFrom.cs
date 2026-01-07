@@ -15,10 +15,9 @@ namespace PocoDataSet.Extensions
         #region Public Methods
         /// <summary>
         /// Replaces rows in the current data set with rows from the refreshed data set.
-        /// Keeps existing schema and ensures the internal tracking column <c>_ClientKey</c> exists.
-        /// 
+        /// Keeps existing schema and ensures the internal tracking column _ClientKey exists.
         /// This is a destructive operation intended for search results and full reload scenarios.
-        /// After completion, all loaded rows are in <see cref="DataRowState.Unchanged"/> state.
+        /// After completion, all loaded rows are in Unchanged state.
         /// </summary>
         /// <param name="currentDataSet">Current data set to reload</param>
         /// <param name="refreshedDataSet">Refreshed data set snapshot</param>

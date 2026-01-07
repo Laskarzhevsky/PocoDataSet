@@ -21,21 +21,12 @@ namespace PocoDataSet.ObservableExtensions
         public static bool TryGetTable(this IObservableDataSet? observableDataSet, string tableName, out IObservableDataTable? observableDataTable)
         {
             observableDataTable = null;
-
             if (observableDataSet == null)
             {
                 return false;
             }
 
-            IDictionary<string, IObservableDataTable> tables = observableDataSet.Tables;
-            IObservableDataTable? table;
-            if (tables.TryGetValue(tableName, out table))
-            {
-                observableDataTable = table;
-                return true;
-            }
-
-            return false;
+            return observableDataSet.Tables.TryGetValue(tableName, out observableDataTable);
         }
         #endregion
     }

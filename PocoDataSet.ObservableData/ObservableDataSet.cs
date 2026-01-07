@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -12,6 +13,18 @@ namespace PocoDataSet.ObservableData
     /// </summary>
     public class ObservableDataSet : IObservableDataSet
     {
+        #region Data Fields
+        /// <summary>
+        /// Holds reference to observable tables
+        /// </summary>
+        readonly Dictionary<string, IObservableDataTable> _observableDataTables = new Dictionary<string, IObservableDataTable>(StringComparer.Ordinal);
+
+        /// <summary>
+        /// Provides a read-only view over observable tables to prevent external mutation
+        /// </summary>
+        readonly ReadOnlyDictionary<string, IObservableDataTable> _readOnlyTables;
+        #endregion
+
         #region Events
         /// <summary>
         /// Cell changed notification
@@ -49,12 +62,6 @@ namespace PocoDataSet.ObservableData
         /// Holds reference to inner IDataSet
         /// </summary>
         readonly IDataSet _innerDataSet;
-
-        /// <summary>
-        /// Holds reference to observable tables
-        /// </summary>
-        readonly IDictionary<string, IObservableDataTable> _observableDataTables = new Dictionary<string, IObservableDataTable>(StringComparer.Ordinal);
-
         /// <summary>
         /// Holds reference to observable tables
         /// </summary>
@@ -67,6 +74,7 @@ namespace PocoDataSet.ObservableData
         /// </summary>
         public ObservableDataSet()
         {
+            _readOnlyTables = new ReadOnlyDictionary<string, IObservableDataTable>(_observableDataTables);
             _innerDataSet = DataSetFactory.CreateDataSet();
             CreateObservableTables();
         }
@@ -77,6 +85,7 @@ namespace PocoDataSet.ObservableData
         /// <param name="dataSet">Data set</param>
         public ObservableDataSet(IDataSet dataSet)
         {
+            _readOnlyTables = new ReadOnlyDictionary<string, IObservableDataTable>(_observableDataTables);
             _innerDataSet = dataSet;
             CreateObservableTables();
         }
@@ -122,9 +131,9 @@ namespace PocoDataSet.ObservableData
                 return _observableDataViews[viewKey];
             }
 
-            if (Tables.ContainsKey(tableName))
+            if (_observableDataTables.ContainsKey(tableName))
             {
-                IObservableDataView? observableDataView = new ObservableDataView(Tables[tableName], rowFilterString, caseSensitiveRowFilter, sortString, requestorName);
+                IObservableDataView? observableDataView = new ObservableDataView(_observableDataTables[tableName], rowFilterString, caseSensitiveRowFilter, sortString, requestorName);
                 _observableDataViews.Add(viewKey, observableDataView);
 
                 return observableDataView;
@@ -197,7 +206,7 @@ namespace PocoDataSet.ObservableData
         /// <param name="tableName">Table name</param>
         public void RemoveObservableTable(string tableName)
         {
-            if (Tables.ContainsKey(tableName))
+            if (_observableDataTables.ContainsKey(tableName))
             {
                 IObservableDataTable observableDataTable = _observableDataTables[tableName];
 
@@ -227,7 +236,7 @@ namespace PocoDataSet.ObservableData
                     TableRemoved(this, new TablesChangedEventArgs(tableName));
                 }
 
-                Tables.Remove(tableName);
+                _observableDataTables.Remove(tableName);
 
                 // Keep inner dataset consistent
                 if (_innerDataSet.Tables.ContainsKey(tableName))
@@ -285,11 +294,11 @@ namespace PocoDataSet.ObservableData
         /// Gets tables
         /// IObservableDataSet interface implementation
         /// </summary>
-        public IDictionary<string, IObservableDataTable> Tables
+        public IReadOnlyDictionary<string, IObservableDataTable> Tables
         {
             get
             {
-                return _observableDataTables;
+                return _readOnlyTables;
             }
         }
 

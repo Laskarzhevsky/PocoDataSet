@@ -16,10 +16,9 @@ namespace PocoDataSet.ObservableExtensions
         #region Public Methods
         /// <summary>
         /// Replaces rows in the current observable data set with rows from the refreshed data set.
-        /// Keeps existing schema and ensures the internal tracking column <c>_ClientKey</c> exists.
-        /// 
+        /// Keeps existing schema and ensures the internal tracking column _ClientKey exists.
         /// This is a destructive operation intended for search results and full reload scenarios.
-        /// After completion, all loaded observable rows are in <see cref="DataRowState.Unchanged"/> state.
+        /// After completion, all loaded observable rows are in Unchanged state.
         /// </summary>
         /// <param name="observableDataSet">Observable data set to reload</param>
         /// <param name="refreshedDataSet">Refreshed data set snapshot</param>

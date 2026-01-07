@@ -9,7 +9,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Merges current data set with refreshed data set using a specific merge mode.
+        /// Merges current data set with refreshed data set using a specific merge mode by copying all changes from refreshed data set
         /// </summary>
         /// <param name="currentDataSet">Current data set</param>
         /// <param name="refreshedDataSet">Refreshed data set</param>

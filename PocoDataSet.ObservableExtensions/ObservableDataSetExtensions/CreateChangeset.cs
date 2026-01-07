@@ -10,10 +10,10 @@ namespace PocoDataSet.ObservableExtensions
     public static partial class ObservableDataSetExtensions
     {
         /// <summary>
-        /// Creates a "changeset" dataset that contains only rows in Added/Modified/Deleted states.
+        /// Creates a "changeset" dataset that contains only rows in Added / Modified / Deleted states.
         /// </summary>
         /// <param name="currentObservableDataSet">Current observable data set</param>
-        /// <returns>Outbound dataset containing changed rows</returns>
+        /// <returns>Dataset containing changed rows</returns>
         public static IDataSet? CreateChangeset(this IObservableDataSet? currentObservableDataSet)
         {
             if (currentObservableDataSet == null)
@@ -24,34 +24,6 @@ namespace PocoDataSet.ObservableExtensions
             // The observable layer is only a wrapper.
             // The source of truth for state is the inner dataset.
             return currentObservableDataSet.InnerDataSet.CreateChangeset();
-        }
-
-        /// <summary>
-        /// Merges outbound changes from observable dataset into an existing target dataset.
-        /// Useful if you already created a dataset instance for a service request.
-        /// </summary>
-        /// <param name="currentObservableDataSet">Current observable data set</param>
-        /// <param name="targetDataSet">Target dataset to receive changes</param>
-        /// <param name="mergeOptions">Merge options</param>
-        public static void MergeOutboundInto(this IObservableDataSet? currentObservableDataSet, IDataSet? targetDataSet, IMergeOptions? mergeOptions = null)
-        {
-            if (currentObservableDataSet == null)
-            {
-                return;
-            }
-
-            if (targetDataSet == null)
-            {
-                return;
-            }
-
-            IDataSet? outboundChangeset = currentObservableDataSet.CreateChangeset();
-            if (outboundChangeset == null)
-            {
-                return;
-            }
-
-            targetDataSet.MergeWith(outboundChangeset, mergeOptions);
         }
     }
 }
