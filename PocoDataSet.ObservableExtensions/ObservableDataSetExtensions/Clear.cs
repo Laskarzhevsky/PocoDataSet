@@ -29,7 +29,7 @@ namespace PocoDataSet.ObservableExtensions
 
                 for (int i = table.Rows.Count - 1; i >= 0; i--)
                 {
-                    table.RemoveRow(i);
+                    table.RemoveRowAt(i);
                 }
             }
         }

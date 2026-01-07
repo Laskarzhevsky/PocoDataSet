@@ -16,7 +16,7 @@ namespace PocoDataSet.Demo
             // 1. Create observable data set
             IObservableDataSet observableDataSet = new ObservableDataSet();
 
-            // 2. Create Department observable data table with one row
+            // 2. Table with one row in Added state
             IObservableDataTable departmentObservableDataTable = observableDataSet.AddNewTable("Department");
             departmentObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
             departmentObservableDataTable.AddColumn("Name", DataTypeNames.STRING);
@@ -25,15 +25,41 @@ namespace PocoDataSet.Demo
             departmentObservableDataRow["Id"] = 1;
             departmentObservableDataRow["Name"] = "Reception";
 
-            // 3. Call GetFieldValue method and observe "Reception" as a name
-            string? deprtmentName = observableDataSet.GetFieldValue<string>("Department", 0, "Name");
+            // 3. Table with one row in Modified state
+            IObservableDataTable employmentTypeObservableDataTable = observableDataSet.AddNewTable("EmploymentType");
+            employmentTypeObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
+            employmentTypeObservableDataTable.AddColumn("Code", DataTypeNames.STRING);
+            employmentTypeObservableDataTable.AddColumn("Description", DataTypeNames.STRING);
 
-            // 4. Call UpdateFieldValue method and verify that vauls changed
-            observableDataSet.UpdateFieldValue<string>("Department", 0, "Name", "Emergency");
+            IObservableDataRow employmentTypeObservableDataRow = employmentTypeObservableDataTable.AddNewRow();
+            employmentTypeObservableDataRow["Id"] = 1;
+            employmentTypeObservableDataRow["Code"] = "ET01";
+            employmentTypeObservableDataRow["Description"] = "Full Time";
 
-            // 5. Call GetFieldValue method and observe "Emergency" as a name
-            deprtmentName = observableDataSet.GetFieldValue<string>("Department", 0, "Name");
+            // Make the row Unchanged, then modify it
+            employmentTypeObservableDataRow.AcceptChanges();
+            employmentTypeObservableDataRow["Description"] = "Part Time";
 
+            // 4. Table with one row in Deleted state
+            IObservableDataTable employeeObservableDataTable = observableDataSet.AddNewTable("Employee");
+            employeeObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
+            employeeObservableDataTable.AddColumn("FirstName", DataTypeNames.STRING);
+            employeeObservableDataTable.AddColumn("LastName", DataTypeNames.STRING);
+
+            IObservableDataRow employeeObservableDataRow = employeeObservableDataTable.AddNewRow();
+            employeeObservableDataRow["Id"] = 1;
+            employeeObservableDataRow["FirstName"] = "John";
+            employeeObservableDataRow["LastName"] = "Doe";
+            employeeObservableDataRow.AcceptChanges();
+            employeeObservableDataRow.Delete();
+
+            // 5. Accept changes at data set level
+            observableDataSet.AcceptChanges();
+
+            // Expected result:
+            // - Department: one Unchanged row (1, Reception)
+            // - EmploymentType: one Unchanged row (1, ET01, Part Time)
+            // - Employee: deleted row removed from the table
             int i = 0;
             /*
                         // 1) Create an empty data set

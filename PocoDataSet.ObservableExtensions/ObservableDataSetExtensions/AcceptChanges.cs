@@ -1,6 +1,4 @@
-using PocoDataSet.Extensions;
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -21,7 +19,10 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            observableDataSet.InnerDataSet.AcceptChanges();
+            foreach (IObservableDataTable observableDataTable in observableDataSet.Tables.Values)
+            {
+                observableDataTable.AcceptChanges();
+            }
         }
         #endregion
     }

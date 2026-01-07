@@ -61,7 +61,7 @@ namespace PocoDataSet.ObservableTests
                     if (observableTable.Rows.Count > 0)
                     {
                         int indexToRemove = random.Next(0, observableTable.Rows.Count);
-                        observableTable.RemoveRow(indexToRemove);
+                        observableTable.RemoveRowAt(indexToRemove);
                     }
                 }
                 else

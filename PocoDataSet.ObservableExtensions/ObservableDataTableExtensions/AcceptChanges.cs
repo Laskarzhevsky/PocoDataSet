@@ -1,6 +1,5 @@
-using PocoDataSet.Extensions;
+using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -21,14 +20,28 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            ObservableDataTable? concreteTable = observableDataTable as ObservableDataTable;
-            if (concreteTable != null)
+            for (int i = observableDataTable.Rows.Count - 1; i >= 0; i--)
             {
-                concreteTable.AcceptChanges();
-                return;
-            }
+                IObservableDataRow observableDataRow = observableDataTable.Rows[i];
 
-            observableDataTable.InnerDataTable.AcceptChanges();
+                switch (observableDataRow.DataRowState)
+                {
+                    case DataRowState.Deleted:
+                        // Commit deletion: row must disappear
+                        observableDataTable.RemoveRowAt(i);
+                        break;
+
+                    case DataRowState.Added:
+                    case DataRowState.Modified:
+                        observableDataRow.AcceptChanges();
+                        break;
+
+                    case DataRowState.Unchanged:
+                    case DataRowState.Detached:
+                    default:
+                        break;
+                }
+            }
         }
         #endregion
     }

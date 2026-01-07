@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ExtensionMethodsTests\ObservableDataSetExtensions\" />
     <Folder Include="ExtensionMethodsTests\ObservableDataTableExtensions\" />
   </ItemGroup>
 </Project>

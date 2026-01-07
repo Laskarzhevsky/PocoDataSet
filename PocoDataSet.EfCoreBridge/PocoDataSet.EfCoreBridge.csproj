@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet to Entity Framework Core bridge. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website.</Description>
+    <Description>POCO DataSet to Entity Framework Core bridge. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. The source code is published on https://github.com/Laskarzhevsky/PocoDataSet</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PocoDataSet.EfCoreBridge</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -52,11 +52,11 @@ namespace PocoDataSet.IObservableData
         IObservableDataRow AddRow(IDataRow dataRow);
 
         /// <summary>
-        /// Removes row
+        /// Removes row at position specified by row index
         /// </summary>
         /// <param name="rowIndex">Row index</param>
         /// <returns>Removed observable data row </returns>
-        IObservableDataRow RemoveRow(int rowIndex);
+        IObservableDataRow RemoveRowAt(int rowIndex);
         #endregion
 
         #region Properties

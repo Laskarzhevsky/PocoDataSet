@@ -50,7 +50,7 @@ namespace PocoDataSet.ObservableTests
 
             // Act
             IObservableDataTable observableTable = observableDataSet.Tables["Department"];
-            observableTable.RemoveRow(0);
+            observableTable.RemoveRowAt(0);
 
             // Assert
             Assert.Equal(1, removedCounter.Count);
@@ -93,7 +93,7 @@ namespace PocoDataSet.ObservableTests
             Assert.Equal(1, viewBChanged.Count);
 
             // Act 2: remove a row from table
-            observableTable.RemoveRow(0);
+            observableTable.RemoveRowAt(0);
 
             // Assert 2: both views update and raise RowsRemoved once
             Assert.Equal(1, viewARemoved.Count);

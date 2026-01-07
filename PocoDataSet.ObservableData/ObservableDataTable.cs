@@ -121,7 +121,7 @@ namespace PocoDataSet.ObservableData
         /// </summary>
         /// <param name="rowIndex">Row index</param>
         /// <returns>Removed observable data row </returns>
-        public IObservableDataRow RemoveRow(int rowIndex)
+        public IObservableDataRow RemoveRowAt(int rowIndex)
         {
             IObservableDataRow observableDataRow = _observableDataRows[rowIndex];
             observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;

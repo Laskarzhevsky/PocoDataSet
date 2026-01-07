@@ -50,7 +50,7 @@ namespace PocoDataSet.ObservableTests
             view.Rows[0].UpdateDataFieldValue(ColumnNames.SELECTED, true, null);
 
             // Act: remove the selected row via observable table (NOT innerTable)
-            observableTable.RemoveRow(0);
+            observableTable.RemoveRowAt(0);
 
             // Assert: view should now have 1 row left
             Assert.Single(view.Rows);

@@ -23,9 +23,9 @@ namespace PocoDataSet.Extensions
 
             for (int i = dataTable.Rows.Count - 1; i >= 0; i--)
             {
-                IDataRow row = dataTable.Rows[i];
+                IDataRow dataRow = dataTable.Rows[i];
 
-                switch (row.DataRowState)
+                switch (dataRow.DataRowState)
                 {
                     case DataRowState.Deleted:
                         // Commit deletion: row must disappear
@@ -34,7 +34,7 @@ namespace PocoDataSet.Extensions
 
                     case DataRowState.Added:
                     case DataRowState.Modified:
-                        row.AcceptChanges();
+                        dataRow.AcceptChanges();
                         break;
 
                     case DataRowState.Unchanged:
