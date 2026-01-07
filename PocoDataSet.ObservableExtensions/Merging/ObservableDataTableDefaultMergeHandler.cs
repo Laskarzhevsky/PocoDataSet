@@ -27,6 +27,13 @@ namespace PocoDataSet.ObservableExtensions
         public void Merge(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
             List<string> currentObservableDataTablePrimaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
+            // Refresh mode requires a stable primary key for deterministic matching.
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh && currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "MergeMode.Refresh requires a primary key on current table '" + currentObservableDataTable.TableName + "'.");
+            }
+
             if (currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
             {
                 // Current table has no primary key (treat as reload/replace).
@@ -49,6 +56,11 @@ namespace PocoDataSet.ObservableExtensions
                     throw new InvalidOperationException(
                         "MergeMode.PostSave requires column '" + ClientKeyColumnName + "' in refreshed table '" + refreshedDataTable.TableName + "'.");
                 }
+            }
+
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh)
+            {
+                ValidateNoDuplicatePrimaryKeys(refreshedDataTable, currentObservableDataTablePrimaryKeyColumnNames, "refreshed");
             }
 
             Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(currentObservableDataTablePrimaryKeyColumnNames);
@@ -87,7 +99,26 @@ namespace PocoDataSet.ObservableExtensions
         #endregion
 
         #region Private Methods
-        static bool TableHasColumn(IDataTable dataTable, string columnName)
+        static void ValidateNoDuplicatePrimaryKeys(IDataTable dataTable, List<string> primaryKeyColumnNames, string tableRoleDescription)
+        {
+            HashSet<string> seen = new HashSet<string>();
+
+            for (int i = 0; i < dataTable.Rows.Count; i++)
+            {
+                IDataRow row = dataTable.Rows[i];
+                string key = row.CompilePrimaryKeyValue(primaryKeyColumnNames);
+
+                if (seen.Contains(key))
+                {
+                    throw new InvalidOperationException(
+                        "Duplicate primary key '" + key + "' detected in " + tableRoleDescription + " table '" + dataTable.TableName + "'.");
+                }
+
+                seen.Add(key);
+            }
+        }
+
+static bool TableHasColumn(IDataTable dataTable, string columnName)
         {
             // IDataTable.Columns is IList<IColumnMetadata>
             for (int i = 0; i < dataTable.Columns.Count; i++)

@@ -344,6 +344,76 @@ namespace PocoDataSet.ObservableTests
                 currentObservableDataSet.MergeWith(postSaveDataSet, options));
         }
 
+        [Fact]
+        public void MergeWith_Refresh_Throws_WhenNoPrimaryKeyDefined()
+        {
+            // Arrange
+            IDataSet currentInnerDataSet = DataSetFactory.CreateDataSet();
+            IObservableDataSet currentObservableDataSet = new ObservableDataSet(currentInnerDataSet);
+
+            // IMPORTANT: no "Id" column, because "Id" implies PK by convention
+            IObservableDataTable currentTable = currentObservableDataSet.AddNewTable("Department");
+            currentTable.AddColumn("Code", DataTypeNames.INT32); // NOT PK
+            currentTable.AddColumn("Name", DataTypeNames.STRING);
+
+            IObservableDataRow row = currentTable.AddNewRow();
+            row["Code"] = 100;
+            row["Name"] = "Engineering";
+
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedTable = refreshedDataSet.AddNewTable("Department");
+            refreshedTable.AddColumn("Code", DataTypeNames.INT32);
+            refreshedTable.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow refreshedRow = refreshedTable.AddNewRow();
+            refreshedRow["Code"] = 100;
+            refreshedRow["Name"] = "Engineering";
+
+            IObservableMergeOptions options = new ObservableMergeOptions();
+            options.MergeMode = MergeMode.Refresh;
+
+            // Act + Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                currentObservableDataSet.MergeWith(refreshedDataSet, options));
+        }
+
+        [Fact]
+        public void MergeWith_Refresh_Throws_WhenRefreshedTableHasDuplicatePrimaryKeys()
+        {
+            // Arrange
+            IDataSet currentInnerDataSet = DataSetFactory.CreateDataSet();
+            IObservableDataSet currentObservableDataSet = new ObservableDataSet(currentInnerDataSet);
+
+            IObservableDataTable currentTable = currentObservableDataSet.AddNewTable("Department");
+            currentTable.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
+            currentTable.AddColumn("Name", DataTypeNames.STRING);
+
+            IObservableDataRow row = currentTable.AddNewRow();
+            row["Id"] = 1;
+            row["Name"] = "Engineering";
+
+            // Refreshed dataset with DUPLICATE PK rows (Id=1 appears twice)
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedTable = refreshedDataSet.AddNewTable("Department");
+            refreshedTable.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
+            refreshedTable.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow r1 = refreshedTable.AddNewRow();
+            r1["Id"] = 1;
+            r1["Name"] = "Engineering";
+
+            IDataRow r2 = refreshedTable.AddNewRow();
+            r2["Id"] = 1; // duplicate
+            r2["Name"] = "Engineering Duplicate";
+
+            IObservableMergeOptions options = new ObservableMergeOptions();
+            options.MergeMode = MergeMode.Refresh;
+
+            // Act + Assert
+            Assert.Throws<InvalidOperationException>(() =>
+                currentObservableDataSet.MergeWith(refreshedDataSet, options));
+        }
+
 
         static IObservableDataRow? FindRowByClientKey(IObservableDataTable table, Guid clientKey)
         {
