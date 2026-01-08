@@ -6,14 +6,19 @@ namespace PocoDataSet.IData
     public enum MergeMode
     {
         /// <summary>
+        /// Post-save merge (server-confirmed changeset is applied back to the UI-bound dataset).
+        /// Identity/rowversion propagation + AcceptChanges are performed for affected rows.
+        /// </summary>
+        PostSave = 1,
+
+        /// <summary>
         /// Default "refresh" merge (server data replaces local baseline).
         /// </summary>
         Refresh = 0,
 
         /// <summary>
-        /// Post-save merge (server-confirmed changeset is applied back to the UI-bound dataset).
-        /// Identity/rowversion propagation + AcceptChanges are performed for affected rows.
+        /// Allow Replace to overwrite local values and commit as Unchanged.
         /// </summary>
-        PostSave = 1
+        Replace = 2
     }
 }

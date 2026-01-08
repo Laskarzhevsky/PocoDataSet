@@ -31,6 +31,11 @@ namespace PocoDataSet.ObservableExtensions
             // - PostSave: allow updating Added/Modified/Unchanged, but never Deleted.
             switch (observableMergeOptions.MergeMode)
             {
+                case MergeMode.Replace:
+                    // Replace discards local changes; refreshed values always win.
+                    // Commit baseline the same way as Refresh/PostSave.
+                    break;
+
                 case MergeMode.Refresh:
                     if (dataRowState != DataRowState.Unchanged)
                     {
@@ -69,7 +74,7 @@ namespace PocoDataSet.ObservableExtensions
             }
 
             // In both Refresh and PostSave, the server snapshot becomes baseline.
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave)
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave || observableMergeOptions.MergeMode == MergeMode.Replace)
             {
                 // AcceptChanges on an Unchanged row is a no-op; on Added/Modified it commits the post-save baseline.
                 currentDataRow.AcceptChanges();
@@ -130,7 +135,7 @@ namespace PocoDataSet.ObservableExtensions
                 rowValueChanged = true;
             }
 
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave)
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave || observableMergeOptions.MergeMode == MergeMode.Replace)
             {
                 // Commit baseline (also clears Modified/Added after a successful post-save reconciliation).
                 currentObservableDataRow.AcceptChanges();

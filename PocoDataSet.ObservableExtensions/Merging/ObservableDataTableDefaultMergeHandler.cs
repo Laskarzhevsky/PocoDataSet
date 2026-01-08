@@ -26,6 +26,14 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableMergeOptions">Observable merge options</param>
         public void Merge(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
+
+            if (observableMergeOptions.MergeMode == MergeMode.Replace)
+            {
+                // Replace semantics: discard all local state and rebuild from refreshed data.
+                MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                return;
+            }
+
             List<string> currentObservableDataTablePrimaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
             // Refresh mode requires a stable primary key for deterministic matching.
             if (observableMergeOptions.MergeMode == MergeMode.Refresh && currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
