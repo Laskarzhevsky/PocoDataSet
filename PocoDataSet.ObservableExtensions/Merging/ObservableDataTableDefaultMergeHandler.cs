@@ -35,6 +35,26 @@ namespace PocoDataSet.ObservableExtensions
             }
 
             List<string> currentObservableDataTablePrimaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
+            // Default merge mode: do not silently discard local changes.
+            // If there are pending local changes, the caller must choose MergeMode.Refresh (preserve) or MergeMode.Replace (discard).
+            if (observableMergeOptions.MergeMode == MergeMode.Default)
+            {
+                if (currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        "MergeMode.Default requires a primary key on current table '" + currentObservableDataTable.TableName + "'.");
+                }
+
+                for (int i = 0; i < currentObservableDataTable.Rows.Count; i++)
+                {
+                    if (currentObservableDataTable.Rows[i].InnerDataRow.DataRowState != DataRowState.Unchanged)
+                    {
+                        throw new InvalidOperationException(
+                            "MergeMode.Default cannot be used when current table '" + currentObservableDataTable.TableName + "' contains pending changes.");
+                    }
+                }
+            }
+
             // Refresh mode requires a stable primary key for deterministic matching.
             if (observableMergeOptions.MergeMode == MergeMode.Refresh && currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
             {
