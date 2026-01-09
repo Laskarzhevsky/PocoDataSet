@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergeExcludeTablesTests
+    public  class MergeExcludeTablesTests
     {
         [Fact]
         public void Merge_Refresh_Skips_ExcludedExistingTable()

@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class AcceptRejectEdgeTests
+    public  class AcceptRejectEdgeTests
     {
         [Fact]
         public void RejectChanges_OnTable_RemovesAddedRows()

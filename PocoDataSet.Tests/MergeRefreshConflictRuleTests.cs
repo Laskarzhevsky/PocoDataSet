@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergeRefreshConflictRuleTests
+    public  class MergeRefreshConflictRuleTests
     {
         [Fact]
         public void Merge_Refresh_DoesNotOverwrite_LocalModifiedRow_WhenServerAlsoChangedRow()

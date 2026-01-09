@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class PocoMappingEdgeCaseTests
+    public  class PocoMappingEdgeCaseTests
     {
         [Fact]
         public void CopyToPoco_NullableEnum_IsAssigned_WhenRowHasStringValue()
@@ -157,22 +157,22 @@ namespace PocoDataSet.Tests
             Inactive = 2
         }
 
-        private sealed class PocoWithNullableEnum
+        private  class PocoWithNullableEnum
         {
             public SampleStatus? NullableStatus { get; set; }
         }
 
-        private sealed class PocoWithDateTime
+        private  class PocoWithDateTime
         {
             public DateTime WhenUtc { get; set; }
         }
 
-        private sealed class PocoWithGuid
+        private  class PocoWithGuid
         {
             public Guid ClientKey { get; set; }
         }
 
-        private sealed class PocoWithName
+        private  class PocoWithName
         {
             public string? Name { get; set; }
         }

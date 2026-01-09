@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowDeleteIdempotencyTests
+    public  class DataRowDeleteIdempotencyTests
     {
         [Fact]
         public void DeleteRow_CalledTwice_DoesNotCorruptState()

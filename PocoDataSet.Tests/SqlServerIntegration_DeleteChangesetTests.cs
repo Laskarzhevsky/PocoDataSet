@@ -10,7 +10,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class SqlServerIntegration_DeleteChangesetTests
+    public  class SqlServerIntegration_DeleteChangesetTests
     {
         [Fact(Skip = "Temporarily disabled feature")]
         public async Task SaveChangesAsync_DeletedRow_IssuesDeleteInDatabase()

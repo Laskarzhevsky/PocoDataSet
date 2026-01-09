@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowExtensionsCopyToPocoMoreTests
+    public  class DataRowExtensionsCopyToPocoMoreTests
     {
         [Fact]
         public void CopyToPoco_WhenRowContainsGuidAsString_Parses_AndAssignsValue()
@@ -53,7 +53,7 @@ namespace PocoDataSet.Tests
             Assert.Equal(StatusEnum.Active, target.Status);
         }
 
-        private sealed class PocoWithGuid
+        private  class PocoWithGuid
         {
             public Guid Id
             {
@@ -67,7 +67,7 @@ namespace PocoDataSet.Tests
             Active = 1
         }
 
-        private sealed class PocoWithNullableEnum
+        private  class PocoWithNullableEnum
         {
             public StatusEnum? Status
             {

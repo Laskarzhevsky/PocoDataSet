@@ -4,7 +4,7 @@ using Xunit;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowStateTests
+    public  class DataRowStateTests
     {
         [Fact]
         public void AddRow_NewRow_BecomesAdded()

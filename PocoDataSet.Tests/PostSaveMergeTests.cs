@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class PostSaveMergeTests
+    public  class PostSaveMergeTests
     {
         [Fact]
         public void Merge_PostSave_PropagatesServerIdentity_ByClientKey_AndAcceptsChanges()

@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataSetClearTests
+    public  class DataSetClearTests
     {
         [Fact]
         public void Clear_RemovesAllRows_ButKeepsTablesAndColumns()

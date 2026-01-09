@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class ColumnConstraintsNoEnforcementTests
+    public  class ColumnConstraintsNoEnforcementTests
     {
         [Fact]
         public void IsNullableFalse_DoesNotRejectNullAssignment()

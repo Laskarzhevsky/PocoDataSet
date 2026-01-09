@@ -4,7 +4,7 @@ using Xunit;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergeBehaviorTests
+    public  class MergeBehaviorTests
     {
         [Fact]
         public void Merge_NoPrimaryKeys_ReplacesAllRows_AndTracksAddedDeleted()

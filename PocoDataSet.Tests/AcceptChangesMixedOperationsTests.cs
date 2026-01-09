@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class AcceptChangesMixedOperationsTests
+    public  class AcceptChangesMixedOperationsTests
     {
         [Fact]
         public void AcceptChanges_AfterAddedModifiedDeleted_LeavesOnlyUnchangedRows()

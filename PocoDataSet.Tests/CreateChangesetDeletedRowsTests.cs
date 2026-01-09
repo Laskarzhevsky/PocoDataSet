@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class CreateChangesetDeletedRowsTests
+    public  class CreateChangesetDeletedRowsTests
     {
         [Fact]
         public void CreateChangeset_IncludesDeletedRow_AndContainsPrimaryKeyColumn()

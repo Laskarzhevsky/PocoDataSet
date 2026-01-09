@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergeCompositePrimaryKeyBehaviorTests
+    public  class MergeCompositePrimaryKeyBehaviorTests
     {
         [Fact]
         public void Merge_WithCompositePrimaryKey_Refresh_UpdatesMatchesAndRemovesMissingUnchangedRow()

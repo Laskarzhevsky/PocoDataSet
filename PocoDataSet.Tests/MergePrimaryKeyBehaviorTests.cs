@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergePrimaryKeyBehaviorTests
+    public  class MergePrimaryKeyBehaviorTests
     {
         [Fact]
         public void Merge_WithPrimaryKey_UpdatesMatchingRows_AndTracksUpdated()

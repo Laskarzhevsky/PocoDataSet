@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataSetReloadFromTests
+    public  class DataSetReloadFromTests
     {
         [Fact]
         public void ReloadFrom_ReplacesRows_AndAssignsClientKey_AndLeavesRowsUnchanged()

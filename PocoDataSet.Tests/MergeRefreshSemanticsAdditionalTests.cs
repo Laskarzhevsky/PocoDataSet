@@ -7,7 +7,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class MergeRefreshSemanticsAdditionalTests
+    public  class MergeRefreshSemanticsAdditionalTests
     {
         [Fact]
         public void Merge_Refresh_Updates_UnchangedRow_AndKeepsItUnchanged()

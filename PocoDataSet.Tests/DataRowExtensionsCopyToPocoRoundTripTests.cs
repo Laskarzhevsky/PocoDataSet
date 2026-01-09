@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowExtensionsCopyToPocoRoundTripTests
+    public  class DataRowExtensionsCopyToPocoRoundTripTests
     {
         [Fact]
         public void CopyFromPoco_ThenCopyToPoco_RoundTripsValues_ForSimpleTypes()
@@ -148,7 +148,7 @@ namespace PocoDataSet.Tests
             Assert.True(true);
         }
 
-        private sealed class SourcePoco
+        private  class SourcePoco
         {
             public int Id { get; set; }
 
@@ -159,7 +159,7 @@ namespace PocoDataSet.Tests
             public bool IsActive { get; set; }
         }
 
-        private sealed class TargetPoco
+        private  class TargetPoco
         {
             public int Id { get; set; }
 
@@ -170,7 +170,7 @@ namespace PocoDataSet.Tests
             public bool IsActive { get; set; }
         }
 
-        private sealed class PocoWithThrowingGetter
+        private  class PocoWithThrowingGetter
         {
             public int Id
             {
@@ -178,7 +178,7 @@ namespace PocoDataSet.Tests
             }
         }
 
-        private sealed class PocoWithThrowingSetter
+        private  class PocoWithThrowingSetter
         {
             private string? _name;
 

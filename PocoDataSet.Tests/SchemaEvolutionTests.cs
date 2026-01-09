@@ -6,7 +6,7 @@ using PocoDataSet.Serializer;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class SchemaEvolutionTests
+    public  class SchemaEvolutionTests
     {
         [Fact]
         public void Deserialize_OldJsonMissingNewColumn_AddsMissingColumnAsNull()

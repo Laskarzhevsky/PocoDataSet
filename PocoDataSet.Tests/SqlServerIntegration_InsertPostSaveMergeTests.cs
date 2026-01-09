@@ -11,7 +11,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class SqlServerIntegration_InsertPostSaveMergeTests
+    public  class SqlServerIntegration_InsertPostSaveMergeTests
     {
         [Fact(Skip = "Temporarily disabled feature")]
         public async Task Insert_Then_PostSaveMerge_PropagatesIdentityAndRowVersion()

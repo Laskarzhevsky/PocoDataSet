@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class ColumnConstraintsNoEnforcementMoreTests
+    public  class ColumnConstraintsNoEnforcementMoreTests
     {
         [Fact]
         public void TypeMetadata_DoesNotAutoConvertStringToInt()

@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataTablePrimaryKeysPropagationTests
+    public  class DataTablePrimaryKeysPropagationTests
     {
         [Fact]
         public void AddColumn_WhenColumnIsPrimaryKey_PopulatesTablePrimaryKeys()

@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class CreateChangesetTests
+    public  class CreateChangesetTests
     {
         [Fact]
         public void CreateChangeset_IncludesOnlyChangedRows_AndOnlyTablesWithChanges()

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataTableInvariantsTests
+    public  class DataTableInvariantsTests
     {
         [Fact]
         public void AddRow_ThenContainsRow_AndRemoveRow_Works()

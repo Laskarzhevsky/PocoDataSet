@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowCopyFromTests
+    public  class DataRowCopyFromTests
     {
         [Fact]
         public void CopyFrom_CopiesValues_ForMatchingColumns()

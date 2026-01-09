@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class PrimaryKeyChangeBehaviorTests
+    public  class PrimaryKeyChangeBehaviorTests
     {
         [Fact]
         public void ChangingPrimaryKey_OnLoadedRow_Throws()

@@ -5,7 +5,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class DataRowExtensionsCopyToPocoTests
+    public  class DataRowExtensionsCopyToPocoTests
     {
         [Fact]
         public void CopyToPoco_WhenDataRowIsNull_DoesNothing()
@@ -178,7 +178,7 @@ namespace PocoDataSet.Tests
             Inactive = 2
         }
 
-        private sealed class SamplePoco
+        private  class SamplePoco
         {
             public int Id { get; set; }
 

@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class TortureDataSetStabilityTests
+    public  class TortureDataSetStabilityTests
     {
         [Fact]
         public void Torture_RandomOperations_DoNotCorruptState_AndMaintainInvariants()

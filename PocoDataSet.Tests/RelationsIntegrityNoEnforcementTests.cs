@@ -8,7 +8,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class RelationsIntegrityNoEnforcementTests
+    public  class RelationsIntegrityNoEnforcementTests
     {
         [Fact]
         public void DeletingParent_DoesNotCascadeOrRestrictChild()

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace PocoDataSet.Tests
 {
-    public sealed class AddNewTable_PrimaryKeysFromMetadata_Tests
+    public  class AddNewTable_PrimaryKeysFromMetadata_Tests
     {
         [Fact]
         public void AddNewTable_Fills_PrimaryKeys_From_ColumnMetadata_IsPrimaryKey_Flags()
