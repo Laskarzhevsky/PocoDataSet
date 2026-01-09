@@ -26,52 +26,25 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableMergeOptions">Observable merge options</param>
         public void Merge(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
+            IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
 
-            if (observableMergeOptions.MergeMode == MergeMode.Replace)
+            if (policy.IsFullReload)
             {
-                // Replace semantics: discard all local state and rebuild from refreshed data.
                 MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
                 return;
             }
 
-            List<string> currentObservableDataTablePrimaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
-            // Default merge mode: do not silently discard local changes.
-            // If there are pending local changes, the caller must choose MergeMode.Refresh (preserve) or MergeMode.Replace (discard).
-            if (observableMergeOptions.MergeMode == MergeMode.Default)
-            {
-                if (currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
-                {
-                    throw new InvalidOperationException(
-                        "MergeMode.Default requires a primary key on current table '" + currentObservableDataTable.TableName + "'.");
-                }
+            List<string> primaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
 
-                for (int i = 0; i < currentObservableDataTable.Rows.Count; i++)
-                {
-                    if (currentObservableDataTable.Rows[i].InnerDataRow.DataRowState != DataRowState.Unchanged)
-                    {
-                        throw new InvalidOperationException(
-                            "MergeMode.Default cannot be used when current table '" + currentObservableDataTable.TableName + "' contains pending changes.");
-                    }
-                }
-            }
+            policy.ValidateAfterPrimaryKeyDiscovery(currentObservableDataTable, refreshedDataTable, observableMergeOptions, primaryKeyColumnNames.Count);
 
-            // Refresh mode requires a stable primary key for deterministic matching.
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh && currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
+            if (primaryKeyColumnNames.Count == 0)
             {
-                throw new InvalidOperationException(
-                    "MergeMode.Refresh requires a primary key on current table '" + currentObservableDataTable.TableName + "'.");
-            }
-
-            if (currentObservableDataTablePrimaryKeyColumnNames.Count == 0)
-            {
-                // Current table has no primary key (treat as reload/replace).
                 MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
                 return;
             }
 
-            // Current table has primary key
-            // PostSave requires __ClientKey for safe correlation (identity/rowversion propagation)
-            if (observableMergeOptions.MergeMode == MergeMode.PostSave)
+            if (policy.RequiresClientKeyCorrelation)
             {
                 if (!TableHasColumn(currentObservableDataTable.InnerDataTable, ClientKeyColumnName))
                 {
@@ -86,18 +59,17 @@ namespace PocoDataSet.ObservableExtensions
                 }
             }
 
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh)
+            if (policy.RejectDuplicateRefreshedPrimaryKeys)
             {
-                ValidateNoDuplicatePrimaryKeys(refreshedDataTable, currentObservableDataTablePrimaryKeyColumnNames, "refreshed");
+                ValidateNoDuplicatePrimaryKeys(refreshedDataTable, primaryKeyColumnNames, "refreshed");
             }
 
-            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(currentObservableDataTablePrimaryKeyColumnNames);
+            Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildDataRowIndex(primaryKeyColumnNames);
 
-            // PostSave correlation: build row maps by __ClientKey (if present in both tables)
             Dictionary<Guid, IDataRow>? refreshedRowsByClientKey = null;
             Dictionary<Guid, IObservableDataRow>? currentRowsByClientKey = null;
 
-            if (observableMergeOptions.MergeMode == MergeMode.PostSave
+            if (policy.RequiresClientKeyCorrelation
                 && TableHasColumn(currentObservableDataTable.InnerDataTable, ClientKeyColumnName)
                 && TableHasColumn(refreshedDataTable, ClientKeyColumnName))
             {
@@ -105,23 +77,25 @@ namespace PocoDataSet.ObservableExtensions
                 currentRowsByClientKey = BuildCurrentObservableRowsByClientKey(currentObservableDataTable, true);
             }
 
-            HashSet<string> primaryKeysOfMergedRefreshedRows = new HashSet<string>();
+            HashSet<string> processedRefreshedPrimaryKeys = new HashSet<string>();
 
             MergeCurrentObservableDataTableRows(
                 currentObservableDataTable,
                 refreshedDataTable,
                 observableMergeOptions,
-                currentObservableDataTablePrimaryKeyColumnNames,
-                refreshedDataTableDataRowIndex,
-                primaryKeysOfMergedRefreshedRows,
+                policy,
+                primaryKeyColumnNames,
+                refreshedIndex,
+                processedRefreshedPrimaryKeys,
                 refreshedRowsByClientKey);
 
             MergeNonProcessedDataRowsFromRefreshedDataTable(
                 currentObservableDataTable,
                 refreshedDataTable,
                 observableMergeOptions,
-                refreshedDataTableDataRowIndex,
-                primaryKeysOfMergedRefreshedRows,
+                policy,
+                refreshedIndex,
+                processedRefreshedPrimaryKeys,
                 currentRowsByClientKey);
         }
         #endregion
@@ -146,9 +120,8 @@ namespace PocoDataSet.ObservableExtensions
             }
         }
 
-static bool TableHasColumn(IDataTable dataTable, string columnName)
+        static bool TableHasColumn(IDataTable dataTable, string columnName)
         {
-            // IDataTable.Columns is IList<IColumnMetadata>
             for (int i = 0; i < dataTable.Columns.Count; i++)
             {
                 if (dataTable.Columns[i].ColumnName == columnName)
@@ -242,7 +215,7 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
                 {
                     throw new InvalidOperationException(
                         "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
-                }
+                    }
 
                 index[g] = row;
             }
@@ -257,7 +230,7 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
         /// <param name="observableDataTable">Observable data table</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>New row with default values added to data table</returns>
-        private IDataRow AddNewDataRowWithDefaultValuesToInnerTable(IObservableDataTable observableDataTable, IObservableMergeOptions observableMergeOptions)
+        IDataRow AddNewDataRowWithDefaultValuesToInnerTable(IObservableDataTable observableDataTable, IObservableMergeOptions observableMergeOptions)
         {
             IDataRow newDataRow = observableDataTable.InnerDataTable.AddNewRow();
             foreach (IColumnMetadata columnMetadata in observableDataTable.Columns)
@@ -265,9 +238,7 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
                 newDataRow[columnMetadata.ColumnName] = observableMergeOptions.DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
-            // This row is being created from refreshed/server data, not from user entry.
             newDataRow.AcceptChanges();
-
             return newDataRow;
         }
 
@@ -285,23 +256,22 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
             IObservableDataTable currentObservableDataTable,
             IDataTable refreshedDataTable,
             IObservableMergeOptions observableMergeOptions,
-            List<string> currentObservableDataTablePrimaryKeyColumnNames,
-            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex,
-            HashSet<string> primaryKeysOfMergedRefreshedRows,
+            IObservableMergePolicy policy,
+            List<string> primaryKeyColumnNames,
+            Dictionary<string, IDataRow> refreshedIndex,
+            HashSet<string> processedRefreshedPrimaryKeys,
             Dictionary<Guid, IDataRow>? refreshedRowsByClientKey)
         {
             for (int i = currentObservableDataTable.Rows.Count - 1; i >= 0; i--)
             {
                 IObservableDataRow observableDataRow = currentObservableDataTable.Rows[i];
-                string observableDataRowPrimaryKeyValue = observableDataRow.CompilePrimaryKeyValue(currentObservableDataTablePrimaryKeyColumnNames);
+                string currentPkValue = observableDataRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
 
                 IDataRow? refreshedDataRow = null;
-                refreshedDataTableDataRowIndex.TryGetValue(observableDataRowPrimaryKeyValue, out refreshedDataRow);
+                refreshedIndex.TryGetValue(currentPkValue, out refreshedDataRow);
 
-                // PostSave correlation: when PK doesn't match yet (e.g., identity assigned by DB),
-                // try to match by __ClientKey and propagate server-generated values into the existing row.
                 if (refreshedDataRow == null
-                    && observableMergeOptions.MergeMode == MergeMode.PostSave
+                    && policy.RequiresClientKeyCorrelation
                     && refreshedRowsByClientKey != null)
                 {
                     object? clientKeyValue;
@@ -315,49 +285,37 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
 
                 if (refreshedDataRow == null)
                 {
-                    bool shouldPreserveRow = false;
+                    bool preserve = policy.PreserveRowWhenMissingFromRefreshed(observableDataRow.InnerDataRow.DataRowState);
 
-                    // Refresh must preserve local pending changes (Added/Modified/Deleted).
-                    if (observableMergeOptions.MergeMode == MergeMode.Refresh)
+                    if (preserve)
                     {
-                        if (observableDataRow.InnerDataRow.DataRowState != DataRowState.Unchanged)
-                        {
-                            shouldPreserveRow = true;
-                        }
-                    }
-
-                    // PostSave should never treat "missing from refreshed" as deletion unless you explicitly opt into it.
-                    if (observableMergeOptions.MergeMode == MergeMode.PostSave)
-                    {
-                        shouldPreserveRow = true;
-                    }
-
-                    if (shouldPreserveRow)
-                    {
-                        // Keep row intact
                     }
                     else if (observableMergeOptions.ExcludeTablesFromRowDeletion.Contains(currentObservableDataTable.TableName))
                     {
-                        // Keep row intact
                     }
                     else
                     {
-                        IObservableDataRow removedObservableDataRow = currentObservableDataTable.RemoveRowAt(i);
-                        observableMergeOptions.ObservableDataSetMergeResult.DeletedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, removedObservableDataRow));
+                        IObservableDataRow removed = currentObservableDataTable.RemoveRowAt(i);
+                        observableMergeOptions.ObservableDataSetMergeResult.DeletedObservableDataRows.Add(
+                            new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, removed));
                     }
                 }
                 else
                 {
-                    bool changed = observableDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.InnerDataTable.Columns, observableMergeOptions);
+                    bool changed = observableDataRow.MergeWith(
+                        refreshedDataRow,
+                        currentObservableDataTable.TableName,
+                        currentObservableDataTable.InnerDataTable.Columns,
+                        observableMergeOptions);
+
                     if (changed)
                     {
-                        observableMergeOptions.ObservableDataSetMergeResult.UpdatedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
+                        observableMergeOptions.ObservableDataSetMergeResult.UpdatedObservableDataRows.Add(
+                            new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
                     }
 
-                    // IMPORTANT: mark the REFRESHED row as processed (not the current row's PK),
-                    // because PostSave correlation can merge Id=0 row with Id=10 refreshed row.
-                    string refreshedPrimaryKeyValue = refreshedDataRow.CompilePrimaryKeyValue(currentObservableDataTablePrimaryKeyColumnNames);
-                    primaryKeysOfMergedRefreshedRows.Add(refreshedPrimaryKeyValue);
+                    string refreshedPkValue = refreshedDataRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
+                    processedRefreshedPrimaryKeys.Add(refreshedPkValue);
                 }
             }
         }
@@ -371,28 +329,27 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
         /// <param name="observableMergeOptions">Observable merge options</param>
         void MergeObservableDataRowsWithoutPrimaryKeys(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
-            // Track deletions BEFORE clearing the table
             for (int i = 0; i < currentObservableDataTable.Rows.Count; i++)
             {
-                observableMergeOptions.ObservableDataSetMergeResult.DeletedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, currentObservableDataTable.Rows[i]));
+                observableMergeOptions.ObservableDataSetMergeResult.DeletedObservableDataRows.Add(
+                    new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, currentObservableDataTable.Rows[i]));
             }
 
-            // Clear current rows
             for (int i = currentObservableDataTable.Rows.Count - 1; i >= 0; i--)
             {
                 currentObservableDataTable.RemoveRowAt(i);
             }
 
-            // Add all refreshed rows as new rows
             for (int i = 0; i < refreshedDataTable.Rows.Count; i++)
             {
                 IDataRow refreshedDataRow = refreshedDataTable.Rows[i];
                 IDataRow newDataRow = AddNewDataRowWithDefaultValuesToInnerTable(currentObservableDataTable, observableMergeOptions);
 
-                // Copy refreshed values (this will AcceptChanges in Refresh/PostSave via the row handler).
                 newDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.Columns, observableMergeOptions);
                 IObservableDataRow observableDataRow = currentObservableDataTable.AddRow(newDataRow);
-                observableMergeOptions.ObservableDataSetMergeResult.AddedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
+
+                observableMergeOptions.ObservableDataSetMergeResult.AddedObservableDataRows.Add(
+                    new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
             }
         }
 
@@ -409,23 +366,22 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
             IObservableDataTable currentObservableDataTable,
             IDataTable refreshedDataTable,
             IObservableMergeOptions observableMergeOptions,
-            Dictionary<string, IDataRow> refreshedDataTableDataRowIndex,
-            HashSet<string> primaryKeysOfMergedRefreshedRows,
+            IObservableMergePolicy policy,
+            Dictionary<string, IDataRow> refreshedIndex,
+            HashSet<string> processedRefreshedPrimaryKeys,
             Dictionary<Guid, IObservableDataRow>? currentRowsByClientKey)
         {
-            foreach (KeyValuePair<string, IDataRow> keyValuePair in refreshedDataTableDataRowIndex)
+            foreach (KeyValuePair<string, IDataRow> pair in refreshedIndex)
             {
-                string primaryKeyValue = keyValuePair.Key;
-                if (primaryKeysOfMergedRefreshedRows.Contains(primaryKeyValue))
+                string pkValue = pair.Key;
+                if (processedRefreshedPrimaryKeys.Contains(pkValue))
                 {
                     continue;
                 }
 
-                IDataRow refreshedDataRow = keyValuePair.Value;
+                IDataRow refreshedDataRow = pair.Value;
 
-                // PostSave: if this refreshed row correlates to an existing current row by __ClientKey,
-                // it should have been merged already. Do not add it as a new row (prevents duplicates).
-                if (observableMergeOptions.MergeMode == MergeMode.PostSave && currentRowsByClientKey != null)
+                if (policy.RequiresClientKeyCorrelation && currentRowsByClientKey != null)
                 {
                     object? clientKeyValue;
                     refreshedDataRow.TryGetValue(ClientKeyColumnName, out clientKeyValue);
@@ -434,19 +390,17 @@ static bool TableHasColumn(IDataTable dataTable, string columnName)
                     {
                         if (currentRowsByClientKey.ContainsKey(clientKey))
                         {
-                            // This is a correlated row; skip adding.
-                            // If it wasn't merged earlier, that indicates missing correlation handling or inconsistent data.
                             continue;
                         }
                     }
                 }
 
                 IDataRow newDataRow = AddNewDataRowWithDefaultValuesToInnerTable(currentObservableDataTable, observableMergeOptions);
-
-                // Copy refreshed values (row handler will commit baseline).
                 newDataRow.MergeWith(refreshedDataRow, currentObservableDataTable.TableName, currentObservableDataTable.Columns, observableMergeOptions);
+
                 IObservableDataRow observableDataRow = currentObservableDataTable.AddRow(newDataRow);
-                observableMergeOptions.ObservableDataSetMergeResult.AddedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
+                observableMergeOptions.ObservableDataSetMergeResult.AddedObservableDataRows.Add(
+                    new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
             }
         }
         #endregion

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using PocoDataSet.Data;
 using PocoDataSet.Extensions;
@@ -9,7 +9,7 @@ using PocoDataSet.ObservableData;
 namespace PocoDataSet.ObservableExtensions
 {
     /// <summary>
-    /// Provides observable data set default merge handler 
+    /// Provides observable data set default merge handler
     /// </summary>
     public class ObservableDataSetDefaultMergeHandler : IObservableDataSetMergeHandler
     {
@@ -22,6 +22,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableMergeOptions">Observable merge options</param>
         public void Merge(IObservableDataSet currentObservableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions observableMergeOptions)
         {
+            // DataSet-level merge does not contain merge-mode branching; table handlers apply mode policies.
             HashSet<string> mergedTableNames = new HashSet<string>();
             MergeExistingTables(currentObservableDataSet, refreshedDataSet, observableMergeOptions, mergedTableNames);
             AddNonExistingTables(currentObservableDataSet, refreshedDataSet, observableMergeOptions, mergedTableNames);
@@ -76,7 +77,7 @@ namespace PocoDataSet.ObservableExtensions
             foreach (IObservableDataTable observableDataTable in currentObservableDataSet.Tables.Values)
             {
                 mergedTableNames.Add(observableDataTable.TableName);
-                if (observableMergeOptions != null && observableMergeOptions.ExcludeTablesFromMerge.Contains(observableDataTable.TableName))
+                if (observableMergeOptions.ExcludeTablesFromMerge.Contains(observableDataTable.TableName))
                 {
                     continue;
                 }

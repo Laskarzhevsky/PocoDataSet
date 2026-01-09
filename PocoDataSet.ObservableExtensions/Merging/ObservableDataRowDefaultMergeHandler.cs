@@ -24,68 +24,15 @@ namespace PocoDataSet.ObservableExtensions
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
         public bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
-            DataRowState dataRowState = currentDataRow.DataRowState;
-
-            // Apply the same policy as the non-observable merge:
-            // - Refresh: update only Unchanged rows (never overwrite user edits).
-            // - PostSave: allow updating Added/Modified/Unchanged, but never Deleted.
-            switch (observableMergeOptions.MergeMode)
+            IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
+            if (!policy.CanOverwriteRow(currentDataRow.DataRowState))
             {
-                case MergeMode.Replace:
-                    // Replace discards local changes; refreshed values always win.
-                    // Always allow overwrite.
-                    break;
-
-                case MergeMode.Default:
-                    // Default: only merge Unchanged rows
-                    if (dataRowState != DataRowState.Unchanged)
-                    {
-                        return false;
-                    }
-                    break;
-
-                case MergeMode.Refresh:
-                    // Refresh: do not overwrite local edits
-                    if (dataRowState != DataRowState.Unchanged)
-                    {
-                        return false;
-                    }
-                    break;
-
-                case MergeMode.PostSave:
-                    // PostSave: never touch Deleted rows
-                    if (dataRowState == DataRowState.Deleted)
-                    {
-                        return false;
-                    }
-                    break;
+                return false;
             }
 
-            bool rowValueChanged = false;
-            foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
+            bool rowValueChanged = ApplyValues(currentDataRow, refreshedDataRow, listOfColumnMetadata);
+            if (policy.ShouldAcceptChangesAfterMerge)
             {
-                string columnName = columnMetadata.ColumnName;
-
-                // Be tolerant to schema evolution / special columns (e.g., __ClientKey) that may not exist yet on older rows.
-                object? oldValue;
-                currentDataRow.TryGetValue(columnName, out oldValue);
-
-                object? newValue;
-                refreshedDataRow.TryGetValue(columnName, out newValue);
-
-                if (DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
-                {
-                    continue;
-                }
-
-                currentDataRow[columnName] = newValue;
-                rowValueChanged = true;
-            }
-
-            // In both Refresh and PostSave, the server snapshot becomes baseline.
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave || observableMergeOptions.MergeMode == MergeMode.Replace || observableMergeOptions.MergeMode == MergeMode.Default)
-            {
-                // AcceptChanges on an Unchanged row is a no-op; on Added/Modified it commits the post-save baseline.
                 currentDataRow.AcceptChanges();
             }
 
@@ -102,39 +49,68 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
-        {
-            DataRowState dataRowState = currentObservableDataRow.InnerDataRow.DataRowState;
-            switch (observableMergeOptions.MergeMode)
+        public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions) {
+            IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
+            if (!policy.CanOverwriteRow(currentObservableDataRow.InnerDataRow.DataRowState))
             {
-                case MergeMode.Replace:
-                    break;
-
-                case MergeMode.Default:
-                    if (dataRowState != DataRowState.Unchanged)
-                    {
-                        return false;
-                    }
-
-                    break;
-
-                case MergeMode.Refresh:
-                    if (dataRowState != DataRowState.Unchanged)
-                    {
-                        return false;
-                    }
-
-                    break;
-                case MergeMode.PostSave:
-                    if (dataRowState == DataRowState.Deleted)
-                    {
-                        return false;
-                    }
-
-                    break;
+                return false;
             }
 
+            bool rowValueChanged = ApplyValues(currentObservableDataRow, refreshedDataRow, listOfColumnMetadata);
+            if (policy.ShouldAcceptChangesAfterMerge)
+            {
+                currentObservableDataRow.AcceptChanges();
+            }
+
+            return rowValueChanged;
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Applies values
+        /// </summary>
+        /// <param name="currentDataRow">Current data row</param>
+        /// <param name="refreshedDataRow">Refreshed data row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>True if at least one value had changed, otherwise false</returns>
+        static bool ApplyValues(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        {
             bool rowValueChanged = false;
+
+            foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
+            {
+                string columnName = columnMetadata.ColumnName;
+
+                object? oldValue;
+                currentDataRow.TryGetValue(columnName, out oldValue);
+
+                object? newValue;
+                refreshedDataRow.TryGetValue(columnName, out newValue);
+
+                if (DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
+                {
+                    continue;
+                }
+
+                currentDataRow[columnName] = newValue;
+                rowValueChanged = true;
+            }
+
+            return rowValueChanged;
+        }
+
+        /// <summary>
+        /// Applies values
+        /// </summary>
+        /// <param name="currentObservableDataRow">Current observable data row</param>
+        /// <param name="refreshedDataRow">Refreshed data row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>True if at least one value had changed, otherwise false</returns>
+        static bool ApplyValues(IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        {
+            bool rowValueChanged = false;
+
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;
@@ -150,15 +126,8 @@ namespace PocoDataSet.ObservableExtensions
                     continue;
                 }
 
-                // Use observable indexer so events fire.
                 currentObservableDataRow[columnName] = newValue;
                 rowValueChanged = true;
-            }
-
-            if (observableMergeOptions.MergeMode == MergeMode.Refresh || observableMergeOptions.MergeMode == MergeMode.PostSave || observableMergeOptions.MergeMode == MergeMode.Replace || observableMergeOptions.MergeMode == MergeMode.Default)
-            {
-                // Commit baseline (also clears Modified/Added after a successful post-save reconciliation).
-                currentObservableDataRow.AcceptChanges();
             }
 
             return rowValueChanged;
