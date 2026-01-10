@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using PocoDataSet.IData;
@@ -11,13 +12,18 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Creates a "changeset" dataset that contains only rows in Added/Modified/Deleted states.
+        /// Creates a "delta changeset" dataset.
+        /// - Added rows: full row values (same as CreateChangeset).
+        /// - Modified rows: only primary key columns + __ClientKey (if present) + changed columns.
+        /// - Deleted rows: only primary key columns + __ClientKey (if present).
         /// </summary>
+        /// <param name="dataSet">Source data set</param>
+        /// <returns>Delta changeset data set, or null if source is null</returns>
         public static IDataSet? CreateChangeset(this IDataSet? dataSet)
         {
             if (dataSet == null)
             {
-                return dataSet;
+                return null;
             }
 
             IDataSet changeset = DataSetFactory.CreateDataSet();
@@ -49,7 +55,7 @@ namespace PocoDataSet.Extensions
                 IDataTable targetTable = changeset.AddNewTable(tableName);
                 targetTable.AddColumns(sourceTable.Columns);
 
-                // Copy PrimaryKeys metadata (single or composite)
+                // Preserve primary keys
                 if (sourceTable.PrimaryKeys != null && sourceTable.PrimaryKeys.Count > 0)
                 {
                     List<string> primaryKeys = new List<string>();
@@ -61,20 +67,48 @@ namespace PocoDataSet.Extensions
                     targetTable.PrimaryKeys = primaryKeys;
                 }
 
-                // Copy rows
+                // Copy rows as deltas
                 for (int i = 0; i < changedRows.Count; i++)
                 {
                     IDataRow sourceRow = changedRows[i];
 
-                    // Create a new row with same columns
-                    IDataRow targetRow = DataRowExtensions.CreateRowFromColumns(sourceTable.Columns);
-                    foreach (IColumnMetadata columnMetadata in sourceTable.Columns)
+                    IDataRow targetRow;
+
+                    if (sourceRow.DataRowState == DataRowState.Added)
                     {
-                        string columnName = columnMetadata.ColumnName;
-                        if (sourceRow.ContainsKey(columnName))
+                        // Added rows: full row values (insert payload)
+                        targetRow = DataRowExtensions.CreateRowFromColumns(sourceTable.Columns);
+                    }
+                    else
+                    {
+                        // Modified / Deleted rows: floating row that contains ONLY explicitly provided fields.
+                        // Missing fields mean "not provided" (distinct from a provided null).
+                        targetRow = DataRowExtensions.CreateFloatingRow(sourceTable.Columns.Count);
+                    }
+
+                    List<string> columnsToCopy = GetColumnsToCopy(sourceTable, sourceRow);
+
+                    for (int c = 0; c < columnsToCopy.Count; c++)
+                    {
+                        string columnName = columnsToCopy[c];
+
+                        object? value = null;
+
+                        // 1) Prefer current/provided value
+                        if (sourceRow.TryGetValue(columnName, out value))
                         {
-                            targetRow[columnName] = sourceRow[columnName];
+                            targetRow[columnName] = value;
+                            continue;
                         }
+
+                        // 2) Fallback to original value (important for PK / __ClientKey on floating rows)
+                        if (sourceRow.TryGetOriginalValue(columnName, out value))
+                        {
+                            targetRow[columnName] = value;
+                            continue;
+                        }
+
+                        // 3) Neither exists -> do not include the field
                     }
 
                     // IMPORTANT:
@@ -95,6 +129,108 @@ namespace PocoDataSet.Extensions
             }
 
             return changeset;
+        }
+        #endregion
+
+        #region Private Methods
+        static List<string> GetColumnsToCopy(IDataTable sourceTable, IDataRow sourceRow)
+        {
+            List<string> columnsToCopy = new List<string>();
+
+            // Primary keys (for Modified/Deleted)
+            if (sourceRow.DataRowState == DataRowState.Modified ||
+                sourceRow.DataRowState == DataRowState.Deleted)
+            {
+                if (sourceTable.PrimaryKeys != null && sourceTable.PrimaryKeys.Count > 0)
+                {
+                    for (int i = 0; i < sourceTable.PrimaryKeys.Count; i++)
+                    {
+                        string pk = sourceTable.PrimaryKeys[i];
+                        if (!columnsToCopy.Contains(pk))
+                        {
+                            columnsToCopy.Add(pk);
+                        }
+                    }
+                }
+
+                // __ClientKey (optional)
+                if (sourceTable.ContainsColumn(SpecialColumnNames.CLIENT_KEY) && !columnsToCopy.Contains(SpecialColumnNames.CLIENT_KEY))
+                {
+                    columnsToCopy.Add(SpecialColumnNames.CLIENT_KEY);
+                }
+            }
+
+            if (sourceRow.DataRowState == DataRowState.Added)
+            {
+                // For inserts we keep the existing behavior: include full row values.
+                for (int i = 0; i < sourceTable.Columns.Count; i++)
+                {
+                    string columnName = sourceTable.Columns[i].ColumnName;
+                    if (!columnsToCopy.Contains(columnName))
+                    {
+                        columnsToCopy.Add(columnName);
+                    }
+                }
+
+                return columnsToCopy;
+            }
+
+            if (sourceRow.DataRowState == DataRowState.Modified)
+            {
+                // Add only changed columns.
+                for (int i = 0; i < sourceTable.Columns.Count; i++)
+                {
+                    string columnName = sourceTable.Columns[i].ColumnName;
+
+                    // skip keys / client key (already included above)
+                    if (columnsToCopy.Contains(columnName))
+                    {
+                        continue;
+                    }
+
+                    object? currentValue = null;
+                    bool hasCurrent = sourceRow.TryGetValue(columnName, out currentValue);
+
+                    object? originalValue = null;
+                    bool hasOriginal = sourceRow.TryGetOriginalValue(columnName, out originalValue);
+
+                    // If we can't find current, nothing to send.
+                    if (!hasCurrent)
+                    {
+                        continue;
+                    }
+
+                    // If we don't have original baseline (unusual for Modified), be conservative and treat as changed.
+                    if (!hasOriginal)
+                    {
+                        columnsToCopy.Add(columnName);
+                        continue;
+                    }
+
+                    if (!AreEqual(originalValue, currentValue))
+                    {
+                        columnsToCopy.Add(columnName);
+                    }
+                }
+            }
+
+            // Deleted: only keys + __ClientKey
+            return columnsToCopy;
+        }
+
+        static bool AreEqual(object? left, object? right)
+        {
+            if (left == null && right == null)
+            {
+                return true;
+            }
+
+            if (left == null || right == null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
         }
         #endregion
     }

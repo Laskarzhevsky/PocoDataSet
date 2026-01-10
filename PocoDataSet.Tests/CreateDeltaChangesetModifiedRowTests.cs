@@ -9,10 +9,10 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public partial class CreateDeltaChangesetDeletedRowsTests
+    public partial class CreateChangesetDeletedRowsTests2
     {
         [Fact]
-        public void CreateDeltaChangeset_ModifiedRow_SkipsColumn_WhenTryGetValueReturnsFalse()
+        public void CreateChangeset_ModifiedRow_SkipsColumn_WhenTryGetValueReturnsFalse()
         {
             // Arrange: create a fake dataset/table/row where
             // - schema contains "Description"
@@ -60,7 +60,7 @@ namespace PocoDataSet.Tests
             IDataSet fakeDataSet = FakeDataSetProxy.Create(tables);
 
             // Act
-            IDataSet? changeset = fakeDataSet.CreateDeltaChangeset();
+            IDataSet? changeset = fakeDataSet.CreateChangeset();
 
             // Assert
             Assert.NotNull(changeset);

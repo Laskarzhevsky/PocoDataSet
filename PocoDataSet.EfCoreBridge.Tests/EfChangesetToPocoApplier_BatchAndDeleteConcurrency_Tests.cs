@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 
 using PocoDataSet.Data;
 using PocoDataSet.EfCoreBridge;
@@ -99,13 +100,19 @@ public sealed class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
     [Fact]
     public void ApplyTableAndSave_DeletedRow_WithConcurrencyTokenProvided_ThrowsOnMismatch()
     {
-        // Arrange: shared in-memory DB so two contexts see same data.
-        string sharedDbName = "PocoDataSet_EfCoreBridge_DeleteConcurrency_" + Guid.NewGuid().ToString("N");
+        // Arrange: SQLite in-memory
+        using SqliteConnection connection = new SqliteConnection("Data Source=:memory:");
+        connection.Open();
 
         DbContextOptions<TestDbContext> options = new DbContextOptionsBuilder<TestDbContext>()
-            .UseInMemoryDatabase(sharedDbName)
+            .UseSqlite(connection)
             .EnableSensitiveDataLogging()
             .Options;
+
+        using (TestDbContext setup = new TestDbContext(options))
+        {
+            setup.Database.EnsureCreated();
+        }
 
         // Seed row with RowVersion V1
         using (TestDbContext seed = new TestDbContext(options))
@@ -123,33 +130,30 @@ public sealed class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
             concurrent.SaveChanges();
         }
 
-        // Build PocoDataSet baseline with RowVersion V1
-        IDataSet ds = DataSetFactory.CreateDataSet();
-        IDataTable t = ds.AddNewTable("Department");
-        t.AddColumn("Id", DataTypeNames.INT32);
-        t.AddColumn("Name", DataTypeNames.STRING);
-        t.AddColumn("Description", DataTypeNames.STRING);
-        t.AddColumn("RowVersion", DataTypeNames.BINARY);
-        t.PrimaryKeys = new List<string> { "Id" };
+        // Build a CHANGSET TABLE directly (do not use ds.CreateChangeset here)
+        IDataSet cs = DataSetFactory.CreateDataSet();
+        IDataTable ct = cs.AddNewTable("Department");
+        ct.AddColumn("Id", DataTypeNames.INT32);
+        ct.AddColumn("RowVersion", DataTypeNames.BINARY);
+        ct.PrimaryKeys = new List<string> { "Id" };
 
-        IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
-        r["Id"] = 1;
-        r["Name"] = "Old";
-        r["Description"] = "Keep";
-        r["RowVersion"] = new byte[] { 1 };
-        t.AddLoadedRow(r);
+        // 1) Add as LOADED (Unchanged)
+        IDataRow row = DataRowExtensions.CreateRowFromColumns(ct.Columns);
+        row["Id"] = 1;
+        row["RowVersion"] = new byte[] { 1 };
+        ct.AddLoadedRow(row);
 
-        // Delete row and include concurrency token V1
-        r.Delete();
-        r["RowVersion"] = new byte[] { 1 };
+        // 2) Now mark as Deleted (legal because it’s already in the table)
+        row.Delete();
 
-        IDataSet cs = ds.CreateChangeset();
+        // (Optional but safe) ensure RowVersion is still present after Delete()
+        row["RowVersion"] = new byte[] { 1 };
 
         // Act / Assert
         using (TestDbContext db = new TestDbContext(options))
         {
             Assert.Throws<DbUpdateConcurrencyException>(
-                () => EfChangesetToPocoApplier.ApplyTableAndSave(db, db.Departments, cs.Tables["Department"]));
+                () => EfChangesetToPocoApplier.ApplyTableAndSave(db, db.Departments, ct));
         }
     }
 }

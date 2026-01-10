@@ -7,10 +7,10 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Tests
 {
-    public partial class CreateDeltaChangesetDeletedRowsTests
+    public partial class CreateChangesetDeletedRowsTests2
     {
         [Fact]
-        public void CreateDeltaChangeset_IncludesDeletedRow_AndContainsPrimaryKeyValue()
+        public void CreateChangeset_IncludesDeletedRow_AndContainsPrimaryKeyValue()
         {
             // Arrange
             IDataSet dataSet = DataSetFactory.CreateDataSet();
@@ -34,7 +34,7 @@ namespace PocoDataSet.Tests
             Assert.Equal(DataRowState.Deleted, loaded.DataRowState);
 
             // Act
-            IDataSet? changeset = dataSet.CreateDeltaChangeset();
+            IDataSet? changeset = dataSet.CreateChangeset();
 
             // Assert
             Assert.NotNull(changeset);
@@ -58,7 +58,7 @@ namespace PocoDataSet.Tests
 }
 
         [Fact]
-        public void CreateDeltaChangeset_DeletedRow_IncludesAllCompositePrimaryKeyValues()
+        public void CreateChangeset_DeletedRow_IncludesAllCompositePrimaryKeyValues()
         {
             // Arrange
             IDataSet dataSet = DataSetFactory.CreateDataSet();
@@ -82,7 +82,7 @@ namespace PocoDataSet.Tests
             Assert.Equal(DataRowState.Deleted, loaded.DataRowState);
 
             // Act
-            IDataSet? changeset = dataSet.CreateDeltaChangeset();
+            IDataSet? changeset = dataSet.CreateChangeset();
 
             // Assert
             Assert.NotNull(changeset);

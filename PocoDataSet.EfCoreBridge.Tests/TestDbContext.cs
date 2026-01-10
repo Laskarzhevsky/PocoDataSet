@@ -12,16 +12,22 @@ public sealed class TestDbContext : DbContext
 
     public DbSet<OrderLine> OrderLines => Set<OrderLine>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Keys
+        modelBuilder.Entity<Department>()
+            .HasKey(x => x.Id);
+
         modelBuilder.Entity<OrderLine>()
             .HasKey(x => new { x.OrderId, x.LineNo });
 
-        // Optional concurrency token for PATCH semantics tests.
-        // Relational providers treat rowversion/timestamp as an optimistic concurrency token.
+        // Concurrency token used by PATCH semantics tests.
+        // IMPORTANT: Do NOT use IsRowVersion() here, because we set RowVersion explicitly in tests
+        // and we also want provider-agnostic optimistic concurrency checks (e.g., SQLite in-memory).
         modelBuilder.Entity<Department>()
             .Property(x => x.RowVersion)
-            .IsRowVersion();
+            .IsConcurrencyToken()
+            .ValueGeneratedNever();
     }
 }
 
