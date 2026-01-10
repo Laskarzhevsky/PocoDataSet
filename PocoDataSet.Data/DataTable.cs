@@ -107,14 +107,17 @@ namespace PocoDataSet.Data
                 throw new InvalidOperationException("Cannot add a Deleted row to a table.");
             }
 
-            // Ensure the row contains all columns
-            for (int i = 0; i < Columns.Count; i++)
+            // Ensure the row contains all columns (non-floating rows only)
+            if (!(dataRow is IFloatingDataRow))
             {
-                string columnName = Columns[i].ColumnName;
-                if (!dataRow.ContainsKey(columnName))
+                for (int i = 0; i < Columns.Count; i++)
                 {
-                    // Detached + indexer assignment is safe: it does not snapshot originals.
-                    dataRow[columnName] = null;
+                    string columnName = Columns[i].ColumnName;
+                    if (!dataRow.ContainsKey(columnName))
+                    {
+                        // Detached + indexer assignment is safe: it does not snapshot originals.
+                        dataRow[columnName] = null;
+                    }
                 }
             }
 
@@ -153,14 +156,17 @@ namespace PocoDataSet.Data
                 throw new InvalidOperationException("Cannot add a Deleted row to a table.");
             }
 
-            // Ensure all columns exist in the row.
-            for (int i = 0; i < Columns.Count; i++)
+            // Ensure all columns exist in the row (non-floating rows only).
+            if (!(dataRow is IFloatingDataRow))
             {
-                string columnName = Columns[i].ColumnName;
-                if (!dataRow.ContainsKey(columnName))
+                for (int i = 0; i < Columns.Count; i++)
                 {
-                    // This uses your indexer; for Detached rows this won't snapshot originals.
-                    dataRow[columnName] = null;
+                    string columnName = Columns[i].ColumnName;
+                    if (!dataRow.ContainsKey(columnName))
+                    {
+                        // This uses your indexer; for Detached rows this won't snapshot originals.
+                        dataRow[columnName] = null;
+                    }
                 }
             }
 

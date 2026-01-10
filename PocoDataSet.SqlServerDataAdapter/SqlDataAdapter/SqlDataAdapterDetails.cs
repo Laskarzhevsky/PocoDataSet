@@ -591,7 +591,10 @@ ORDER BY ic.key_ordinal;";
 			{
 				string pk = metadata.PrimaryKeyColumns[i];
 				object? value;
-				row.TryGetValue(pk, out value);
+				if (!row.TryGetValue(pk, out value))
+				{
+					row.TryGetOriginalValue(pk, out value);
+				}
 
 				string text;
 				if (value == null)
@@ -623,20 +626,36 @@ ORDER BY ic.key_ordinal;";
 				break;
 			}
 
-			if (!row.HasOriginalValues)
+			object? rvValue = null;
+			bool hasRv = false;
+
+			// Prefer the OriginalValues snapshot when available (classic full changeset scenario)
+			if (row.HasOriginalValues && row.OriginalValues != null)
 			{
-				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues snapshot is missing.");
+				hasRv = row.OriginalValues.TryGetValue(rvColumn, out rvValue);
 			}
 
-			object? origValue;
-			if (!row.OriginalValues.TryGetValue(rvColumn, out origValue))
+			// Delta / floating rows may not have OriginalValues; rowversion should be provided directly.
+			if (!hasRv)
 			{
-				throw new InvalidOperationException("Optimistic concurrency requested but OriginalValues does not contain rowversion column '" + rvColumn + "'.");
+				if (row.TryGetValue(rvColumn, out rvValue))
+				{
+					hasRv = true;
+				}
+				else if (row.TryGetOriginalValue(rvColumn, out rvValue))
+				{
+					hasRv = true;
+				}
+			}
+
+			if (!hasRv)
+			{
+				throw new InvalidOperationException("Optimistic concurrency requested but rowversion value is missing for column '" + rvColumn + "'.");
 			}
 
 			string parameterName = "@oc_rv";
 			whereClauses.Add(EscapeIdentifier(rvColumn) + " = " + parameterName);
-			sqlParameters.Add(CreateSqlParameter(parameterName, origValue));
+			sqlParameters.Add(CreateSqlParameter(parameterName, rvValue));
 		}
 
 		void AddOriginalValuesConcurrencyClauses(IDataTable table, TableWriteMetadata metadata, IDataRow row, List<string> whereClauses, List<SqlParameter> sqlParameters)
@@ -878,14 +897,18 @@ ORDER BY ic.key_ordinal;";
 					continue;
 				}
 
+				object? value;
+				if (!row.TryGetValue(columnName, out value))
+				{
+					// Floating/delta rows: missing field means "not provided" -> omit it from INSERT.
+					continue;
+				}
+
 				string parameterName = "@p" + parameterIndex;
 				parameterIndex++;
 
 				columnNames.Add(EscapeIdentifier(columnName));
 				parameterNames.Add(parameterName);
-
-				object? value;
-				row.TryGetValue(columnName, out value);
 				sqlParameters.Add(CreateSqlParameter(parameterName, value));
 			}
 
@@ -944,13 +967,17 @@ ORDER BY ic.key_ordinal;";
 					continue;
 				}
 
+				object? value;
+				if (!row.TryGetValue(columnName, out value))
+				{
+					// Floating/delta rows: missing field means "not provided" -> do not update it.
+					continue;
+				}
+
 				string parameterName = "@p" + parameterIndex;
 				parameterIndex++;
 
 				setClauses.Add(EscapeIdentifier(columnName) + " = " + parameterName);
-
-				object? value;
-				row.TryGetValue(columnName, out value);
 				sqlParameters.Add(CreateSqlParameter(parameterName, value));
 			}
 
@@ -968,7 +995,10 @@ ORDER BY ic.key_ordinal;";
 				whereClauses.Add(EscapeIdentifier(pkColumnName) + " = " + parameterName);
 
 				object? pkValue;
-				row.TryGetValue(pkColumnName, out pkValue);
+				if (!row.TryGetValue(pkColumnName, out pkValue))
+				{
+					row.TryGetOriginalValue(pkColumnName, out pkValue);
+				}
 				sqlParameters.Add(CreateSqlParameter(parameterName, pkValue));
 			}
 
@@ -1020,7 +1050,10 @@ ORDER BY ic.key_ordinal;";
 				whereClauses.Add(EscapeIdentifier(pkColumnName) + " = " + parameterName);
 
 				object? pkValue;
-				row.TryGetValue(pkColumnName, out pkValue);
+				if (!row.TryGetValue(pkColumnName, out pkValue))
+				{
+					row.TryGetOriginalValue(pkColumnName, out pkValue);
+				}
 				sqlParameters.Add(CreateSqlParameter(parameterName, pkValue));
 			}
 

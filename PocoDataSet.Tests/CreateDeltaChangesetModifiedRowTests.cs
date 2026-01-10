@@ -80,10 +80,8 @@ namespace PocoDataSet.Tests
 
             // "Description" exists in schema (target table has full schema),
             // but since TryGetValue failed, it must not be copied => null.
-            object? csDescription = null;
-            Assert.True(csRow.TryGetValue("Description", out csDescription));
-            Assert.Null(csDescription);
-        }
+            Assert.False(csRow.ContainsKey("Description"));
+}
 
         private  class FakeDataSetProxy : DispatchProxy
         {

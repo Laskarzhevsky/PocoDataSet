@@ -166,11 +166,13 @@ namespace PocoDataSet.Tests
             Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
             Assert.True(csRow.ContainsKey("Name"));
 
-            // Unchanged column is not copied (value remains null/default)
+            // Unchanged column is not copied (floating row => field is absent)
+            Assert.False(csRow.ContainsKey("Description"));
+
             object? description;
             bool hasDescription = csRow.TryGetValue("Description", out description);
-            Assert.True(hasDescription);
-            Assert.Null(description);
+            Assert.False(hasDescription);
+            Assert.Null(description); // out value should be null when TryGetValue returns false
 
             // Values are correct
             Assert.Equal(10, (int)csRow["Id"]!);
@@ -278,9 +280,7 @@ namespace PocoDataSet.Tests
             Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
 
             // "Description" exists in schema, but should NOT have been copied (null = not included)
-            object? descriptionValue = null;
-            Assert.True(csRow.TryGetValue("Description", out descriptionValue));
-            Assert.Null(descriptionValue);
+            Assert.False(csRow.ContainsKey("Description"));
         }
 
         [Fact]
@@ -349,14 +349,18 @@ namespace PocoDataSet.Tests
 
             // Row1: Name copied, Description must be null (not copied)
             Assert.Equal("Sales Updated", (string)cs1["Name"]!);
+            Assert.False(cs1.ContainsKey("Description"));
+
             object? cs1Description = null;
-            Assert.True(cs1.TryGetValue("Description", out cs1Description));
+            Assert.False(cs1.TryGetValue("Description", out cs1Description));
             Assert.Null(cs1Description);
 
             // Row2: Description copied, Name must be null (not copied)
             Assert.Equal("D2 Updated", (string)cs2["Description"]!);
+            Assert.False(cs2.ContainsKey("Name"));
+
             object? cs2Name = null;
-            Assert.True(cs2.TryGetValue("Name", out cs2Name));
+            Assert.False(cs2.TryGetValue("Name", out cs2Name));
             Assert.Null(cs2Name);
         }
 
@@ -464,10 +468,8 @@ namespace PocoDataSet.Tests
 
             // "Description" is in schema (table schema copied),
             // but must not have been copied as a value.
-            object? csDesc = null;
-            Assert.True(csRow.TryGetValue("Description", out csDesc));
-            Assert.Null(csDesc);
-        }
+            Assert.False(csRow.ContainsKey("Description"));
+}
 */
         [Fact]
         public void CreateDeltaChangeset_ModifiedRow_DoesNotRequireClientKey_WhenTableDoesNotContainClientKey()

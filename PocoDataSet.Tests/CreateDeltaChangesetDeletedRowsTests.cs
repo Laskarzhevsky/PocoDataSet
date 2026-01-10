@@ -54,10 +54,8 @@ namespace PocoDataSet.Tests
             Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
 
             // Unrelated columns exist in schema, but must not have values copied
-            object? nameValue = null;
-            Assert.True(csRow.TryGetValue("Name", out nameValue));
-            Assert.Null(nameValue);
-        }
+            Assert.False(csRow.ContainsKey("Name"));
+}
 
         [Fact]
         public void CreateDeltaChangeset_DeletedRow_IncludesAllCompositePrimaryKeyValues()
@@ -102,9 +100,7 @@ namespace PocoDataSet.Tests
             Assert.Equal(2, (int)csRow["DepartmentId"]!);
 
             // Unrelated columns exist in schema, but must not have values copied
-            object? nameValue = null;
-            Assert.True(csRow.TryGetValue("Name", out nameValue));
-            Assert.Null(nameValue);
-        }
+            Assert.False(csRow.ContainsKey("Name"));
+}
     }
 }

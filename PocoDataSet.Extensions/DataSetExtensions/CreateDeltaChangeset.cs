@@ -72,18 +72,43 @@ namespace PocoDataSet.Extensions
                 {
                     IDataRow sourceRow = changedRows[i];
 
-                    // Always create using full column set (row itself will be sparse)
-                    IDataRow targetRow = DataRowExtensions.CreateRowFromColumns(sourceTable.Columns);
+                    IDataRow targetRow;
+
+                    if (sourceRow.DataRowState == DataRowState.Added)
+                    {
+                        // Added rows: full row values (insert payload)
+                        targetRow = DataRowExtensions.CreateRowFromColumns(sourceTable.Columns);
+                    }
+                    else
+                    {
+                        // Modified / Deleted rows: floating row that contains ONLY explicitly provided fields.
+                        // Missing fields mean "not provided" (distinct from a provided null).
+                        targetRow = DataRowExtensions.CreateFloatingRow(sourceTable.Columns.Count);
+                    }
 
                     List<string> columnsToCopy = GetColumnsToCopy(sourceTable, sourceRow);
 
                     for (int c = 0; c < columnsToCopy.Count; c++)
                     {
                         string columnName = columnsToCopy[c];
-                        if (sourceRow.ContainsKey(columnName))
+
+                        object? value = null;
+
+                        // 1) Prefer current/provided value
+                        if (sourceRow.TryGetValue(columnName, out value))
                         {
-                            targetRow[columnName] = sourceRow[columnName];
+                            targetRow[columnName] = value;
+                            continue;
                         }
+
+                        // 2) Fallback to original value (important for PK / __ClientKey on floating rows)
+                        if (sourceRow.TryGetOriginalValue(columnName, out value))
+                        {
+                            targetRow[columnName] = value;
+                            continue;
+                        }
+
+                        // 3) Neither exists -> do not include the field
                     }
 
                     // IMPORTANT:

@@ -23,6 +23,20 @@ namespace PocoDataSet.Data
             return new DataRow();
         }
 
+
+        /// <summary>
+        /// Creates an empty floating (sparse) row that can contain only explicitly provided fields.
+        /// </summary>
+        public static IFloatingDataRow CreateFloating(int initialCapacity = 0)
+        {
+            if (initialCapacity > 0)
+            {
+                return new FloatingDataRow(initialCapacity);
+            }
+
+            return new FloatingDataRow();
+        }
+
         /// <summary>
         /// Create a row and initialize each column with its default value
         /// </summary>
