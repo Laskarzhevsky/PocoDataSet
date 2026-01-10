@@ -18,11 +18,11 @@ public sealed class EfChangesetToPocoApplier_Tests
         // Arrange
         using TestDbContext db = DbTestHelpers.CreateContext();
 
-        db.Departments.Add(new Department { Id = 1, Name = "Old" });
-        db.Departments.Add(new Department { Id = 2, Name = "ToDelete" });
+        db.Departments.Add(new Department { Id = 1, Name = "Old", Description = "Keep" });
+        db.Departments.Add(new Department { Id = 2, Name = "ToDelete", Description = "WillBeRemoved" });
         db.SaveChanges();
 
-        // Detached (ToPoco) applier uses new entity instances. Clear tracker to avoid identity conflicts in this test.
+        // Clear tracker to keep the test independent from tracking behavior.
         db.ChangeTracker.Clear();
 
         IDataSet ds = DataSetFactory.CreateDataSet();
@@ -60,6 +60,7 @@ public sealed class EfChangesetToPocoApplier_Tests
         Assert.Equal(2, all.Count);
         Assert.Equal(1, all[0].Id);
         Assert.Equal("Updated", all[0].Name);
+        Assert.Equal("Keep", all[0].Description);
         Assert.Equal(3, all[1].Id);
         Assert.Equal("New", all[1].Name);
     }

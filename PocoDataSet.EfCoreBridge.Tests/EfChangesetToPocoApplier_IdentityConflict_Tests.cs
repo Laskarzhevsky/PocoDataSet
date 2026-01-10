@@ -13,7 +13,7 @@ namespace PocoDataSet.EfCoreBridge.Tests;
 public sealed class EfChangesetToPocoApplier_IdentityConflict_Tests
 {
     [Fact]
-    public void ApplyTableAndSave_Throws_WhenDbContextAlreadyTracksSameKey()
+    public void ApplyTableAndSave_PatchesTrackedEntity_WhenDbContextAlreadyTracksSameKey()
     {
         using TestDbContext db = DbTestHelpers.CreateContext();
 
@@ -22,7 +22,7 @@ public sealed class EfChangesetToPocoApplier_IdentityConflict_Tests
         db.Departments.Add(tracked);
         db.SaveChanges();
 
-        // Build a changeset that modifies the same entity (detached ToPoco creates a NEW instance)
+        // Build a changeset that modifies the same entity.
         IDataSet ds = DataSetFactory.CreateDataSet();
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
@@ -44,9 +44,16 @@ public sealed class EfChangesetToPocoApplier_IdentityConflict_Tests
 
         IDataTable ct = cs.Tables["Department"];
 
-        // Act/Assert: identity conflict should be thrown by EF
-        Assert.Throws<System.InvalidOperationException>(
-            () => EfChangesetToPocoApplier.ApplyTableAndSave(db, db.Departments, ct));
+        // Act/Assert: floating PATCH applies to the already-tracked entity (no identity conflict).
+        EfChangesetToPocoApplier.ApplyTableAndSave(db, db.Departments, ct);
+
+        Assert.Equal("Updated", tracked.Name);
+
+        Department? saved = db.Departments.Find(1);
+        Assert.NotNull(saved);
+        Assert.Equal("Updated", saved!.Name);
+
+        Assert.Equal(1, db.Departments.Count());
     }
 
     [Fact]

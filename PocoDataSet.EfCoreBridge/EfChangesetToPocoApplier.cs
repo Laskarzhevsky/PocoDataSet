@@ -10,7 +10,13 @@ using PocoDataSet.IData;
 namespace PocoDataSet.EfCoreBridge
 {
     /// <summary>
-    /// Applies PocoDataSet changesets to EF Core using detached entities created via ToPoco.
+    /// Applies PocoDataSet changesets to EF Core.
+    ///
+    /// IMPORTANT: In the "floating row" model, Modified and Deleted rows are sparse (PATCH payloads).
+    /// Therefore, this applier delegates to <see cref="EfChangesetCopyToPocoApplier"/> so that:
+    /// - only provided fields are applied
+    /// - unknown columns are ignored
+    /// - only provided fields are marked modified
     /// </summary>
     public static class EfChangesetToPocoApplier
     {
@@ -20,30 +26,7 @@ namespace PocoDataSet.EfCoreBridge
             IDataTable changesetTable)
             where TEntity : class, new()
         {
-            if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
-            if (dbSet == null) throw new ArgumentNullException(nameof(dbSet));
-            if (changesetTable == null) throw new ArgumentNullException(nameof(changesetTable));
-
-            for (int i = 0; i < changesetTable.Rows.Count; i++)
-            {
-                IDataRow row = changesetTable.Rows[i];
-
-                if (row.DataRowState == DataRowState.Added)
-                {
-                    TEntity entity = row.ToPoco<TEntity>();
-                    dbSet.Add(entity);
-                }
-                else if (row.DataRowState == DataRowState.Modified)
-                {
-                    TEntity entity = row.ToPoco<TEntity>();
-                    dbSet.Update(entity);
-                }
-                else if (row.DataRowState == DataRowState.Deleted)
-                {
-                    TEntity entity = row.ToPoco<TEntity>();
-                    dbSet.Remove(entity);
-                }
-            }
+            EfChangesetCopyToPocoApplier.ApplyTable(dbContext, dbSet, changesetTable);
         }
 
         public static void ApplyTableAndSave<TEntity>(
