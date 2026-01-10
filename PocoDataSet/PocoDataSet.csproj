@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Laskarzhevsky Software Inc</Authors>
     <Company>Laskarzhevsky Software Inc</Company>
-    <Description>Meta-package that brings in all POCO DataSet components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. The source code is published on https://github.com/Laskarzhevsky/PocoDataSet</Description>
+    <Description>Meta-package that brings in all POCO DataSet components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. The source code is published on https://github.com/Laskarzhevsky/PocoDataSet Support:Vitaly.Laskarzhevsky@gmail.com</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>
@@ -13,7 +13,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
     <TargetFramework>net9.0</TargetFramework>
-    <Version>1.0.19</Version>
+    <Version>1.0.20</Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -21,14 +21,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="PocoDataSet.Data" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.IData" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.19" />
-    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.19" />
+    <PackageReference Include="PocoDataSet.Data" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.IData" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.20" />
+    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.20" />
   </ItemGroup>
 </Project>
