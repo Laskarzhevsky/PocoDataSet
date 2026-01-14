@@ -12,23 +12,24 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Copies column values from the source data row into the target data row
-        /// using the provided column metadata list.
-        /// Missing columns are ignored; extra target columns are left untouched.
+        /// Copies column values from the source data row into the current data row using list of column metadata.
+        /// If source data row doesn't have filed specified in the list of column metadata then method does nothing.
+        /// If current data row doesn't have filed specified in the list of column metadata but source data row contains it
+        /// then method adds it to the current row supporting schema-evolution
         /// </summary>
         /// <param name="currentDataRow">Current data row</param>
         /// <param name="sourceDataRow">Source data row</param>
-        /// <param name="sourceColumns">Source column metadata</param>
-        public static void CopyFrom(this IDataRow? currentDataRow, IDataRow sourceDataRow, IList<IColumnMetadata> sourceColumns)
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public static void CopyFrom(this IDataRow? currentDataRow, IDataRow sourceDataRow, IList<IColumnMetadata> listOfColumnMetadata)
         {
             if (currentDataRow == null)
             {
                 return;
             }
 
-            for (int i = 0; i < sourceColumns.Count; i++)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                string columnName = sourceColumns[i].ColumnName;
+                string columnName = listOfColumnMetadata[i].ColumnName;
 
                 object? value;
                 if (sourceDataRow.TryGetValue(columnName, out value))

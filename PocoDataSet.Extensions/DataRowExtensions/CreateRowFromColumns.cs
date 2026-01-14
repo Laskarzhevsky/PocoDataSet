@@ -12,19 +12,19 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Creates row from columns
+        /// Creates data row from list of column metadata
         /// </summary>
-        /// <param name="columnsMetadata">Columns metadata</param>
-        /// <returns>Created row</returns>
-        public static IDataRow CreateRowFromColumns(List<IColumnMetadata> columnsMetadata)
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>Created data row</returns>
+        public static IDataRow CreateRowFromColumns(List<IColumnMetadata> listOfColumnMetadata)
         {
-            IDataRow row = DataRowFactory.CreateEmpty(columnsMetadata.Count);
-            foreach (IColumnMetadata column in columnsMetadata)
+            IDataRow dataRow = DataRowFactory.CreateEmpty(listOfColumnMetadata.Count);
+            foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
-                row[column.ColumnName] = null;
+                dataRow[columnMetadata.ColumnName] = null;
             }
 
-            return row;
+            return dataRow;
         }
         #endregion
     }

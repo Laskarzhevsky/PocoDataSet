@@ -12,7 +12,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds new table to data set
+        /// Adds new table to data set without columns and without rows
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>
@@ -38,7 +38,7 @@ namespace PocoDataSet.Extensions
         }
 
         /// <summary>
-        /// Adds new table to data set
+        /// Adds new table to data set with columns specified inside of list of column metadata
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="tableName">Table name</param>

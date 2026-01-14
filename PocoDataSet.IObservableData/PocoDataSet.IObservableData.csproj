@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet Observable interfaces. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. The source code is published on https://github.com/Laskarzhevsky/PocoDataSet Support:Vitaly.Laskarzhevsky@gmail.com</Description>
+    <Description>POCO DataSet Observable interfaces. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. Technical support: dev.sky-soft.inc@outlook.com</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PocoDataSet.IObservableData</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

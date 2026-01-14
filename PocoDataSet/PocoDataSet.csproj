@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors>Laskarzhevsky Software Inc</Authors>
     <Company>Laskarzhevsky Software Inc</Company>
-    <Description>Meta-package that brings in all POCO DataSet components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. The source code is published on https://github.com/Laskarzhevsky/PocoDataSet Support:Vitaly.Laskarzhevsky@gmail.com</Description>
+    <Description>Meta-package that brings in all POCO DataSet components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. Technical support: dev.sky-soft.inc@outlook.com</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsPackable>true</IsPackable>

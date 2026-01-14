@@ -3,7 +3,7 @@ using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 using PocoDataSet.ObservableData;
-using PocoDataSet.ObservableExtensions;
+//using PocoDataSet.ObservableExtensions;
 using PocoDataSet.Serializer;
 using PocoDataSet.SqlServerDataAdapter;
 
@@ -13,53 +13,18 @@ namespace PocoDataSet.Demo
     {
         private static async Task Main()
         {
-            // 1. Create observable data set
-            IObservableDataSet observableDataSet = new ObservableDataSet();
+            // 1. Create an empty data set
+            IDataSet dataSet = DataSetFactory.CreateDataSet();
 
-            // 2. Table with one row in Added state
-            IObservableDataTable departmentObservableDataTable = observableDataSet.AddNewTable("Department");
-            departmentObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
-            departmentObservableDataTable.AddColumn("Name", DataTypeNames.STRING);
+            // 2. Create a table and define its columns
+            IDataTable departmentDataTable = dataSet.AddNewTable("Department");
+            departmentDataTable.AddColumn("Id", DataTypeNames.INT32);
+            departmentDataTable.AddColumn("Name", DataTypeNames.STRING);
 
-            IObservableDataRow departmentObservableDataRow = departmentObservableDataTable.AddNewRow();
-            departmentObservableDataRow["Id"] = 1;
-            departmentObservableDataRow["Name"] = "Reception";
+            // 3. Create a row from the table columns (all values are null)
+            IDataRow departmentDataRow = DataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
 
-            // 3. Table with one row in Modified state
-            IObservableDataTable employmentTypeObservableDataTable = observableDataSet.AddNewTable("EmploymentType");
-            employmentTypeObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
-            employmentTypeObservableDataTable.AddColumn("Code", DataTypeNames.STRING);
-            employmentTypeObservableDataTable.AddColumn("Description", DataTypeNames.STRING);
 
-            IObservableDataRow employmentTypeObservableDataRow = employmentTypeObservableDataTable.AddNewRow();
-            employmentTypeObservableDataRow["Id"] = 1;
-            employmentTypeObservableDataRow["Code"] = "ET01";
-            employmentTypeObservableDataRow["Description"] = "Full Time";
-
-            // Make the row Unchanged, then modify it
-            employmentTypeObservableDataRow.AcceptChanges();
-            employmentTypeObservableDataRow["Description"] = "Part Time";
-
-            // 4. Table with one row in Deleted state
-            IObservableDataTable employeeObservableDataTable = observableDataSet.AddNewTable("Employee");
-            employeeObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
-            employeeObservableDataTable.AddColumn("FirstName", DataTypeNames.STRING);
-            employeeObservableDataTable.AddColumn("LastName", DataTypeNames.STRING);
-
-            IObservableDataRow employeeObservableDataRow = employeeObservableDataTable.AddNewRow();
-            employeeObservableDataRow["Id"] = 1;
-            employeeObservableDataRow["FirstName"] = "John";
-            employeeObservableDataRow["LastName"] = "Doe";
-            employeeObservableDataRow.AcceptChanges();
-            employeeObservableDataRow.Delete();
-
-            // 5. Accept changes at data set level
-            observableDataSet.AcceptChanges();
-
-            // Expected result:
-            // - Department: one Unchanged row (1, Reception)
-            // - EmploymentType: one Unchanged row (1, ET01, Part Time)
-            // - Employee: deleted row removed from the table
             int i = 0;
             /*
                         // 1) Create an empty data set
