@@ -10,8 +10,6 @@ namespace PocoDataSet.Extensions
     /// </summary>
     public static partial class DataSetExtensions
     {
-        private const string ClientKeyColumnName = "_ClientKey";
-
         #region Public Methods
         /// <summary>
         /// Replaces rows in the current data set with rows from the refreshed data set.
@@ -81,9 +79,9 @@ namespace PocoDataSet.Extensions
                     newRow.CopyFrom(refreshedRow, refreshedTable.Columns);
 
                     // Assign client key (always new identity for reloaded rows).
-                    if (ContainsColumn(currentTable.Columns, ClientKeyColumnName))
+                    if (ContainsColumn(currentTable.Columns, SpecialColumnNames.CLIENT_KEY))
                     {
-                        newRow[ClientKeyColumnName] = Guid.NewGuid();
+                        newRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
                     }
 
                     currentTable.AddLoadedRow(newRow);
@@ -122,10 +120,10 @@ namespace PocoDataSet.Extensions
 
         private static void EnsureClientKeyColumnExists(IDataTable table)
         {
-            if (!ContainsColumn(table.Columns, ClientKeyColumnName))
+            if (!ContainsColumn(table.Columns, SpecialColumnNames.CLIENT_KEY))
             {
                 // GUID not nullable, not PK, not FK
-                table.AddColumn(ClientKeyColumnName, DataTypeNames.GUID, false, false, false);
+                table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID, false, false, false);
             }
         }
 
