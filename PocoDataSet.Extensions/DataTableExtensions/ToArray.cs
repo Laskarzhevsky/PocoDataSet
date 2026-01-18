@@ -12,11 +12,11 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Converts all rows in the specified <see cref="IDataTable"/> to an array of interface proxies.
+        /// Converts all rows in the specified data table to an array of interface proxies.
         /// </summary>
         /// <typeparam name="TInterface">The interface type describing the table's row contract.</typeparam>
         /// <param name="dataTable">The data table to convert.</param>
-        /// <returns>An array of <typeparamref name="TInterface"/> proxies backed by <see cref="IDataRow"/>.</returns>
+        /// <returns>An array of <typeparamref name="TInterface"/> proxies backed by data rows.</returns>
         public static TInterface[] ToArray<TInterface>(this IDataTable? dataTable) where TInterface : class
         {
             if (dataTable == null)
@@ -29,11 +29,11 @@ namespace PocoDataSet.Extensions
         }
 
         /// <summary>
-        /// Converts all rows in the specified <see cref="IDataTable"/> to an array using a custom selector.
+        /// Converts all rows in the specified data table to an array of elements using a custom selector.
         /// </summary>
         /// <typeparam name="T">The element type of the resulting array.</typeparam>
         /// <param name="dataTable">The data table to convert.</param>
-        /// <param name="selector">A delegate that creates a <typeparamref name="T"/> from an <see cref="IDataRow"/>.</param>
+        /// <param name="selector">A delegate that creates an element of specified type from a data row.</param>
         /// <returns>An array of elements created from each row.</returns>
         public static T[] ToArray<T>(this IDataTable? dataTable, Func<IDataRow, T> selector)
         {

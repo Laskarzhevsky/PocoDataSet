@@ -64,7 +64,7 @@ namespace PocoDataSet.ObservableExtensions
                 ValidateNoDuplicatePrimaryKeys(refreshedDataTable, primaryKeyColumnNames, "refreshed");
             }
 
-            Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildDataRowIndex(primaryKeyColumnNames);
+            Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildPrimaryKeyIndex(primaryKeyColumnNames);
 
             Dictionary<Guid, IDataRow>? refreshedRowsByClientKey = null;
             Dictionary<Guid, IObservableDataRow>? currentRowsByClientKey = null;

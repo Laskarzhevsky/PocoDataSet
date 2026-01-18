@@ -31,7 +31,7 @@ namespace PocoDataSet.Extensions
                 throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
 
-            dataTable.RemoveRow(rowIndex);
+            DataTableExtensions.RemoveRowAt(dataTable, rowIndex);
         }
 
         /// <summary>

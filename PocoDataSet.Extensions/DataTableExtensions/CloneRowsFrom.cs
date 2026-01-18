@@ -15,21 +15,21 @@ namespace PocoDataSet.Extensions
         /// <summary>
         /// Clones rows from data table
         /// </summary>
-        /// <param name="clonedDataTable">Cloned data table</param>
         /// <param name="dataTable">Data table</param>
-        public static void CloneRowsFrom(this IDataTable? clonedDataTable, IDataTable? dataTable)
+        /// <param name="sourceDataTable">Source data table</param>
+        public static void CloneRowsFrom(this IDataTable? dataTable, IDataTable? sourceDataTable)
         {
-            if (clonedDataTable == null || dataTable == null)
+            if (dataTable == null || sourceDataTable == null)
             {
                 return;
             }
 
-            for (int i = 0; i < dataTable.Rows.Count; i++)
+            for (int i = 0; i < sourceDataTable.Rows.Count; i++)
             {
-                IDataRow sourceRow = dataTable.Rows[i];
+                IDataRow sourceRow = sourceDataTable.Rows[i];
                 IDataRow targetRow = CreateEmptyRowFrom(sourceRow);
                 FillTargetRowFromSourceRow(sourceRow, targetRow);
-                clonedDataTable.AddRow(targetRow);
+                dataTable.AddRow(targetRow);
             }
         }
         #endregion

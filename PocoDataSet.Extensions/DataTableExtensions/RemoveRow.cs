@@ -1,6 +1,4 @@
-﻿using System;
-
-using PocoDataSet.IData;
+﻿using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -11,29 +9,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Removes row from data table using state-aware semantics.
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <param name="rowIndex">Row index</param>
-        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if table does not have row with specified index</exception>
-        public static void RemoveRow(this IDataTable? dataTable, int rowIndex)
-        {
-            if (dataTable == null)
-            {
-                return;
-            }
-
-            if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(rowIndex));
-            }
-
-            IDataRow dataRow = dataTable.Rows[rowIndex];
-            RemoveRow(dataTable, dataRow);
-        }
-
-        /// <summary>
-        /// Removes row from data table using state-aware semantics.
+        /// Removes row from data table
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="dataRow">Data row to remove</param>
@@ -54,22 +30,7 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            // Case 1: New row → undo creation
-            if (dataRow.DataRowState == DataRowState.Added)
-            {
-                dataTable.RemoveRow(dataRow);
-                return;
-            }
-
-            // Case 2: Existing row → soft delete
-            if (dataRow.DataRowState == DataRowState.Unchanged ||
-                dataRow.DataRowState == DataRowState.Modified)
-            {
-                dataRow.Delete();
-                return;
-            }
-
-            // Case 3: Deleted / Detached → nothing to do
+            dataTable.RemoveRow(dataRow); // always physical
         }
         #endregion
     }

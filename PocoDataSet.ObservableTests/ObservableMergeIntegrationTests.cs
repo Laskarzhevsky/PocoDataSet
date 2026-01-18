@@ -56,7 +56,7 @@ namespace PocoDataSet.ObservableTests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
             IDataTable table = dataSet.AddNewTable("Department");
             // Observable merge relies on the client-only key column.
-            table.AddColumn("__ClientKey", DataTypeNames.GUID);
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.PrimaryKeys.Add("Id");
@@ -66,13 +66,13 @@ namespace PocoDataSet.ObservableTests
             Guid clientKey2 = Guid.Parse("22222222-2222-2222-2222-222222222222");
 
             DataRow row1 = new DataRow();
-            row1["__ClientKey"] = clientKey1;
+            row1[SpecialColumnNames.CLIENT_KEY] = clientKey1;
             row1["Id"] = 1;
             row1["Name"] = "Sales";
             table.AddRow(row1);
 
             DataRow row2 = new DataRow();
-            row2["__ClientKey"] = clientKey2;
+            row2[SpecialColumnNames.CLIENT_KEY] = clientKey2;
             row2["Id"] = 2;
             row2["Name"] = "HR";
             table.AddRow(row2);
@@ -87,7 +87,7 @@ namespace PocoDataSet.ObservableTests
         {
             IDataSet refreshed = DataSetFactory.CreateDataSet();
             IDataTable refreshedTable = refreshed.AddNewTable("Department");
-            refreshedTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            refreshedTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
             refreshedTable.PrimaryKeys.Add("Id");
@@ -97,13 +97,13 @@ namespace PocoDataSet.ObservableTests
             Guid clientKey1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
             DataRow refreshedRow1 = new DataRow();
-            refreshedRow1["__ClientKey"] = clientKey1;
+            refreshedRow1[SpecialColumnNames.CLIENT_KEY] = clientKey1;
             refreshedRow1["Id"] = 1;
             refreshedRow1["Name"] = "SalesUpdated";
             refreshedTable.AddRow(refreshedRow1);
 
             DataRow refreshedRow3 = new DataRow();
-            refreshedRow3["__ClientKey"] = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            refreshedRow3[SpecialColumnNames.CLIENT_KEY] = Guid.Parse("33333333-3333-3333-3333-333333333333");
             refreshedRow3["Id"] = 3;
             refreshedRow3["Name"] = "IT";
             refreshedTable.AddRow(refreshedRow3);

@@ -66,7 +66,7 @@ namespace PocoDataSet.ObservableTests.ObservableDataSetExtensions
             currentDepartment.AddColumn("Id", DataTypeNames.INT32, false, true);
 
             // Correlation only (not PK)
-            currentDepartment.AddColumn("__ClientKey", DataTypeNames.GUID);
+            currentDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
             currentDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
@@ -74,7 +74,7 @@ namespace PocoDataSet.ObservableTests.ObservableDataSetExtensions
             Guid clientKey = Guid.NewGuid();
 
             IObservableDataRow newRow = currentDepartment.AddNewRow();
-            newRow["__ClientKey"] = clientKey;
+            newRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
             newRow["Name"] = "Engineering";
             // newRow["Id"] is 0 here
 
@@ -86,14 +86,14 @@ namespace PocoDataSet.ObservableTests.ObservableDataSetExtensions
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32, false, true);
 
             // Same correlation column
-            postSaveDepartment.AddColumn("__ClientKey", DataTypeNames.GUID);
+            postSaveDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             IDataRow savedRow = postSaveDepartment.AddNewRow();
             savedRow["Id"] = 10;
-            savedRow["__ClientKey"] = clientKey;
+            savedRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
             savedRow["Name"] = "Engineering";
             savedRow["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -111,7 +111,7 @@ namespace PocoDataSet.ObservableTests.ObservableDataSetExtensions
 
             foreach (IObservableDataRow row in currentObservableDataSet.Tables["Department"].Rows)
             {
-                object? keyValue = row["__ClientKey"];
+                object? keyValue = row[SpecialColumnNames.CLIENT_KEY];
                 if (keyValue is Guid g && g == clientKey)
                 {
                     matched = row;

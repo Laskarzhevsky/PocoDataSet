@@ -22,12 +22,12 @@ namespace PocoDataSet.ObservableTests
             IObservableDataTable t = current.AddNewTable("T");
             t.AddColumn("Id", DataTypeNames.INT32, false, true, false);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.AddColumn("_ClientKey", DataTypeNames.GUID, false, false, false);
+            t.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID, false, false, false);
 
             IObservableDataRow existing = t.AddNewRow();
             existing["Id"] = 99;
             existing["Name"] = "Old";
-            existing["_ClientKey"] = Guid.NewGuid();
+            existing[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
             existing.AcceptChanges();
 
             // Refreshed snapshot
@@ -66,7 +66,7 @@ namespace PocoDataSet.ObservableTests
                 Assert.NotNull(idObj);
 
                 object? ckObj;
-                innerRow.TryGetValue("_ClientKey", out ckObj);
+                innerRow.TryGetValue(SpecialColumnNames.CLIENT_KEY, out ckObj);
                 Assert.NotNull(ckObj);
             }
         }

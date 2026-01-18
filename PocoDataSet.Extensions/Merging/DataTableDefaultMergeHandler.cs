@@ -35,7 +35,7 @@ namespace PocoDataSet.Extensions
             else
             {
                 // Current table has primary key
-                Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildDataRowIndex(currentDataTablePrimaryKeyColumnNames);
+                Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildPrimaryKeyIndex(currentDataTablePrimaryKeyColumnNames);
                 HashSet<string> primaryKeysOfMergedDataRows = new HashSet<string>();
 
                 MergeCurrentDataTableRows(currentDataTable, refreshedDataTable, mergeOptions, currentDataTablePrimaryKeyColumnNames, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);

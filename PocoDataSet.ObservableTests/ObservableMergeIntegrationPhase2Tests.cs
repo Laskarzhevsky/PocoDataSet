@@ -12,8 +12,6 @@ namespace PocoDataSet.ObservableTests
     public class ObservableMergeIntegrationPhase2Tests
     {
         #region Public Methods
-        const string ClientKeyColumnName = "__ClientKey";
-
         [Fact]
         public void MergeWith_PostSaveMode_MultipleAddedRows_PropagatesIdentities_AndDoesNotCreateDuplicates()
         {
@@ -23,7 +21,7 @@ namespace PocoDataSet.ObservableTests
 
             IObservableDataTable currentDepartment = currentObservableDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            currentDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            currentDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
             currentDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
@@ -31,29 +29,29 @@ namespace PocoDataSet.ObservableTests
             Guid key2 = Guid.NewGuid();
 
             IObservableDataRow row1 = currentDepartment.AddNewRow();
-            row1[ClientKeyColumnName] = key1;
+            row1[SpecialColumnNames.CLIENT_KEY] = key1;
             row1["Name"] = "Engineering";
 
             IObservableDataRow row2 = currentDepartment.AddNewRow();
-            row2[ClientKeyColumnName] = key2;
+            row2[SpecialColumnNames.CLIENT_KEY] = key2;
             row2["Name"] = "Sales";
 
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            postSaveDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            postSaveDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             IDataRow saved1 = postSaveDepartment.AddNewRow();
             saved1["Id"] = 10;
-            saved1[ClientKeyColumnName] = key1;
+            saved1[SpecialColumnNames.CLIENT_KEY] = key1;
             saved1["Name"] = "Engineering";
             saved1["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
             IDataRow saved2 = postSaveDepartment.AddNewRow();
             saved2["Id"] = 11;
-            saved2[ClientKeyColumnName] = key2;
+            saved2[SpecialColumnNames.CLIENT_KEY] = key2;
             saved2["Name"] = "Sales";
             saved2["RowVersion"] = new byte[] { 2, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -88,7 +86,7 @@ namespace PocoDataSet.ObservableTests
 
             IObservableDataTable currentDepartment = currentObservableDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            currentDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            currentDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
             currentDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
@@ -96,7 +94,7 @@ namespace PocoDataSet.ObservableTests
             Guid existingKey = Guid.NewGuid();
             IObservableDataRow existing = currentDepartment.AddNewRow();
             existing["Id"] = 5;
-            existing[ClientKeyColumnName] = existingKey;
+            existing[SpecialColumnNames.CLIENT_KEY] = existingKey;
             existing["Name"] = "HR";
             existing["RowVersion"] = new byte[] { 9, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -107,28 +105,28 @@ namespace PocoDataSet.ObservableTests
             // New row (Added scenario)
             Guid newKey = Guid.NewGuid();
             IObservableDataRow added = currentDepartment.AddNewRow();
-            added[ClientKeyColumnName] = newKey;
+            added[SpecialColumnNames.CLIENT_KEY] = newKey;
             added["Name"] = "Engineering";
 
             // Post-save dataset
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            postSaveDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            postSaveDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             // Returned for existing modified row (PK match)
             IDataRow savedExisting = postSaveDepartment.AddNewRow();
             savedExisting["Id"] = 5;
-            savedExisting[ClientKeyColumnName] = existingKey;
+            savedExisting[SpecialColumnNames.CLIENT_KEY] = existingKey;
             savedExisting["Name"] = "HR Updated";
             savedExisting["RowVersion"] = new byte[] { 10, 0, 0, 0, 0, 0, 0, 0 };
 
             // Returned for added row (correlation by client key, PK differs because identity assigned)
             IDataRow savedAdded = postSaveDepartment.AddNewRow();
             savedAdded["Id"] = 10;
-            savedAdded[ClientKeyColumnName] = newKey;
+            savedAdded[SpecialColumnNames.CLIENT_KEY] = newKey;
             savedAdded["Name"] = "Engineering";
             savedAdded["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -169,20 +167,20 @@ namespace PocoDataSet.ObservableTests
 
             IObservableDataTable currentDepartment = currentObservableDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            currentDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            currentDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
             currentDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             Guid clientKey = Guid.NewGuid();
             IObservableDataRow added = currentDepartment.AddNewRow();
-            added[ClientKeyColumnName] = clientKey;
+            added[SpecialColumnNames.CLIENT_KEY] = clientKey;
             added["Name"] = "Engineering";
             // added["Id"] is 0
 
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            postSaveDepartment.AddColumn(ClientKeyColumnName, DataTypeNames.GUID);
+            postSaveDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
@@ -221,30 +219,30 @@ namespace PocoDataSet.ObservableTests
 
             IObservableDataTable currentDepartment = currentObservableDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            currentDepartment.AddColumn("__ClientKey", DataTypeNames.GUID);      // correlation-only
+            currentDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);      // correlation-only
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
             currentDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             Guid collisionKey = Guid.NewGuid();
 
             IObservableDataRow first = currentDepartment.AddNewRow();
-            first["__ClientKey"] = collisionKey;
+            first[SpecialColumnNames.CLIENT_KEY] = collisionKey;
             first["Name"] = "First";
 
             IObservableDataRow second = currentDepartment.AddNewRow();
-            second["__ClientKey"] = collisionKey; // collision
+            second[SpecialColumnNames.CLIENT_KEY] = collisionKey; // collision
             second["Name"] = "Second";
 
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32, false, true); // PK
-            postSaveDepartment.AddColumn("__ClientKey", DataTypeNames.GUID);
+            postSaveDepartment.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             IDataRow saved = postSaveDepartment.AddNewRow();
             saved["Id"] = 10;
-            saved["__ClientKey"] = collisionKey;
+            saved[SpecialColumnNames.CLIENT_KEY] = collisionKey;
             saved["Name"] = "Second";
             saved["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -422,7 +420,7 @@ namespace PocoDataSet.ObservableTests
                 IObservableDataRow row = table.Rows[i];
 
                 object? value;
-                row.InnerDataRow.TryGetValue(ClientKeyColumnName, out value);
+                row.InnerDataRow.TryGetValue(SpecialColumnNames.CLIENT_KEY, out value);
 
                 if (value is Guid g && g == clientKey)
                 {

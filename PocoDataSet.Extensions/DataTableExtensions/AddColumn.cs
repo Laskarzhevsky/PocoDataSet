@@ -21,12 +21,13 @@ namespace PocoDataSet.Extensions
         /// <param name="isNullable">Flag indicating whether column is nullable</param>
         /// <param name="isPrimaryKey">Flag indicating whether column is primary key</param>
         /// <param name="isForeignKey">Flag indicating whether column is foreign key</param>
+        /// <returns>Added column</returns>
         /// <exception cref="KeyDuplicationException">Exception is thrown if a table contains a column with specified name already</exception>
-        public static void AddColumn(this IDataTable? dataTable, string columnName, string dataType, bool? isNullable = null, bool? isPrimaryKey = null, bool? isForeignKey = null)
+        public static IColumnMetadata AddColumn(this IDataTable? dataTable, string columnName, string dataType, bool? isNullable = null, bool? isPrimaryKey = null, bool? isForeignKey = null)
         {
             if (dataTable == null)
             {
-                return;
+                return default!;
             }
 
             if (string.IsNullOrEmpty(columnName))
@@ -142,6 +143,8 @@ namespace PocoDataSet.Extensions
             }
 
             EnsureExistingRowsHaveColumn(dataTable, columnName);
+
+            return columnMetadata;
         }
         #endregion
     }

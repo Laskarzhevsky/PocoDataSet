@@ -13,46 +13,47 @@ namespace PocoDataSet.Tests
         [Fact]
         public void ReloadFrom_ReplacesRows_AndAssignsClientKey_AndLeavesRowsUnchanged()
         {
-            // Arrange: current dataset with a table and a tracking column already present
-            IDataSet current = DataSetFactory.CreateDataSet();
-            IDataTable t = current.AddNewTable("T");
-            t.AddColumn("Id", DataTypeNames.INT32);
-            t.AddColumn("Name", DataTypeNames.STRING);
-            t.AddColumn("_ClientKey", DataTypeNames.GUID, false, false, false);
-            t.PrimaryKeys = new List<string> { "Id" };
+            // Arrange
+            // 1. Create current dataset with a table and a tracking column already present
+            IDataSet currentDataSet = DataSetFactory.CreateDataSet();
+            IDataTable departmentDataTable = currentDataSet.AddNewTable("Department");
+            departmentDataTable.AddColumn("Id", DataTypeNames.INT32);
+            departmentDataTable.AddColumn("Name", DataTypeNames.STRING);
+            departmentDataTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID, false, false, false);
+            departmentDataTable.PrimaryKeys = new List<string> { "Id" };
 
-            IDataRow existing = DataRowExtensions.CreateRowFromColumns(t.Columns);
-            existing["Id"] = 99;
-            existing["Name"] = "Old";
-            existing["_ClientKey"] = Guid.NewGuid();
-            t.AddLoadedRow(existing);
+            IDataRow departmentDataRow = DataRowExtensions.CreateRowFromColumns(departmentDataTable.Columns);
+            departmentDataRow["Id"] = 99;
+            departmentDataRow["Name"] = "Reception";
+            departmentDataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
+            departmentDataTable.AddLoadedRow(departmentDataRow);
 
-            // Refreshed snapshot
-            IDataSet refreshed = DataSetFactory.CreateDataSet();
-            IDataTable rt = refreshed.AddNewTable("T");
-            rt.AddColumn("Id", DataTypeNames.INT32);
-            rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "Id" };
+            // 2. Create refreshed snapshot
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedDepartmentDataTable = refreshedDataSet.AddNewTable("Department");
+            refreshedDepartmentDataTable.AddColumn("Id", DataTypeNames.INT32);
+            refreshedDepartmentDataTable.AddColumn("Name", DataTypeNames.STRING);
+            refreshedDepartmentDataTable.PrimaryKeys = new List<string> { "Id" };
 
-            IDataRow r1 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
-            r1["Id"] = 1;
-            r1["Name"] = "A";
-            rt.AddLoadedRow(r1);
+            IDataRow refreshedDepartmentDataRow1 = DataRowExtensions.CreateRowFromColumns(refreshedDepartmentDataTable.Columns);
+            refreshedDepartmentDataRow1["Id"] = 1;
+            refreshedDepartmentDataRow1["Name"] = "Finance";
+            refreshedDepartmentDataTable.AddLoadedRow(refreshedDepartmentDataRow1);
 
-            IDataRow r2 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
-            r2["Id"] = 2;
-            r2["Name"] = "B";
-            rt.AddLoadedRow(r2);
+            IDataRow refreshedDepartmentDataRow2 = DataRowExtensions.CreateRowFromColumns(refreshedDepartmentDataTable.Columns);
+            refreshedDepartmentDataRow2["Id"] = 2;
+            refreshedDepartmentDataRow2["Name"] = "Emergency";
+            refreshedDepartmentDataTable.AddLoadedRow(refreshedDepartmentDataRow2);
 
             // Act
-            current.ReloadFrom(refreshed);
+            currentDataSet.ReloadFrom(refreshedDataSet);
 
             // Assert
-            Assert.Equal(2, t.Rows.Count);
+            Assert.Equal(2, departmentDataTable.Rows.Count);
 
-            for (int i = 0; i < t.Rows.Count; i++)
+            for (int i = 0; i < departmentDataTable.Rows.Count; i++)
             {
-                IDataRow row = t.Rows[i];
+                IDataRow row = departmentDataTable.Rows[i];
 
                 Assert.Equal(DataRowState.Unchanged, row.DataRowState);
 
@@ -61,7 +62,7 @@ namespace PocoDataSet.Tests
                 Assert.NotNull(idObj);
 
                 object? ckObj;
-                row.TryGetValue("_ClientKey", out ckObj);
+                row.TryGetValue(SpecialColumnNames.CLIENT_KEY, out ckObj);
                 Assert.NotNull(ckObj);
             }
         }

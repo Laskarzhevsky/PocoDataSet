@@ -11,8 +11,6 @@ namespace PocoDataSet.ObservableExtensions
     /// </summary>
     public static partial class ObservableDataSetExtensions
     {
-        private const string ClientKeyColumnName = "_ClientKey";
-
         #region Public Methods
         /// <summary>
         /// Replaces rows in the current observable data set with rows from the refreshed data set.
@@ -74,9 +72,9 @@ namespace PocoDataSet.ObservableExtensions
                     newRow.CopyFrom(refreshedRow, refreshedTable.Columns);
 
                     // Assign client key (always new identity for reloaded rows).
-                    if (ContainsColumn(observableTable.Columns, ClientKeyColumnName))
+                    if (ContainsColumn(observableTable.Columns, SpecialColumnNames.CLIENT_KEY))
                     {
-                        newRow[ClientKeyColumnName] = Guid.NewGuid();
+                        newRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
                     }
 
                     // Loaded baseline
@@ -141,9 +139,9 @@ namespace PocoDataSet.ObservableExtensions
 
         private static void EnsureClientKeyColumnExists(IObservableDataTable table)
         {
-            if (!ContainsColumn(table.Columns, ClientKeyColumnName))
+            if (!ContainsColumn(table.Columns, SpecialColumnNames.CLIENT_KEY))
             {
-                table.AddColumn(ClientKeyColumnName, DataTypeNames.GUID, false, false, false);
+                table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID, false, false, false);
             }
         }
 

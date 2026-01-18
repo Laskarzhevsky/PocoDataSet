@@ -74,12 +74,12 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = currentDataSet.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow currentRow = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             currentRow["Id"] = 2;
             currentRow["Name"] = "Financial";
-            currentRow["__ClientKey"] = System.Guid.NewGuid();
+            currentRow[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
 
             // Baseline attach: Unchanged
             currentTable.AddLoadedRow(currentRow);
@@ -92,12 +92,12 @@ namespace PocoDataSet.Tests
             IDataTable changesetTable = changeset.AddNewTable("Department");
             changesetTable.AddColumn("Id", DataTypeNames.INT32);
             changesetTable.AddColumn("Name", DataTypeNames.STRING);
-            changesetTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            changesetTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow changesetRow = DataRowExtensions.CreateRowFromColumns(changesetTable.Columns);
             changesetRow["Id"] = 2;
             changesetRow["Name"] = "Financial";
-            changesetRow["__ClientKey"] = currentRow["__ClientKey"];
+            changesetRow[SpecialColumnNames.CLIENT_KEY] = currentRow[SpecialColumnNames.CLIENT_KEY];
 
             // IMPORTANT:
             // We must attach as baseline (Unchanged), then Delete().
@@ -133,7 +133,7 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentTable.AddColumn("RowVersion", DataTypeNames.BINARY);
             currentTable.PrimaryKeys = new List<string> { "Id" };
 
@@ -142,7 +142,7 @@ namespace PocoDataSet.Tests
             IDataRow currentRow = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             currentRow["Id"] = 10;
             currentRow["Name"] = "Before";
-            currentRow["__ClientKey"] = clientKey;
+            currentRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
             currentRow["RowVersion"] = new byte[] { 1, 2, 3, 4 };
             currentTable.AddLoadedRow(currentRow);
 
@@ -156,14 +156,14 @@ namespace PocoDataSet.Tests
             IDataTable changesetTable = changeset.AddNewTable("Department");
             changesetTable.AddColumn("Id", DataTypeNames.INT32);
             changesetTable.AddColumn("Name", DataTypeNames.STRING);
-            changesetTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            changesetTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             changesetTable.AddColumn("RowVersion", DataTypeNames.BINARY);
             changesetTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow serverRow = DataRowExtensions.CreateRowFromColumns(changesetTable.Columns);
             serverRow["Id"] = 10;
             serverRow["Name"] = "Edited";
-            serverRow["__ClientKey"] = clientKey;
+            serverRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
             serverRow["RowVersion"] = new byte[] { 9, 9, 9, 9 };
 
             // Mark as Modified in the changeset so PostSave applies it as an update
@@ -194,7 +194,7 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentTable.PrimaryKeys = new List<string> { "Id" };
 
             Guid clientKey = Guid.NewGuid();
@@ -203,7 +203,7 @@ namespace PocoDataSet.Tests
             IDataRow local = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             local["Id"] = 0;
             local["Name"] = "NewDept";
-            local["__ClientKey"] = clientKey;
+            local[SpecialColumnNames.CLIENT_KEY] = clientKey;
             currentTable.AddRow(local);
 
             Assert.Equal(DataRowState.Added, local.DataRowState);
@@ -213,13 +213,13 @@ namespace PocoDataSet.Tests
             IDataTable serverTable = serverChangeset.AddNewTable("Department");
             serverTable.AddColumn("Id", DataTypeNames.INT32);
             serverTable.AddColumn("Name", DataTypeNames.STRING);
-            serverTable.AddColumn("__ClientKey", DataTypeNames.GUID);
+            serverTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             serverTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow saved = DataRowExtensions.CreateRowFromColumns(serverTable.Columns);
             saved["Id"] = 123;
             saved["Name"] = "NewDept";
-            saved["__ClientKey"] = clientKey;
+            saved[SpecialColumnNames.CLIENT_KEY] = clientKey;
             serverTable.AddRow(saved); // Keep as Added in changeset
 
             // Act

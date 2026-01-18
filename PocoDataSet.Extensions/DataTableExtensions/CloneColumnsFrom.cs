@@ -12,21 +12,21 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Clones columns from data table
+        /// Clones columns from the source data table
         /// </summary>
-        /// <param name="clonedDataTable">Cloned data table</param>
         /// <param name="dataTable">Data table</param>
-        public static void CloneColumnsFrom(this IDataTable? clonedDataTable, IDataTable? dataTable)
+        /// <param name="sourceDataTable">Source data table</param>
+        public static void CloneColumnsFrom(this IDataTable? dataTable, IDataTable? sourceDataTable)
         {
-            if (clonedDataTable == null || dataTable == null)
+            if (dataTable == null || sourceDataTable == null)
             {
                 return;
             }
 
             List<IColumnMetadata> clonedListOfColumnMetadata = new List<IColumnMetadata>();
-            for (int i = 0; i < dataTable.Columns.Count; i++)
+            for (int i = 0; i < sourceDataTable.Columns.Count; i++)
             {
-                IColumnMetadata columnMetadata = dataTable.Columns[i];
+                IColumnMetadata columnMetadata = sourceDataTable.Columns[i];
                 IColumnMetadata clonedColumnMetadata = new ColumnMetadata();
                 clonedColumnMetadata.ColumnName = columnMetadata.ColumnName;
                 clonedColumnMetadata.DataType = columnMetadata.DataType;
@@ -42,7 +42,7 @@ namespace PocoDataSet.Extensions
                 clonedColumnMetadata.ReferencedTableName = columnMetadata.ReferencedTableName;
                 clonedColumnMetadata.Scale = columnMetadata.Scale;
 
-                clonedDataTable.Columns.Add(clonedColumnMetadata);
+                dataTable.Columns.Add(clonedColumnMetadata);
             }
         }
         #endregion

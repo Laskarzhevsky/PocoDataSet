@@ -5,24 +5,22 @@ using PocoDataSet.IData;
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Contains data set extension methods
+    /// Contains data table extension methods
     /// </summary>
     public static partial class DataTableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Gets "live" data row as an interface
+        /// Removes row at specified position from data table
         /// </summary>
-        /// <typeparam name="TInterface">POCO interface type</typeparam>
         /// <param name="dataTable">Data table</param>
         /// <param name="rowIndex">Row index</param>
-        /// <returns>"Live" data row as an interface</returns>
         /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if table does not have row with specified index</exception>
-        public static TInterface? AsInterface<TInterface>(this IDataTable? dataTable, int rowIndex) where TInterface : class
+        public static void RemoveRowAt(this IDataTable? dataTable, int rowIndex)
         {
             if (dataTable == null)
             {
-                return default(TInterface);
+                return;
             }
 
             if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
@@ -31,7 +29,7 @@ namespace PocoDataSet.Extensions
             }
 
             IDataRow dataRow = dataTable.Rows[rowIndex];
-            return DataRowExtensions.AsInterface<TInterface>(dataRow);
+            RemoveRow(dataTable, dataRow);
         }
         #endregion
     }

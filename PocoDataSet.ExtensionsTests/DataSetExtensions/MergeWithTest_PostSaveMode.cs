@@ -10,7 +10,7 @@ namespace PocoDataSet.ExtensionsTests
     public partial class DataSetExtensionsTests
     {
         [Fact]
-        public void MergeWithTest_PostSaveModeCopy()
+        public void MergeWithTest_PostSaveMode()
         {
             // Arrange
             // 1. Create a current data set with a newly added row (client-side)

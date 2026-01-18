@@ -11,12 +11,12 @@ namespace PocoDataSet.Extensions
     public static partial class DataTableExtensions
     {
         /// <summary>
-        /// Builds data row index
+        /// Builds primary key index
         /// </summary>
         /// <param name="dataTable">Current data table</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
-        /// <returns>Built data row index</returns>
-        public static Dictionary<string, IDataRow> BuildDataRowIndex(this IDataTable? dataTable, List<string> primaryKeyColumnNames)
+        /// <returns>Built primary key index</returns>
+        public static Dictionary<string, IDataRow> BuildPrimaryKeyIndex(this IDataTable? dataTable, List<string> primaryKeyColumnNames)
         {
             Dictionary<string, IDataRow> dataRowIndex = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
             if (dataTable == null)

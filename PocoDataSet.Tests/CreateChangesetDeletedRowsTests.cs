@@ -68,7 +68,7 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.AddColumn("__ClientKey", DataTypeNames.GUID);
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("RowVersion", DataTypeNames.BINARY);
             table.PrimaryKeys = new List<string> { "Id" };
 
@@ -76,7 +76,7 @@ namespace PocoDataSet.Tests
             IDataRow added = DataRowExtensions.CreateRowFromColumns(table.Columns);
             added["Id"] = 0;
             added["Name"] = "New";
-            added["__ClientKey"] = System.Guid.NewGuid();
+            added[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
             added["RowVersion"] = null;
             table.AddRow(added);
 
@@ -84,7 +84,7 @@ namespace PocoDataSet.Tests
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 5;
             loaded["Name"] = "Before";
-            loaded["__ClientKey"] = System.Guid.NewGuid();
+            loaded[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
             loaded["RowVersion"] = new byte[] { 1, 2, 3 };
             table.AddLoadedRow(loaded);
 
@@ -103,7 +103,7 @@ namespace PocoDataSet.Tests
             // Minimum contract: these columns must exist in changeset schema
             Assert.True(HasColumn(csTable, "Id"));
             Assert.True(HasColumn(csTable, "Name"));
-            Assert.True(HasColumn(csTable, "__ClientKey"));
+            Assert.True(HasColumn(csTable, SpecialColumnNames.CLIENT_KEY));
             Assert.True(HasColumn(csTable, "RowVersion"));
 
             // And we should have 2 rows (Added + Modified)

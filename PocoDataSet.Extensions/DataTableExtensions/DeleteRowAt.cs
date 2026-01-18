@@ -1,4 +1,6 @@
-﻿using PocoDataSet.IData;
+﻿using System;
+
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -13,6 +15,7 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="rowIndex">Row index</param>
+        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if table does not have row with specified index</exception>
         public static void DeleteRowAt(this IDataTable? dataTable, int rowIndex)
         {
             if (dataTable == null)
@@ -22,7 +25,7 @@ namespace PocoDataSet.Extensions
 
             if (rowIndex < 0 || rowIndex >= dataTable.Rows.Count)
             {
-                return;
+                throw new ArgumentOutOfRangeException(nameof(rowIndex));
             }
 
             IDataRow row = dataTable.Rows[rowIndex];

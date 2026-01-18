@@ -25,7 +25,7 @@ namespace PocoDataSet.ObservableExtensions
                 return new Dictionary<string, IDataRow>(System.StringComparer.Ordinal);
             }
 
-            return observableDataTable.InnerDataTable.BuildDataRowIndex(primaryKeyColumnNames);
+            return observableDataTable.InnerDataTable.BuildPrimaryKeyIndex(primaryKeyColumnNames);
         }
         #endregion
     }

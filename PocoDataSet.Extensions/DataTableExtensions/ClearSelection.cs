@@ -9,11 +9,9 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds column
+        /// Clears selection
         /// </summary>
         /// <param name="dataTable">Data table</param>
-        /// <param name="columnName">Column name</param>
-        /// <param name="dataType">Data type</param>
         public static void ClearSelection(this IDataTable? dataTable)
         {
             if (dataTable == null)

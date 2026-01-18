@@ -38,7 +38,7 @@ namespace PocoDataSet.Tests
                 IDataTable dept = current.AddNewTable("Department");
                 dept.AddColumn("Id", DataTypeNames.INT32);
                 dept.AddColumn("Name", DataTypeNames.STRING);
-                dept.AddColumn("__ClientKey", DataTypeNames.GUID);
+                dept.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
                 dept.AddColumn("RowVersion", DataTypeNames.BINARY);
                 dept.PrimaryKeys = new List<string> { "Id" };
 
@@ -47,7 +47,7 @@ namespace PocoDataSet.Tests
                 IDataRow local = DataRowExtensions.CreateRowFromColumns(dept.Columns);
                 local["Id"] = 0; // temporary identity placeholder
                 local["Name"] = "HR";
-                local["__ClientKey"] = clientKey;
+                local[SpecialColumnNames.CLIENT_KEY] = clientKey;
                 local["RowVersion"] = null;
                 dept.AddRow(local);
 
