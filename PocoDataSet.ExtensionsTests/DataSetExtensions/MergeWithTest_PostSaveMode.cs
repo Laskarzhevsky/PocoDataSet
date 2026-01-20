@@ -15,6 +15,7 @@ namespace PocoDataSet.ExtensionsTests
             // Arrange
             // 1. Create a current data set with a newly added row (client-side)
             IDataSet currentDataSet = DataSetFactory.CreateDataSet();
+
             IDataTable currentDepartment = currentDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32); // identity in DB
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);

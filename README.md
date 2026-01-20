@@ -127,6 +127,30 @@ The `PocoDataSet.SqlServerDataAdapter` project provides a lightweight SQL Server
 
 ---
 
+- **PocoDataSet.EfCoreBridge**  
+  Optional bridge between Entity Framework Core and PocoDataSet.
+  It provides convenience helpers to materialize EF Core queries (sync/async) and project results into a PocoDataSet `IDataTable`.
+
+  ## Purpose
+  - Convert `IQueryable<TEntity>` results into `IDataTable` using explicit schema (`List<IColumnMetadata>`).
+  - Support both synchronous and asynchronous query execution (`ToDataTable(...)` / `ToDataTableAsync(...)`).
+  - Keep UI layers dataset-driven while allowing EF Core as the persistence/query model.
+
+  ## Key types / extension methods
+  - `QueryableExtensions.ToDataTable(...)`
+  - `QueryableExtensions.ToDataTableAsync(...)`
+
+  ## Notable behaviors
+  - Schema is provided explicitly via `listOfColumnMetadata` to keep deterministic columns and avoid accidentally including navigation/complex properties.
+  - Internally, the bridge composes existing PocoDataSet extensions:
+    - `IDataSet.PocoListToDataTable<T>(...)`
+    - `IDataTable.CopyFromPocoList<T>(...)`
+    - `IDataRow.CopyFromPoco(...)` / `IDataRow.CopyToPoco(...)`
+    - `IDataRow.ToPoco<T>()`
+
+  ## Where to find it in the solution
+  - Project folder: `PocoDataSet.EfCoreBridge`
+
 ## Getting started
 
 ### 1. Add the projects to your solution

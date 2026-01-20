@@ -1,6 +1,5 @@
-using PocoDataSet.Extensions;
+using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -11,7 +10,9 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Rejects changes for observable table (delegates to inner table)
+        /// Rejects changes for an observable data table in an observable-aware way.
+        /// Added (and Detached) rows are removed from the observable table (raising RowsRemoved).
+        /// Modified and Deleted rows are reverted and RowStateChanged is raised.
         /// </summary>
         /// <param name="observableDataTable">Observable data table</param>
         public static void RejectChanges(this IObservableDataTable? observableDataTable)
@@ -21,14 +22,29 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            ObservableDataTable? concreteTable = observableDataTable as ObservableDataTable;
-            if (concreteTable != null)
+            // Walk backwards so row removals are safe.
+            for (int i = observableDataTable.Rows.Count - 1; i >= 0; i--)
             {
-                concreteTable.RejectChanges();
-                return;
-            }
+                IObservableDataRow observableRow = observableDataTable.Rows[i];
 
-            observableDataTable.InnerDataTable.RejectChanges();
+                switch (observableRow.DataRowState)
+                {
+                    case DataRowState.Added:
+                    case DataRowState.Detached:
+                        observableDataTable.RemoveRowAt(i);
+                        break;
+
+                    case DataRowState.Modified:
+                    case DataRowState.Deleted:
+                        observableRow.RejectChanges();
+                        break;
+
+                    case DataRowState.Unchanged:
+                    default:
+                        // Unchanged -> nothing to do
+                        break;
+                }
+            }
         }
         #endregion
     }

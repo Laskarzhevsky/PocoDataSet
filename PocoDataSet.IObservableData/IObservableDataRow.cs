@@ -23,12 +23,25 @@ namespace PocoDataSet.IObservableData
 
         #region Methods
         /// <summary>
+        /// Accepts changes on the inner data row and raises RowStateChanged if the row state changes.
+        /// Note: Deleted rows should typically be handled at table level because accepting a deletion may remove the row from a table.
+        /// </summary>
+        /// <param name="requestor">Object which requests update</param>
+        void AcceptChanges(object? requestor = null);
+
+        /// <summary>
         /// Gets data field value
         /// </summary>
         /// <typeparam name="T"><Value type/typeparam>
         /// <param name="columnName">Column name</param>
         /// <returns>Data field value</returns>
         T? GetDataFieldValue<T>(string columnName);
+
+        /// <summary>
+        /// Rejects changes
+        /// </summary>
+        /// <param name="requestor">Method execution requestor</param>
+        void RejectChanges(object? requestor = null);
 
         /// <summary>
         /// Updates data field value

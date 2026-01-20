@@ -1,6 +1,4 @@
-using PocoDataSet.Extensions;
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -11,7 +9,8 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Rejects changes for observable data set (delegates to inner data set)
+        /// Rejects changes for an observable data set by delegating to each observable table.
+        /// This ensures observable row collections stay consistent and observable events are raised.
         /// </summary>
         /// <param name="observableDataSet">Observable data set</param>
         public static void RejectChanges(this IObservableDataSet? observableDataSet)
@@ -21,14 +20,10 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            ObservableDataSet? concreteDataSet = observableDataSet as ObservableDataSet;
-            if (concreteDataSet != null)
+            foreach (IObservableDataTable table in observableDataSet.Tables.Values)
             {
-                concreteDataSet.RejectChanges();
-                return;
+                table.RejectChanges();
             }
-
-            observableDataSet.InnerDataSet.RejectChanges();
         }
         #endregion
     }

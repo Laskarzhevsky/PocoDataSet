@@ -51,6 +51,26 @@ namespace PocoDataSet.ObservableData
 
         #region Public Methods
         /// <summary>
+        /// Accepts changes on the inner data row and raises RowStateChanged if the row state changes.
+        /// Note: Deleted rows should typically be handled at table level because accepting a deletion may remove the row from a table.
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        /// <param name="requestor">Object which requests update</param>
+        public void AcceptChanges(object? requestor = null)
+        {
+            DataRowState oldState = _innerDataRow.DataRowState;
+            if (oldState == DataRowState.Deleted)
+            {
+                throw new System.InvalidOperationException("Deleted rows should be accepted at table level. Use IObservableDataTable.AcceptChanges() instead.");
+            }
+
+            _innerDataRow.AcceptChanges();
+
+            DataRowState newState = _innerDataRow.DataRowState;
+            RaiseRowStateChangedEvent(oldState, newState, requestor);
+        }
+
+        /// <summary>
         /// Gets data field value
         /// IObservableDataRow interface implementation
         /// </summary>
@@ -60,6 +80,23 @@ namespace PocoDataSet.ObservableData
         public T? GetDataFieldValue<T>(string columnName)
         {
             return _innerDataRow.GetDataFieldValue<T>(columnName);
+        }
+
+        /// <summary>
+        /// Rejects changes
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        /// <param name="requestor">Method execution requestor</param>
+        public void RejectChanges(object? requestor = null)
+        {
+            DataRowState oldState = _innerDataRow.DataRowState;
+
+            _innerDataRow.RejectChanges();
+
+            DataRowState newState = _innerDataRow.DataRowState;
+
+            // If state changed (e.g., Modified -> Unchanged), raise observable event
+            RaiseRowStateChangedEvent(oldState, newState, requestor);
         }
 
         /// <summary>

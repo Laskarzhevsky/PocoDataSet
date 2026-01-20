@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ExtensionsTests", "PocoDataSet.ExtensionsTests\PocoDataSet.ExtensionsTests.csproj", "{7DD6F071-655E-4DF4-BA60-26EDC719896D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableExtensionsTests", "PocoDataSet.ObservableExtensionsTests\PocoDataSet.ObservableExtensionsTests.csproj", "{47224059-08FB-4D47-A1E0-BC4B12CE4A72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,6 +116,10 @@ Global
 		{7DD6F071-655E-4DF4-BA60-26EDC719896D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DD6F071-655E-4DF4-BA60-26EDC719896D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DD6F071-655E-4DF4-BA60-26EDC719896D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47224059-08FB-4D47-A1E0-BC4B12CE4A72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47224059-08FB-4D47-A1E0-BC4B12CE4A72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47224059-08FB-4D47-A1E0-BC4B12CE4A72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47224059-08FB-4D47-A1E0-BC4B12CE4A72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
