@@ -28,7 +28,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             RowStateChangedEventHandler rowStateChangedEventHandler = new RowStateChangedEventHandler();
 
             departmentObservableDataRow.DataFieldValueChanged += dataFieldValueChangedEventHandler.Handle;
-            departmentObservableDataRow.RowStateChanged += rowStateChangedEventHandler.Handler;
+            departmentObservableDataRow.RowStateChanged += rowStateChangedEventHandler.Handle;
 
             IDepartment department = new Department();
             department.id = 1;

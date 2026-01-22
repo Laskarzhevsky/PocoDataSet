@@ -23,7 +23,21 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            dataTable.Columns = listOfColumnMetadata;
+            if (dataTable.Columns == null)
+            {
+                dataTable.Columns = listOfColumnMetadata;
+            }
+            else
+            {
+                for (int i = 0; i < listOfColumnMetadata.Count; i++)
+                {
+                    IColumnMetadata c = listOfColumnMetadata[i];
+                    if (!dataTable.ContainsColumn(c.ColumnName))
+                    {
+                        dataTable.AddColumn(c.ColumnName, c.DataType, c.IsNullable, c.IsPrimaryKey, c.IsForeignKey);
+                    }
+                }
+            }
 
             // Reuse the same invariant logic as AddColumn
             for (int i = 0; i < listOfColumnMetadata.Count; i++)

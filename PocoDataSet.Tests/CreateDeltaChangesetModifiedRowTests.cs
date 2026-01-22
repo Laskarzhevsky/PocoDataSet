@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-using Xunit;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
+
+using Xunit;
 
 namespace PocoDataSet.Tests
 {
@@ -259,6 +261,7 @@ namespace PocoDataSet.Tests
             bool _isPrimaryKey;
             bool _isIdentity;
             int? _maxLength;
+            private bool _isForeignKey;
 
             public static IColumnMetadata Create(
                 string columnName,
@@ -292,10 +295,14 @@ namespace PocoDataSet.Tests
                     return _columnName!;
                 if (targetMethod.Name == "get_DataTypeName")
                     return _dataTypeName!;
+                if (targetMethod.Name == "get_DataType")
+                    return _dataTypeName!;
                 if (targetMethod.Name == "get_IsNullable")
                     return _isNullable;
                 if (targetMethod.Name == "get_IsPrimaryKey")
                     return _isPrimaryKey;
+                if (targetMethod.Name == "get_IsForeignKey")
+                    return _isForeignKey;
 
                 // Common optional metadata properties (safe defaults)
                 if (targetMethod.Name == "get_IsIdentity")

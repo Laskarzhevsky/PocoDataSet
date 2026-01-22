@@ -31,32 +31,38 @@ namespace PocoDataSet.ObservableExtensionsTests
             int count = 0;
             for (int i = 0; i < _handledRowStateChangedEvents.Count; i++)
             {
-                if (oldState == null && newState == null)
+                IObservableDataRow? handledObservableDataRow = _handledRowStateChangedEvents[i].ObservableDataRow;
+                if (handledObservableDataRow == null)
                 {
-                    if (_handledRowStateChangedEvents[i].ObservableDataRow == observableDataRow)
+                    continue;
+                }
+
+                if (handledObservableDataRow == observableDataRow)
+                {
+                    if (oldState == null && newState == null)
                     {
                         count++;
                     }
-                }
-                else if (oldState != null && newState == null)
-                {
-                    if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.OldState == oldState)
+                    else if (oldState != null && newState == null)
                     {
-                        count++;
+                        if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.OldState == oldState)
+                        {
+                            count++;
+                        }
                     }
-                }
-                else if (oldState == null && newState != null)
-                {
-                    if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.NewState == newState)
+                    else if (oldState == null && newState != null)
                     {
-                        count++;
+                        if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.NewState == newState)
+                        {
+                            count++;
+                        }
                     }
-                }
-                else if (oldState != null && newState != null)
-                {
-                    if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.OldState == oldState && _handledRowStateChangedEvents[i].RowStateChangedEventArgs.NewState == newState)
+                    else if (oldState != null && newState != null)
                     {
-                        count++;
+                        if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.OldState == oldState && _handledRowStateChangedEvents[i].RowStateChangedEventArgs.NewState == newState)
+                        {
+                            count++;
+                        }
                     }
                 }
             }
@@ -65,26 +71,13 @@ namespace PocoDataSet.ObservableExtensionsTests
         }
         #endregion
 
-        public bool HasTransition(IObservableDataRow observableDataRow, DataRowState oldState, DataRowState newState)
-        {
-            for (int i = 0; i < _handledRowStateChangedEvents.Count; i++)
-            {
-                if (_handledRowStateChangedEvents[i].RowStateChangedEventArgs.OldState == oldState && _handledRowStateChangedEvents[i].RowStateChangedEventArgs.NewState == newState)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         #region Evnet Handlers
         /// <summary>
         /// Handles RowStateChanged Event
         /// </summary>
         /// <param name="sender">Event source</param>
         /// <param name="e">Event arguments</param>
-        public void Handler(object? sender, RowStateChangedEventArgs e)
+        public void Handle(object? sender, RowStateChangedEventArgs e)
         {
             if (sender == null) 
             {

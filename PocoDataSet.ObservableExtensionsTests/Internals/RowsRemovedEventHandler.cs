@@ -45,7 +45,7 @@ namespace PocoDataSet.ObservableExtensionsTests
         /// </summary>
         /// <param name="sender">Event source</param>
         /// <param name="e">Event arguments</param>
-        public void Handler(object? sender, RowsChangedEventArgs e)
+        public void Handle(object? sender, RowsChangedEventArgs e)
         {
             if (sender == null)
             {

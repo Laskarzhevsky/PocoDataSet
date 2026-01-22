@@ -52,15 +52,16 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             employeeObservableDataRow["FirstName"] = "John";
             employeeObservableDataRow["LastName"] = "Doe";
             employeeObservableDataTable.AcceptChanges();
+            employeeObservableDataRow["FirstName"] = "Paul";
             employeeObservableDataRow.Delete();
 
             // Event counters
             RowsRemovedEventHandler rowsRemovedEventHandler = new RowsRemovedEventHandler();
             RowStateChangedEventHandler rowStateChangedEventHandler = new RowStateChangedEventHandler();
 
-            departmentObservableDataTable.RowsRemoved += rowsRemovedEventHandler.Handler;
-            employmentTypeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handler;
-            employeeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handler;
+            departmentObservableDataTable.RowsRemoved += rowsRemovedEventHandler.Handle;
+            employmentTypeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handle;
+            employeeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handle;
 
             // Act
             // 5. Reject changes at data set level
@@ -76,11 +77,11 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
 
             Assert.Equal(DataRowState.Unchanged, employmentTypeObservableDataRow.DataRowState);
             Assert.Equal("Full Time", employmentTypeObservableDataRow["Description"]);
-
-            Assert.Equal(DataRowState.Unchanged, employeeObservableDataRow.DataRowState);
-
             Assert.Equal(1, rowsRemovedEventHandler.GetEventCount());
             Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(employmentTypeObservableDataRow, DataRowState.Modified, DataRowState.Unchanged));
+
+            Assert.Equal("John", employeeObservableDataRow["FirstName"]);
+            Assert.Equal(DataRowState.Unchanged, employeeObservableDataRow.DataRowState);
             Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(employeeObservableDataRow, DataRowState.Deleted, DataRowState.Unchanged));
         }
     }

@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-
-using PocoDataSet.Extensions;
-using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableExtensions
@@ -13,18 +9,20 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds columns to observable table (delegates to inner table)
+        /// Deletes observable row from observable table (delegates to inner table)
         /// </summary>
         /// <param name="observableDataTable">Observable data table</param>
-        /// <param name="columns">Columns</param>
-        public static void AddColumns(this IObservableDataTable? observableDataTable, List<IColumnMetadata> columns)
+        public static void ClearRows(this IObservableDataTable? observableDataTable)
         {
             if (observableDataTable == null)
             {
                 return;
             }
 
-            observableDataTable.InnerDataTable.AddColumns(columns);
+            for (int i = observableDataTable.InnerDataTable.Rows.Count - 1; i >= 0; i--)
+            {
+                observableDataTable.RemoveRowAt(i);
+            }
         }
         #endregion
     }

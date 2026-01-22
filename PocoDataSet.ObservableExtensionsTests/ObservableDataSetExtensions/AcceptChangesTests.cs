@@ -62,9 +62,9 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             RowsRemovedEventHandler rowsRemovedEventHandler = new RowsRemovedEventHandler();
             RowStateChangedEventHandler rowStateChangedEventHandler = new RowStateChangedEventHandler();
 
-            departmentObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handler;
-            employmentTypeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handler;
-            employeeObservableDataTable.RowsRemoved += rowsRemovedEventHandler.Handler;
+            departmentObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handle;
+            employmentTypeObservableDataTable.RowStateChanged += rowStateChangedEventHandler.Handle;
+            employeeObservableDataTable.RowsRemoved += rowsRemovedEventHandler.Handle;
 
             // Act
             // 5. Accept changes at data set level
@@ -85,7 +85,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             Assert.Equal(1, employmentTypeObservableDataTable.Rows[0]["Id"]);
             Assert.Equal("ET01", employmentTypeObservableDataTable.Rows[0]["Code"]);
             Assert.Equal("Part Time", employmentTypeObservableDataTable.Rows[0]["Description"]);
-            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(employmentTypeObservableDataRow, DataRowState.Added, DataRowState.Unchanged));
+            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(employmentTypeObservableDataRow, DataRowState.Modified, DataRowState.Unchanged));
 
             // - Employee: deleted row removed from the table
             Assert.Empty(employeeObservableDataTable.Rows);

@@ -119,6 +119,23 @@ namespace PocoDataSet.ObservableData
         /// Removes row
         /// IObservableDataTable interface implementation
         /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        public void RemoveRow(IObservableDataRow observableDataRow)
+        {
+            observableDataRow.DataFieldValueChanged -= ObservableDataRow_DataFieldValueChanged;
+            observableDataRow.RowStateChanged -= ObservableDataRow_RowStateChanged;
+
+            int rowIndex = GetRowIndex(observableDataRow);
+            _innerDataTable.RemoveRow(observableDataRow.InnerDataRow);
+            Rows.Remove(observableDataRow);
+
+            RaiseRowRemovedEvent(rowIndex, observableDataRow);
+        }
+
+        /// <summary>
+        /// Removes row
+        /// IObservableDataTable interface implementation
+        /// </summary>
         /// <param name="rowIndex">Row index</param>
         /// <returns>Removed observable data row </returns>
         public IObservableDataRow RemoveRowAt(int rowIndex)
@@ -215,6 +232,25 @@ namespace PocoDataSet.ObservableData
 
                 RaiseRowAddedEvent(_observableDataRows.Count - 1, observableDataRow);
             }
+        }
+
+        /// <summary>
+        /// Gets row index
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        /// <returns>Row index</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        int GetRowIndex(IObservableDataRow observableDataRow)
+        {
+            for (int i = 0; i < Rows.Count; i++)
+            {
+                if (Rows[i] == observableDataRow)
+                {
+                    return i;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException("Row index not found");
         }
 
         /// <summary>
