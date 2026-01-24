@@ -126,22 +126,26 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return;
             }
 
-            // Ensure PrimaryKey list is initialized
-            DataTable.PrimaryKeys = new List<string>();
+            // Primary keys are a table-level contract.
+            // Use the IDataTable primary key API so the table remains the single source of truth.
+            DataTable.ClearPrimaryKeys();
             if (PrimaryKeyData == null || PrimaryKeyData.Count == 0)
             {
                 return;
             }
 
             // Preserve table column order when building the primary key list
-            foreach (var columnMetadata in DataTable.Columns)
+            List<string> orderedPrimaryKeys = new List<string>();
+            foreach (IColumnMetadata columnMetadata in DataTable.Columns)
             {
                 if (PrimaryKeyData.Contains(columnMetadata.ColumnName))
                 {
-                    DataTable.PrimaryKeys.Add(columnMetadata.ColumnName);
+                    orderedPrimaryKeys.Add(columnMetadata.ColumnName);
                 }
             }
-        }
+
+            DataTable.SetPrimaryKeys(orderedPrimaryKeys);
+}
 
         /// <summary>
         /// Adds rows to data table
