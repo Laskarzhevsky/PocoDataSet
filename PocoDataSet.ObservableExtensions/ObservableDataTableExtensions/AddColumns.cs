@@ -16,15 +16,15 @@ namespace PocoDataSet.ObservableExtensions
         /// Adds columns to observable table (delegates to inner table)
         /// </summary>
         /// <param name="observableDataTable">Observable data table</param>
-        /// <param name="columns">Columns</param>
-        public static void AddColumns(this IObservableDataTable? observableDataTable, List<IColumnMetadata> columns)
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public static void AddColumns(this IObservableDataTable? observableDataTable, List<IColumnMetadata> listOfColumnMetadata)
         {
             if (observableDataTable == null)
             {
                 return;
             }
 
-            observableDataTable.InnerDataTable.AddColumns(columns);
+            observableDataTable.InnerDataTable.AddColumns(listOfColumnMetadata);
         }
         #endregion
     }

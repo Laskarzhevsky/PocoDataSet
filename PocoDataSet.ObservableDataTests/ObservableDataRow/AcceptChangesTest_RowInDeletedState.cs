@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
@@ -8,15 +7,15 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
+namespace PocoDataSet.ObservableDataTests.ObservableDataRow
 {
     public partial class ObservableDataRowExtensionsTests
     {
         [Fact]
-        public void RejectChangesTest_RowInModifiedState()
+        public void AcceptChangesTest_RowInDeletedState()
         {
             // Arrange
-            // 1. Create a new observable data
+            // 1. Create a new observable data set
             IObservableDataSet observableDataSet = new ObservableDataSet();
 
             // 2. Create observable table and row
@@ -28,26 +27,18 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             departmentObservableDataRow["Id"] = 1;
             departmentObservableDataRow["Name"] = "Sales";
 
-            // 3. Accept the row changes to put row into Unchenged state
+            // 3. Accept the row changes
             departmentObservableDataRow.AcceptChanges();
 
-            // Department name is Sales
-            string? departmentName = departmentObservableDataRow["Name"] as string;
-
-            // 4. Modify row data
-            departmentObservableDataRow["Name"] = "Reception";
-
-            // Department name is Reception
-            departmentName = departmentObservableDataRow["Name"] as string;
+            // 4. Call Delete method to put row into Deleted state
+            departmentObservableDataRow.Delete();
 
             // Act
-            // 5. Call RejectChanges
-            departmentObservableDataRow.RejectChanges();
-
-            // Assert
-            // Department name is Sales
-            departmentName = departmentObservableDataRow["Name"] as string;
-            Assert.Equal("Sales", departmentName);
+            // 5. Call AcceptChanges method and observe that exception is thrown
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                departmentObservableDataRow.AcceptChanges();
+            });
         }
     }
 }

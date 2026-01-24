@@ -1,4 +1,5 @@
 using PocoDataSet.Extensions;
+using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableExtensions
@@ -18,15 +19,16 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="isNullable">Flag indicating whether column is nullable</param>
         /// <param name="isPrimaryKey">Flag indicating whether column is primary key</param>
         /// <param name="isForeignKey">Flag indicating whether column is foreign key</param>
-        public static void AddColumn(this IObservableDataTable? observableDataTable, string columnName, string dataType, bool? isNullable = null, bool? isPrimaryKey = null, bool? isForeignKey = null)
+        /// <returns>Added column to observable table</returns>
+        public static IColumnMetadata AddColumn(this IObservableDataTable? observableDataTable, string columnName, string dataType, bool? isNullable = null, bool? isPrimaryKey = null, bool? isForeignKey = null)
         {
             if (observableDataTable == null)
             {
-                return;
+                return default!;
             }
 
-            observableDataTable.InnerDataTable.AddColumn(columnName, dataType, isNullable, isPrimaryKey, isForeignKey);
-}
+            return observableDataTable.InnerDataTable.AddColumn(columnName, dataType, isNullable, isPrimaryKey, isForeignKey);
+        }
         #endregion
     }
 }

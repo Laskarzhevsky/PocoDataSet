@@ -13,12 +13,12 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Builds data row index for inner table
+        /// Builds primary key index (delegates to inner table)
         /// </summary>
         /// <param name="observableDataTable">Observable data table</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
-        /// <returns>Index</returns>
-        public static Dictionary<string, IDataRow> BuildDataRowIndex(this IObservableDataTable? observableDataTable, List<string> primaryKeyColumnNames)
+        /// <returns>Built data row index for inner table</returns>
+        public static Dictionary<string, IDataRow> BuildPrimaryKeyIndex(this IObservableDataTable? observableDataTable, List<string> primaryKeyColumnNames)
         {
             if (observableDataTable == null)
             {

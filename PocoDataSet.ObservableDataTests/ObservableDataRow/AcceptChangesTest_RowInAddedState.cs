@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
@@ -8,15 +7,15 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
+namespace PocoDataSet.ObservableDataTests.ObservableDataRow
 {
     public partial class ObservableDataRowExtensionsTests
     {
         [Fact]
-        public void RejectChangesTest_RowInAddedState()
+        public void AcceptChangesTest_RowInAddedState()
         {
             // Arrange
-            // 1. Create a new observable data
+            // 1. Create a new observable data set
             IObservableDataSet observableDataSet = new ObservableDataSet();
 
             // 2. Create observable table and row
@@ -29,11 +28,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             departmentObservableDataRow["Name"] = "Sales";
 
             // Act
-            // 3. Call RejectChanges method and observe thrown InvalidOperationException
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                departmentObservableDataRow.RejectChanges();
-            });
+            // 3. Accept the row changes
+            departmentObservableDataRow.AcceptChanges();
+
+            // Assert
+            Assert.Equal(DataRowState.Unchanged.ToString(), departmentObservableDataRow.DataRowState.ToString());
+            Assert.Equal("Sales", departmentObservableDataRow["Name"]);
         }
     }
 }

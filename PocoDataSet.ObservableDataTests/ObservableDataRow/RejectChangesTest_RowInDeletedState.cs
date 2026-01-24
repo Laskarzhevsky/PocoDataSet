@@ -8,7 +8,7 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
+namespace PocoDataSet.ObservableDataTests.ObservableDataRow
 {
     public partial class ObservableDataRowExtensionsTests
     {

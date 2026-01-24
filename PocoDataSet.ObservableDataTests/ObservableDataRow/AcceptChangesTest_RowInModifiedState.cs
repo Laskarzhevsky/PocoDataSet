@@ -7,12 +7,12 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
+namespace PocoDataSet.ObservableDataTests.ObservableDataRow
 {
     public partial class ObservableDataRowExtensionsTests
     {
         [Fact]
-        public void AcceptChangesTest_RowInAddedState()
+        public void AcceptChangesTest_RowInModifiedState()
         {
             // Arrange
             // 1. Create a new observable data set
@@ -27,13 +27,19 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             departmentObservableDataRow["Id"] = 1;
             departmentObservableDataRow["Name"] = "Sales";
 
-            // Act
             // 3. Accept the row changes
+            departmentObservableDataRow.AcceptChanges();
+
+            // 4. Update row data to put row into Modified state
+            departmentObservableDataRow["Name"] = "Reception";
+
+            // Act
+            // 5. Call AcceptChanges method and observe that row is in Unchanged state
             departmentObservableDataRow.AcceptChanges();
 
             // Assert
             Assert.Equal(DataRowState.Unchanged.ToString(), departmentObservableDataRow.DataRowState.ToString());
-            Assert.Equal("Sales", departmentObservableDataRow["Name"]);
+            Assert.Equal("Reception", departmentObservableDataRow["Name"]);
         }
     }
 }
