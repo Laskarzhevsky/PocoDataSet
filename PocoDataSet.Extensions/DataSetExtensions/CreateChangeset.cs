@@ -64,7 +64,7 @@ namespace PocoDataSet.Extensions
                         primaryKeys.Add(sourceTable.PrimaryKeys[i]);
                     }
 
-                    targetTable.PrimaryKeys = primaryKeys;
+                    targetTable.SetPrimaryKeys(primaryKeys);
                 }
 
                 // Copy rows as deltas

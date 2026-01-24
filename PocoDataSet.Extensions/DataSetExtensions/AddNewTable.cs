@@ -69,7 +69,7 @@ namespace PocoDataSet.Extensions
                     IColumnMetadata columnMetadata = listOfColumnMetadata[i];
                     if (columnMetadata != null && columnMetadata.IsPrimaryKey)
                     {
-                        dataTable.PrimaryKeys.Add(columnMetadata.ColumnName);
+                        dataTable.AddPrimaryKey(columnMetadata.ColumnName);
                     }
                 }
             }

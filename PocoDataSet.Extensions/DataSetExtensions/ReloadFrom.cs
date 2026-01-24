@@ -63,7 +63,7 @@ namespace PocoDataSet.Extensions
                     {
                         pk.Add(refreshedTable.PrimaryKeys[i]);
                     }
-                    currentTable.PrimaryKeys = pk;
+                    currentTable.SetPrimaryKeys(pk);
                 }
 
                 EnsureClientKeyColumnExists(currentTable);

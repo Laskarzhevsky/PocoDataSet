@@ -74,7 +74,7 @@ namespace PocoDataSet.Extensions
                     }
                 }
 
-                dataTable.PrimaryKeys = primaryKeys;
+                dataTable.SetPrimaryKeys(primaryKeys);
             }
         }
         #endregion

@@ -51,10 +51,21 @@ namespace PocoDataSet.IData
         void AddLoadedRow(IDataRow dataRow);
 
         /// <summary>
+        /// Adds a primary key column name to the table.
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        void AddPrimaryKey(string columnName);
+
+        /// <summary>
         /// Adds row
         /// </summary>
         /// <param name="dataRow">Data row</param>
         void AddRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Clears table primary keys.
+        /// </summary>
+        void ClearPrimaryKeys();
 
         /// <summary>
         /// Gets flag indicating whether table contains specified row
@@ -80,6 +91,12 @@ namespace PocoDataSet.IData
         /// </summary>
         /// <param name="rowIndex">Row index</param>
         void RemoveRowAt(int rowIndex);
+
+        /// <summary>
+        /// Sets primary key column names for the table.
+        /// </summary>
+        /// <param name="primaryKeyColumnNames">Primary key column names</param>
+        void SetPrimaryKeys(IList<string> primaryKeyColumnNames);
         #endregion
     }
 }

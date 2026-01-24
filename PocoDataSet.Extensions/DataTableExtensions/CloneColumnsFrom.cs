@@ -44,6 +44,12 @@ namespace PocoDataSet.Extensions
 
                 dataTable.Columns.Add(clonedColumnMetadata);
             }
+
+            // Preserve primary keys from source table
+            if (sourceDataTable.PrimaryKeys != null && sourceDataTable.PrimaryKeys.Count > 0)
+            {
+                dataTable.SetPrimaryKeys(new List<string>(sourceDataTable.PrimaryKeys));
+            }
         }
         #endregion
     }

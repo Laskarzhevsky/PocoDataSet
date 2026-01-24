@@ -118,28 +118,10 @@ namespace PocoDataSet.Extensions
 
             dataTable.Columns.Add(columnMetadata);
 
-            // Keep table.PrimaryKeys in sync with column metadata
+            // Keep table.PrimaryKeys as a single source of truth
             if (columnMetadata.IsPrimaryKey)
             {
-                if (dataTable.PrimaryKeys == null)
-                {
-                    dataTable.PrimaryKeys = new List<string>();
-                }
-
-                bool exists = false;
-                for (int i = 0; i < dataTable.PrimaryKeys.Count; i++)
-                {
-                    if (string.Equals(dataTable.PrimaryKeys[i], columnName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists)
-                {
-                    dataTable.PrimaryKeys.Add(columnName);
-                }
+                dataTable.AddPrimaryKey(columnName);
             }
 
             EnsureExistingRowsHaveColumn(dataTable, columnName);

@@ -87,7 +87,7 @@ namespace PocoDataSet.Data
         } = string.Empty;
         #endregion
 
-        #region Methods
+        #region Public Methods
         /// <summary>
         /// Adds loaded row from data storage
         /// IDataTable interface implementation
@@ -140,6 +140,33 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
+        /// Adds a primary key column name to the table.
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        public void AddPrimaryKey(string columnName)
+        {
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                throw new ArgumentException("Primary key column name cannot be empty.", nameof(columnName));
+            }
+
+            EnsureColumnExists(columnName);
+
+            for (int i = 0; i < PrimaryKeys.Count; i++)
+            {
+                if (string.Equals(PrimaryKeys[i], columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    MarkColumnAsPrimaryKey(columnName);
+                    return;
+                }
+            }
+
+            PrimaryKeys.Add(columnName);
+            MarkColumnAsPrimaryKey(columnName);
+        }
+
+        /// <summary>
         /// Adds row
         /// IDataTable interface implementation
         /// </summary>
@@ -183,6 +210,27 @@ namespace PocoDataSet.Data
             }
 
             _rows.Add(dataRow);
+        }
+
+        /// <summary>
+        /// Clears table primary keys.
+        /// IDataTable interface implementation
+        /// </summary>
+        public void ClearPrimaryKeys()
+        {
+            PrimaryKeys.Clear();
+
+            if (Columns != null)
+            {
+                for (int i = 0; i < Columns.Count; i++)
+                {
+                    IColumnMetadata columnMetadata = Columns[i];
+                    if (columnMetadata != null)
+                    {
+                        columnMetadata.IsPrimaryKey = false;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -234,6 +282,91 @@ namespace PocoDataSet.Data
             }
 
             _rows.RemoveAt(rowIndex);
+        }
+
+        /// <summary>
+        /// Sets primary key column names for the table.
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <param name="primaryKeyColumnNames">Primary key column names</param>
+        public void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
+        {
+            PrimaryKeys.Clear();
+
+            if (Columns != null)
+            {
+                for (int i = 0; i < Columns.Count; i++)
+                {
+                    IColumnMetadata columnMetadata = Columns[i];
+                    if (columnMetadata != null)
+                    {
+                        columnMetadata.IsPrimaryKey = false;
+                    }
+                }
+            }
+
+            if (primaryKeyColumnNames == null || primaryKeyColumnNames.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < primaryKeyColumnNames.Count; i++)
+            {
+                string columnName = primaryKeyColumnNames[i];
+                if (string.IsNullOrWhiteSpace(columnName))
+                {
+                    continue;
+                }
+
+                AddPrimaryKey(columnName);
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Ensures that column exists
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        private void EnsureColumnExists(string columnName)
+        {
+            if (Columns == null)
+            {
+                throw new InvalidOperationException("Table columns are not initialized.");
+            }
+
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                IColumnMetadata columnMetadata = Columns[i];
+                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException($"Primary key column '{columnName}' does not exist in table '{TableName}'.");
+        }
+
+        /// <summary>
+        /// Marks column as primary key
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        private void MarkColumnAsPrimaryKey(string columnName)
+        {
+            if (Columns == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < Columns.Count; i++)
+            {
+                IColumnMetadata columnMetadata = Columns[i];
+                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
+                {
+                    columnMetadata.IsPrimaryKey = true;
+                    return;
+                }
+            }
         }
         #endregion
     }
