@@ -85,6 +85,14 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
+        /// Gets list of primary key column names (single source of truth for row identity)
+        /// </summary>
+        List<string> PrimaryKeys
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets rows
         /// </summary>
         IList<IObservableDataRow> Rows

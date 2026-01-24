@@ -38,12 +38,12 @@ namespace PocoDataSet.ObservableExtensions
                 }
             }
 
-            // 2) Discover composite primary key from schema
-            foreach (IColumnMetadata columnMetadata in observableDataTable.Columns)
+            // 2) Use table primary keys (single source of truth)
+            if (observableDataTable.PrimaryKeys != null && observableDataTable.PrimaryKeys.Count > 0)
             {
-                if (columnMetadata != null && columnMetadata.IsPrimaryKey)
+                for (int i = 0; i < observableDataTable.PrimaryKeys.Count; i++)
                 {
-                    listOfPrimaryKeys.Add(columnMetadata.ColumnName);
+                    listOfPrimaryKeys.Add(observableDataTable.PrimaryKeys[i]);
                 }
             }
 

@@ -41,7 +41,7 @@ namespace PocoDataSet.ObservableExtensions
                     primaryKeys.Add(refreshedTable.PrimaryKeys[i]);
                 }
 
-                observableDataTable.InnerDataTable.PrimaryKeys = primaryKeys;
+                observableDataTable.InnerDataTable.SetPrimaryKeys(primaryKeys);
             }
 
             for (int i = 0; i < refreshedTable.Rows.Count; i++)
