@@ -18,68 +18,56 @@ namespace PocoDataSet.EfCoreBridge
     /// </summary>
     public static class EfChangesetDataSetApplier
     {
-        #region Public Methods (no resolver required)
+        #region Public Methods (default resolver)
         /// <summary>
-        /// Applies changeset and saves
+        /// Applies changeset and saves.
+        /// Uses <see cref="EfModelEntityTypeResolver"/> for table-to-entity resolution.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
         public static void ApplyChangesetAndSave(DbContext dbContext, IDataSet changeset)
         {
             ApplyChangesetAndSave(dbContext, changeset, (RelationValidationOptions?)null);
         }
 
         /// <summary>
-        /// Applies changeset and saves
+        /// Applies changeset and saves.
+        /// Uses <see cref="EfModelEntityTypeResolver"/> for table-to-entity resolution.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
-        /// <param name="relationOptions">Relation options</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
+        /// <param name="relationOptions">Relation validation options.</param>
         public static void ApplyChangesetAndSave(DbContext dbContext, IDataSet changeset, RelationValidationOptions? relationOptions)
         {
-            RelationValidationOptions effectiveOptions;
-            if (relationOptions == null)
-            {
-                effectiveOptions = new RelationValidationOptions();
-            }
-            else
-            {
-                effectiveOptions = relationOptions;
-            }
+            RelationValidationOptions effectiveOptions = GetEffectiveRelationOptions(relationOptions);
 
             EfModelEntityTypeResolver resolver = new EfModelEntityTypeResolver(dbContext);
             ApplyChangesetAndSave(dbContext, changeset, resolver, effectiveOptions);
         }
 
         /// <summary>
-        /// Applies changeset and saves asynchronously
+        /// Applies changeset and saves asynchronously.
+        /// Uses <see cref="EfModelEntityTypeResolver"/> for table-to-entity resolution.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
-        /// <param name="cancellationToken">Vancellation token</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public static Task ApplyChangesetAndSaveAsync(DbContext dbContext, IDataSet changeset, CancellationToken cancellationToken)
         {
             return ApplyChangesetAndSaveAsync(dbContext, changeset, (RelationValidationOptions?)null, cancellationToken);
         }
 
         /// <summary>
-        /// Applies changeset and saves asynchronously
+        /// Applies changeset and saves asynchronously.
+        /// Uses <see cref="EfModelEntityTypeResolver"/> for table-to-entity resolution.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
-        /// <param name="relationOptions">Relation options</param>
-        /// <param name="cancellationToken">Vancellation token</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
+        /// <param name="relationOptions">Relation validation options.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public static Task ApplyChangesetAndSaveAsync(DbContext dbContext, IDataSet changeset, RelationValidationOptions? relationOptions, CancellationToken cancellationToken)
         {
-            RelationValidationOptions effectiveOptions;
-            if (relationOptions == null)
-            {
-                effectiveOptions = new RelationValidationOptions();
-            }
-            else
-            {
-                effectiveOptions = relationOptions;
-            }
+            RelationValidationOptions effectiveOptions = GetEffectiveRelationOptions(relationOptions);
 
             EfModelEntityTypeResolver resolver = new EfModelEntityTypeResolver(dbContext);
             return ApplyChangesetAndSaveAsync(dbContext, changeset, resolver, effectiveOptions, cancellationToken);
@@ -88,23 +76,15 @@ namespace PocoDataSet.EfCoreBridge
 
         #region Public Methods (resolver overloads)
         /// <summary>
-        /// Applies changeset and saves
+        /// Applies changeset and saves.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
-        /// <param name="entityTypeResolver">Entity type resolver</param>
-        /// <param name="relationOptions">Relation options</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
+        /// <param name="entityTypeResolver">Entity type resolver.</param>
+        /// <param name="relationOptions">Relation validation options.</param>
         public static void ApplyChangesetAndSave(DbContext dbContext, IDataSet changeset, IEntityTypeResolver entityTypeResolver, RelationValidationOptions? relationOptions = null)
         {
-            RelationValidationOptions options;
-            if (relationOptions == null)
-            {
-                options = new RelationValidationOptions();
-            }
-            else
-            {
-                options = relationOptions;
-            }
+            RelationValidationOptions options = GetEffectiveRelationOptions(relationOptions);
 
             // Validate relations before touching EF.
             changeset.EnsureRelationsValid(options);
@@ -114,24 +94,16 @@ namespace PocoDataSet.EfCoreBridge
         }
 
         /// <summary>
-        /// Applies changeset and saves asyncronously
+        /// Applies changeset and saves asynchronously.
         /// </summary>
-        /// <param name="dbContext">Db context</param>
-        /// <param name="changeset">Changeset to apply</param>
-        /// <param name="entityTypeResolver">Entity type resolver</param>
-        /// <param name="relationOptions">Relation options</param>
-        /// <param name="cancellationToken">Vancellation token</param>
+        /// <param name="dbContext">Db context.</param>
+        /// <param name="changeset">Changeset to apply.</param>
+        /// <param name="entityTypeResolver">Entity type resolver.</param>
+        /// <param name="relationOptions">Relation validation options.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         public static async Task ApplyChangesetAndSaveAsync(DbContext dbContext, IDataSet changeset, IEntityTypeResolver entityTypeResolver, RelationValidationOptions? relationOptions = null, CancellationToken cancellationToken = default)
         {
-            RelationValidationOptions options;
-            if (relationOptions == null)
-            {
-                options = new RelationValidationOptions();
-            }
-            else
-            {
-                options = relationOptions;
-            }
+            RelationValidationOptions options = GetEffectiveRelationOptions(relationOptions);
 
             // Validate relations before touching EF.
             changeset.EnsureRelationsValid(options);
@@ -142,6 +114,19 @@ namespace PocoDataSet.EfCoreBridge
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Returns a non-null options instance.
+        /// </summary>
+        private static RelationValidationOptions GetEffectiveRelationOptions(RelationValidationOptions? relationOptions)
+        {
+            if (relationOptions == null)
+            {
+                return new RelationValidationOptions();
+            }
+
+            return relationOptions;
+        }
+
         /// <summary>
         /// Applies changeset
         /// </summary>
