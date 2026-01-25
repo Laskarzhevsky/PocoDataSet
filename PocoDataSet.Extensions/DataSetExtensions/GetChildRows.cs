@@ -35,7 +35,7 @@ namespace PocoDataSet.Extensions
                 return result;
             }
 
-            if (!dataSet.TryGetTable(relation.ChildTable, out IDataTable? childTable) || childTable == null)
+            if (!dataSet.TryGetTable(relation.ChildTableName, out IDataTable? childTable) || childTable == null)
             {
                 return result;
             }

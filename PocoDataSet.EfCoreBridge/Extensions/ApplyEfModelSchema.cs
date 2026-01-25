@@ -193,10 +193,10 @@ namespace PocoDataSet.EfCoreBridge
 
                     IDataRelation relation = new DataRelation();
                     relation.RelationName = relationName;
-                    relation.ParentTable = principalTableName;
-                    relation.ChildTable = dependentTableName;
-                    relation.ParentColumns = parentColumns;
-                    relation.ChildColumns = childColumns;
+                    relation.ParentTableName = principalTableName;
+                    relation.ChildTableName = dependentTableName;
+                    relation.ParentColumnNames = parentColumns;
+                    relation.ChildColumnNames = childColumns;
 
                     dataSet.Relations.Add(relation);
                 }
@@ -338,22 +338,22 @@ namespace PocoDataSet.EfCoreBridge
         {
             foreach (IDataRelation existing in dataSet.Relations)
             {
-                if (!string.Equals(existing.ParentTable, parentTable, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(existing.ParentTableName, parentTable, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                if (!string.Equals(existing.ChildTable, childTable, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(existing.ChildTableName, childTable, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                if (!AreSameColumns(existing.ParentColumns, parentColumns))
+                if (!AreSameColumns(existing.ParentColumnNames, parentColumns))
                 {
                     continue;
                 }
 
-                if (!AreSameColumns(existing.ChildColumns, childColumns))
+                if (!AreSameColumns(existing.ChildColumnNames, childColumns))
                 {
                     continue;
                 }

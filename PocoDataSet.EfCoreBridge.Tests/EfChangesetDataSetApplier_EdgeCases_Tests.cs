@@ -180,10 +180,10 @@ public class EfChangesetDataSetApplier_EdgeCases_Tests
 
         IDataRelation relation = new DataRelation();
         relation.RelationName = relationName;
-        relation.ParentTable = parentTable;
-        relation.ChildTable = childTable;
-        relation.ParentColumns = parentColumns;
-        relation.ChildColumns = childColumns;
+        relation.ParentTableName = parentTable;
+        relation.ChildTableName = childTable;
+        relation.ParentColumnNames = parentColumns;
+        relation.ChildColumnNames = childColumns;
 
         dataSet.Relations.Add(relation);
     }

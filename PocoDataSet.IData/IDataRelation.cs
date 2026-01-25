@@ -9,17 +9,17 @@ namespace PocoDataSet.IData
     {
         #region Properties
         /// <summary>
-        /// Gets or sets child columns
+        /// Gets or sets child column names
         /// </summary>
-        List<string> ChildColumns
+        List<string> ChildColumnNames
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets child table
+        /// Gets or sets child table name
         /// </summary>
-        string ChildTable
+        string ChildTableName
         {
             get; set;
         }
@@ -33,17 +33,17 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets or sets parent columns
+        /// Gets or sets parent column names
         /// </summary>
-        List<string> ParentColumns
+        List<string> ParentColumnNames
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets parent table
+        /// Gets or sets parent table name
         /// </summary>
-        string ParentTable
+        string ParentTableName
         {
             get; set;
         }

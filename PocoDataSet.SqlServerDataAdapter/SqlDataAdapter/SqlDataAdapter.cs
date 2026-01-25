@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Threading.Tasks;
 
 using PocoDataSet.Extensions;
@@ -22,6 +21,17 @@ namespace PocoDataSet.SqlServerDataAdapter
         {
             ConnectionString = connectionString;
         }
+        #endregion
+
+        #region Public Properties
+        /// <summary>
+        /// Gets or sets flag indicating whether relations should be populated from database schema
+        /// after filling a data set with multiple tables.
+        /// </summary>
+        public bool PopulateRelationsFromSchema
+        {
+            get; set;
+        } = true;
         #endregion
 
         #region Public Methods
@@ -63,6 +73,11 @@ namespace PocoDataSet.SqlServerDataAdapter
             {
                 await GetDataFromDatabaseAsync();
                 await DataTableCreator.AddTablesToDataSetAsync();
+                if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
+                {
+                    await PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet).ConfigureAwait(false);
+                }
+
                 dataSet = DataTableCreator.DataSet;
                 dataSet!.AcceptChanges();
             }

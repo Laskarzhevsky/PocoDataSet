@@ -36,7 +36,7 @@ namespace PocoDataSet.Extensions
                 return false;
             }
 
-            if (!dataSet.TryGetTable(relation.ParentTable, out IDataTable? parentTable) || parentTable == null)
+            if (!dataSet.TryGetTable(relation.ParentTableName, out IDataTable? parentTable) || parentTable == null)
             {
                 return false;
             }
@@ -61,10 +61,10 @@ namespace PocoDataSet.Extensions
                 }
 
                 bool match = true;
-                for (int c = 0; c < relation.ParentColumns.Count; c++)
+                for (int c = 0; c < relation.ParentColumnNames.Count; c++)
                 {
-                    object? parentValue = candidate[relation.ParentColumns[c]];
-                    object? childValue = childRow[relation.ChildColumns[c]];
+                    object? parentValue = candidate[relation.ParentColumnNames[c]];
+                    object? childValue = childRow[relation.ChildColumnNames[c]];
 
                     if (!object.Equals(parentValue, childValue))
                     {

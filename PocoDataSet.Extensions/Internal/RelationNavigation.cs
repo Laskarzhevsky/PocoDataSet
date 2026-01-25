@@ -37,10 +37,10 @@ namespace PocoDataSet.Extensions
 
         public static bool RowMatchesRelation(IDataRow parentRow, IDataRow childRow, IDataRelation relation)
         {
-            for (int c = 0; c < relation.ParentColumns.Count; c++)
+            for (int c = 0; c < relation.ParentColumnNames.Count; c++)
             {
-                object? parentValue = parentRow[relation.ParentColumns[c]];
-                object? childValue = childRow[relation.ChildColumns[c]];
+                object? parentValue = parentRow[relation.ParentColumnNames[c]];
+                object? childValue = childRow[relation.ChildColumnNames[c]];
 
                 if (!object.Equals(parentValue, childValue))
                 {

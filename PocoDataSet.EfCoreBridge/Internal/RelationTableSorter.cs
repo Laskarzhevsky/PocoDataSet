@@ -57,8 +57,8 @@ namespace PocoDataSet.EfCoreBridge
                         continue;
                     }
 
-                    string parent = relation.ParentTable;
-                    string child = relation.ChildTable;
+                    string parent = relation.ParentTableName;
+                    string child = relation.ChildTableName;
 
                     if (string.IsNullOrWhiteSpace(parent) || string.IsNullOrWhiteSpace(child))
                     {

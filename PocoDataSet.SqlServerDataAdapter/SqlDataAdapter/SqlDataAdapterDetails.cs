@@ -1208,16 +1208,222 @@ ORDER BY ic.key_ordinal;";
             DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync();
         }
 
+		/// <summary>
+		/// Initializes component
+		/// <param name="returnedTableNames">Returned table names</param>
+		/// </summary>
+		void InitializeComponent(List<string>? returnedTableNames)
+		{
+			DataTableCreator = new DataTableCreator();
+			DataTableCreator.ListOfTableNames = returnedTableNames;
+			DataTableCreator.LoadDataTableKeysInformationRequest += DataTableCreator_LoadDataTableKeysInformationRequestAsync;
+		}
+
         /// <summary>
-        /// Initializes component
-        /// <param name="returnedTableNames">Returned table names</param>
+        /// Populates relations in the filled data set by reading database schema (foreign keys).
+        /// This supports composite foreign keys and relations that reference alternate (unique) keys.
         /// </summary>
-        void InitializeComponent(List<string>? returnedTableNames)
+        /// <param name="dataSet">Filled data set</param>
+        async Task PopulateRelationsFromDatabaseSchemaAsync(IDataSet dataSet)
         {
-            DataTableCreator = new DataTableCreator();
-            DataTableCreator.ListOfTableNames = returnedTableNames;
-            DataTableCreator.LoadDataTableKeysInformationRequest += DataTableCreator_LoadDataTableKeysInformationRequestAsync;
+            if (dataSet == null)
+            {
+                return;
+            }
+
+            if (SqlConnection == null)
+            {
+                return;
+            }
+
+            if (SqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                await SqlConnection.OpenAsync().ConfigureAwait(false);
+            }
+
+            HashSet<string> tableNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string tableName in dataSet.Tables.Keys)
+            {
+                tableNames.Add(tableName);
+            }
+
+            if (tableNames.Count == 0)
+            {
+                return;
+            }
+
+            List<ForeignKeyGroup> foreignKeyGroups = await LoadForeignKeyGroupsAsync(tableNames).ConfigureAwait(false);
+            ApplyForeignKeyGroupsToDataSetRelations(dataSet, foreignKeyGroups);
         }
+
+        /// <summary>
+        /// Applies foreign key groups to the data set relations.
+        /// Parent = dependent table, Referenced = principal table.
+        /// </summary>
+        /// <param name="dataSet">Data set</param>
+        /// <param name="foreignKeyGroups">Foreign key groups</param>
+        internal static void ApplyForeignKeyGroupsToDataSetRelations(IDataSet dataSet, IList<ForeignKeyGroup> foreignKeyGroups)
+        {
+            if (dataSet == null)
+            {
+                return;
+            }
+
+            if (foreignKeyGroups == null || foreignKeyGroups.Count == 0)
+            {
+                return;
+            }
+
+            foreach (ForeignKeyGroup foreignKeyGroup in foreignKeyGroups)
+            {
+                if (string.IsNullOrWhiteSpace(foreignKeyGroup.ForeignKeyName))
+                {
+                    continue;
+                }
+
+                if (!dataSet.Tables.ContainsKey(foreignKeyGroup.ParentTableName))
+                {
+                    continue;
+                }
+
+                if (!dataSet.Tables.ContainsKey(foreignKeyGroup.ReferencedTableName))
+                {
+                    continue;
+                }
+
+                if (foreignKeyGroup.ParentColumnNames.Count == 0 || foreignKeyGroup.ReferencedColumnNames.Count == 0)
+                {
+                    continue;
+                }
+
+                if (foreignKeyGroup.ParentColumnNames.Count != foreignKeyGroup.ReferencedColumnNames.Count)
+                {
+                    continue;
+                }
+
+                // Ensure all columns exist in both tables
+                IDataTable childTable = dataSet.Tables[foreignKeyGroup.ParentTableName];
+                IDataTable parentTable = dataSet.Tables[foreignKeyGroup.ReferencedTableName];
+
+                bool allChildColumnsExist = true;
+                foreach (string childColumnName in foreignKeyGroup.ParentColumnNames)
+                {
+                    if (!childTable.ContainsColumn(childColumnName))
+                    {
+                        allChildColumnsExist = false;
+                        break;
+                    }
+                }
+
+                if (!allChildColumnsExist)
+                {
+                    continue;
+                }
+
+                bool allParentColumnsExist = true;
+                foreach (string parentColumnName in foreignKeyGroup.ReferencedColumnNames)
+                {
+                    if (!parentTable.ContainsColumn(parentColumnName))
+                    {
+                        allParentColumnsExist = false;
+                        break;
+                    }
+                }
+
+                if (!allParentColumnsExist)
+                {
+                    continue;
+                }
+
+                // Relation name must be unique within the dataset.
+                string relationName = foreignKeyGroup.ForeignKeyName;
+                if (dataSet.RelationExists(relationName))
+                {
+                    continue;
+                }
+
+                // Parent = referenced table, Child = dependent table
+                dataSet.AddRelation(relationName, foreignKeyGroup.ReferencedTableName, foreignKeyGroup.ReferencedColumnNames, foreignKeyGroup.ParentTableName, foreignKeyGroup.ParentColumnNames);
+            }
+        }
+
+        /// <summary>
+        /// Loads foreign key groups for the specified table names.
+        /// Parent = dependent table, Referenced = principal table.
+        /// </summary>
+        /// <param name="tableNames">Table names</param>
+        /// <returns>List of foreign key groups</returns>
+        async Task<List<ForeignKeyGroup>> LoadForeignKeyGroupsAsync(HashSet<string> tableNames)
+        {
+            List<ForeignKeyGroup> result = new List<ForeignKeyGroup>();
+
+            // Build an IN list with parameters to avoid SQL injection.
+            List<string> parameters = new List<string>();
+            using SqlCommand sqlCommand = new SqlCommand();
+            sqlCommand.Connection = SqlConnection;
+
+            int index = 0;
+            foreach (string tableName in tableNames)
+            {
+                string paramName = "@t" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                parameters.Add(paramName);
+                sqlCommand.Parameters.AddWithValue(paramName, tableName);
+                index++;
+            }
+
+            string inList = string.Join(", ", parameters);
+
+            sqlCommand.CommandText = @"
+                SELECT
+                    fk.name AS ForeignKeyName,
+                    parent.name AS ParentTable,
+                    referenced.name AS ReferencedTable,
+                    fkc.constraint_column_id AS ColumnOrder,
+                    pc.name AS ParentColumn,
+                    rc.name AS ReferencedColumn
+                FROM sys.foreign_keys fk
+                JOIN sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id
+                JOIN sys.tables parent ON parent.object_id = fk.parent_object_id
+                JOIN sys.columns pc ON pc.object_id = parent.object_id AND pc.column_id = fkc.parent_column_id
+                JOIN sys.tables referenced ON referenced.object_id = fk.referenced_object_id
+                JOIN sys.columns rc ON rc.object_id = referenced.object_id AND rc.column_id = fkc.referenced_column_id
+                WHERE parent.name IN (" + inList + @") AND referenced.name IN (" + inList + @")
+                ORDER BY fk.name, parent.name, referenced.name, fkc.constraint_column_id;";
+
+            Dictionary<string, ForeignKeyGroup> groups = new Dictionary<string, ForeignKeyGroup>(StringComparer.OrdinalIgnoreCase);
+
+            using SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false);
+            while (await sqlDataReader.ReadAsync().ConfigureAwait(false))
+            {
+                string foreignKeyName = sqlDataReader.GetString(0);
+                string parentTable = sqlDataReader.GetString(1);
+                string referencedTable = sqlDataReader.GetString(2);
+                string parentColumn = sqlDataReader.GetString(4);
+                string referencedColumn = sqlDataReader.GetString(5);
+
+                string key = foreignKeyName + "|" + parentTable + "|" + referencedTable;
+                if (!groups.TryGetValue(key, out ForeignKeyGroup? group))
+                {
+                    group = new ForeignKeyGroup();
+                    group.ForeignKeyName = foreignKeyName;
+                    group.ParentTableName = parentTable;
+                    group.ReferencedTableName = referencedTable;
+                    groups[key] = group;
+                }
+
+                group.ParentColumnNames.Add(parentColumn);
+                group.ReferencedColumnNames.Add(referencedColumn);
+            }
+
+            foreach (ForeignKeyGroup group in groups.Values)
+            {
+                result.Add(group);
+            }
+
+            return result;
+        }
+
+
 
         /// <summary>
         /// Loads data table foreign keys

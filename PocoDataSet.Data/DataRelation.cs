@@ -11,19 +11,19 @@ namespace PocoDataSet.Data
     {
         #region Public Properties
         /// <summary>
-        /// Gets or sets child columns
+        /// Gets or sets child column names
         /// IDataRelation interface implementation
         /// </summary>
-        public List<string> ChildColumns 
+        public List<string> ChildColumnNames 
         {
             get; set;
         } = new();
 
         /// <summary>
-        /// Gets or sets child table
+        /// Gets or sets child table name
         /// IDataRelation interface implementation
         /// </summary>
-        public string ChildTable
+        public string ChildTableName
         {
             get; set;
         } = string.Empty;
@@ -38,25 +38,25 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
-        /// Gets or sets parent columns
+        /// Gets or sets parent column names
         /// IDataRelation interface implementation
         /// </summary>
-        public List<string> ParentColumns 
+        public List<string> ParentColumnNames 
         {
             get; set;
         } = new();
 
         /// <summary>
-        /// Gets or sets parent table
+        /// Gets or sets parent table name
         /// IDataRelation interface implementation
         /// </summary>
-        public string ParentTable
+        public string ParentTableName
         {
             get; set;
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets relation name 
+        /// Gets or sets relation name
         /// IDataRelation interface implementation
         /// </summary>
         public string RelationName

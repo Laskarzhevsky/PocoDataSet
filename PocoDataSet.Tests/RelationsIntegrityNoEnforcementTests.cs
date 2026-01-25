@@ -28,10 +28,10 @@ namespace PocoDataSet.Tests
             // Add relation metadata (no behavior enforced today)
             IDataRelation relation = new DataRelation();
             relation.RelationName = "Department_Employee";
-            relation.ParentTable = "Department";
-            relation.ChildTable = "Employee";
-            relation.ParentColumns = new List<string> { "Id" };
-            relation.ChildColumns = new List<string> { "DepartmentId" };
+            relation.ParentTableName = "Department";
+            relation.ChildTableName = "Employee";
+            relation.ParentColumnNames = new List<string> { "Id" };
+            relation.ChildColumnNames = new List<string> { "DepartmentId" };
             dataSet.Relations.Add(relation);
 
             IDataRow d1 = DataRowExtensions.CreateRowFromColumns(dept.Columns);

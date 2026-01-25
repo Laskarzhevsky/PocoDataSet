@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.Data.SqlClient;
 using Xunit;
 
-using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoSqlDataAdapter = PocoDataSet.SqlServerDataAdapter.SqlDataAdapter;
 

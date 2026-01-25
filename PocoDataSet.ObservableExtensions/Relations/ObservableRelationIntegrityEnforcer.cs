@@ -108,18 +108,18 @@ namespace PocoDataSet.ObservableExtensions
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(relation.ParentTable))
+                if (!string.IsNullOrWhiteSpace(relation.ParentTableName))
                 {
-                    _relationTableNames.Add(relation.ParentTable);
+                    _relationTableNames.Add(relation.ParentTableName);
                 }
 
-                if (!string.IsNullOrWhiteSpace(relation.ChildTable))
+                if (!string.IsNullOrWhiteSpace(relation.ChildTableName))
                 {
-                    _relationTableNames.Add(relation.ChildTable);
+                    _relationTableNames.Add(relation.ChildTableName);
                 }
 
-                AddColumnsToCache(relation.ParentColumns);
-                AddColumnsToCache(relation.ChildColumns);
+                AddColumnsToCache(relation.ParentColumnNames);
+                AddColumnsToCache(relation.ChildColumnNames);
             }
         }
 

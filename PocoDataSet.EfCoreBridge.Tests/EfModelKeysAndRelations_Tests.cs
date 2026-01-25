@@ -41,12 +41,12 @@ public class EfModelKeysAndRelations_Tests
 
         // Assert relation
         IDataRelation? relation = ds.Relations.FirstOrDefault(r =>
-            string.Equals(r.ParentTable, "Parent", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(r.ChildTable, "Child", StringComparison.OrdinalIgnoreCase));
+            string.Equals(r.ParentTableName, "Parent", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.ChildTableName, "Child", StringComparison.OrdinalIgnoreCase));
 
         Assert.NotNull(relation);
-        Assert.Equal(new List<string> { "Id" }, relation!.ParentColumns);
-        Assert.Equal(new List<string> { "ParentId" }, relation!.ChildColumns);
+        Assert.Equal(new List<string> { "Id" }, relation!.ParentColumnNames);
+        Assert.Equal(new List<string> { "ParentId" }, relation!.ChildColumnNames);
     }
 
     [Fact]
@@ -74,12 +74,12 @@ public class EfModelKeysAndRelations_Tests
         Assert.Equal(new List<string> { "OrderId", "Version", "LineNo" }, ds.Tables["OrderLines"].PrimaryKeys);
 
         IDataRelation? relation = ds.Relations.FirstOrDefault(r =>
-            string.Equals(r.ParentTable, "Orders", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(r.ChildTable, "OrderLines", StringComparison.OrdinalIgnoreCase));
+            string.Equals(r.ParentTableName, "Orders", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.ChildTableName, "OrderLines", StringComparison.OrdinalIgnoreCase));
 
         Assert.NotNull(relation);
-        Assert.Equal(new List<string> { "OrderId", "Version" }, relation!.ParentColumns);
-        Assert.Equal(new List<string> { "OrderId", "Version" }, relation!.ChildColumns);
+        Assert.Equal(new List<string> { "OrderId", "Version" }, relation!.ParentColumnNames);
+        Assert.Equal(new List<string> { "OrderId", "Version" }, relation!.ChildColumnNames);
     }
 
     [Fact]
@@ -104,12 +104,12 @@ public class EfModelKeysAndRelations_Tests
         Assert.Equal(2, ds.Relations.Count);
 
         Assert.Contains(ds.Relations, r =>
-            string.Equals(r.ParentTable, "A", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(r.ChildTable, "B", StringComparison.OrdinalIgnoreCase));
+            string.Equals(r.ParentTableName, "A", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.ChildTableName, "B", StringComparison.OrdinalIgnoreCase));
 
         Assert.Contains(ds.Relations, r =>
-            string.Equals(r.ParentTable, "B", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(r.ChildTable, "A", StringComparison.OrdinalIgnoreCase));
+            string.Equals(r.ParentTableName, "B", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.ChildTableName, "A", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -139,12 +139,12 @@ public class EfModelKeysAndRelations_Tests
 
         // Assert relation uses principal alternate key columns
         IDataRelation? relation = ds.Relations.FirstOrDefault(r =>
-            string.Equals(r.ParentTable, "Customers", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(r.ChildTable, "Sales", StringComparison.OrdinalIgnoreCase));
+            string.Equals(r.ParentTableName, "Customers", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.ChildTableName, "Sales", StringComparison.OrdinalIgnoreCase));
 
         Assert.NotNull(relation);
-        Assert.Equal(new List<string> { "Code" }, relation!.ParentColumns);
-        Assert.Equal(new List<string> { "CustomerCode" }, relation!.ChildColumns);
+        Assert.Equal(new List<string> { "Code" }, relation!.ParentColumnNames);
+        Assert.Equal(new List<string> { "CustomerCode" }, relation!.ChildColumnNames);
     }
 
     private static SqliteConnection CreateOpenSqliteConnection()

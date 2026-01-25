@@ -24,15 +24,15 @@ namespace PocoDataSet.Extensions
             }
 
             // Check column counts
-            if (relation.ParentColumns == null || relation.ChildColumns == null || relation.ParentColumns.Count == 0 || relation.ChildColumns.Count == 0)
+            if (relation.ParentColumnNames == null || relation.ChildColumnNames == null || relation.ParentColumnNames.Count == 0 || relation.ChildColumnNames.Count == 0)
             {
                 if (options.ReportInvalidRelationDefinitions)
                 {
                     violations.Add(new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable ?? string.Empty,
-                        ChildTable = relation.ChildTable ?? string.Empty,
+                        ParentTable = relation.ParentTableName ?? string.Empty,
+                        ChildTable = relation.ChildTableName ?? string.Empty,
                         Kind = RelationIntegrityViolationKind.InvalidRelationDefinition,
                         Message = "Relation has no parent/child columns configured."
                     });
@@ -40,15 +40,15 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            if (relation.ParentColumns.Count != relation.ChildColumns.Count)
+            if (relation.ParentColumnNames.Count != relation.ChildColumnNames.Count)
             {
                 if (options.ReportInvalidRelationDefinitions)
                 {
                     violations.Add(new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable ?? string.Empty,
-                        ChildTable = relation.ChildTable ?? string.Empty,
+                        ParentTable = relation.ParentTableName ?? string.Empty,
+                        ChildTable = relation.ChildTableName ?? string.Empty,
                         Kind = RelationIntegrityViolationKind.InvalidRelationDefinition,
                         Message = "ParentColumns and ChildColumns count mismatch."
                     });
@@ -57,15 +57,15 @@ namespace PocoDataSet.Extensions
             }
 
             // Tables
-            if (!dataSet.TryGetTable(relation.ParentTable, out parentTable) || parentTable == null)
+            if (!dataSet.TryGetTable(relation.ParentTableName, out parentTable) || parentTable == null)
             {
                 if (options.ReportInvalidRelationDefinitions)
                 {
                     violations.Add(new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable ?? string.Empty,
-                        ChildTable = relation.ChildTable ?? string.Empty,
+                        ParentTable = relation.ParentTableName ?? string.Empty,
+                        ChildTable = relation.ChildTableName ?? string.Empty,
                         Kind = RelationIntegrityViolationKind.InvalidRelationDefinition,
                         Message = "Parent table not found in DataSet."
                     });
@@ -74,15 +74,15 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            if (!dataSet.TryGetTable(relation.ChildTable, out childTable) || childTable == null)
+            if (!dataSet.TryGetTable(relation.ChildTableName, out childTable) || childTable == null)
             {
                 if (options.ReportInvalidRelationDefinitions)
                 {
                     violations.Add(new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable ?? string.Empty,
-                        ChildTable = relation.ChildTable ?? string.Empty,
+                        ParentTable = relation.ParentTableName ?? string.Empty,
+                        ChildTable = relation.ChildTableName ?? string.Empty,
                         Kind = RelationIntegrityViolationKind.InvalidRelationDefinition,
                         Message = "Child table not found in DataSet."
                     });
@@ -92,15 +92,15 @@ namespace PocoDataSet.Extensions
             }
 
             // Columns existence
-            if (!TableHasAllColumns(parentTable, relation.ParentColumns) || !TableHasAllColumns(childTable, relation.ChildColumns))
+            if (!TableHasAllColumns(parentTable, relation.ParentColumnNames) || !TableHasAllColumns(childTable, relation.ChildColumnNames))
             {
                 if (options.ReportInvalidRelationDefinitions)
                 {
                     violations.Add(new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable ?? string.Empty,
-                        ChildTable = relation.ChildTable ?? string.Empty,
+                        ParentTable = relation.ParentTableName ?? string.Empty,
+                        ChildTable = relation.ChildTableName ?? string.Empty,
                         Kind = RelationIntegrityViolationKind.InvalidRelationDefinition,
                         Message = "One or more columns referenced by the relation are missing in tables."
                     });
@@ -172,9 +172,9 @@ namespace PocoDataSet.Extensions
                 if (options.TreatNullForeignKeysAsNotSet)
                 {
                     bool anyNull = false;
-                    for (int c = 0; c < relation.ChildColumns.Count; c++)
+                    for (int c = 0; c < relation.ChildColumnNames.Count; c++)
                     {
-                        object? val = childRow[relation.ChildColumns[c]];
+                        object? val = childRow[relation.ChildColumnNames[c]];
                         if (val == null)
                         {
                             anyNull = true;
@@ -194,14 +194,14 @@ namespace PocoDataSet.Extensions
                     RelationIntegrityViolation violation = new RelationIntegrityViolation
                     {
                         RelationName = relation.RelationName,
-                        ParentTable = relation.ParentTable,
-                        ChildTable = relation.ChildTable,
+                        ParentTable = relation.ParentTableName,
+                        ChildTable = relation.ChildTableName,
                         Kind = RelationIntegrityViolationKind.OrphanChildRow,
                         Message = "Child row references missing parent row."
                     };
 
-                    CaptureKeySnapshot(relation.ChildColumns, childRow, violation.ChildKey);
-                    CaptureKeySnapshotMapped(relation.ParentColumns, relation.ChildColumns, childRow, violation.ParentKey);
+                    CaptureKeySnapshot(relation.ChildColumnNames, childRow, violation.ChildKey);
+                    CaptureKeySnapshotMapped(relation.ParentColumnNames, relation.ChildColumnNames, childRow, violation.ParentKey);
 
                     violations.Add(violation);
                 }
@@ -244,13 +244,13 @@ namespace PocoDataSet.Extensions
                 RelationIntegrityViolation violation = new RelationIntegrityViolation
                 {
                     RelationName = relation.RelationName,
-                    ParentTable = relation.ParentTable,
-                    ChildTable = relation.ChildTable,
+                    ParentTable = relation.ParentTableName,
+                    ChildTable = relation.ChildTableName,
                     Kind = RelationIntegrityViolationKind.DeletedParentHasChildren,
                     Message = "Parent row is deleted but non-deleted child rows still exist (restrict delete)."
                 };
 
-                CaptureKeySnapshot(relation.ParentColumns, parentRow, violation.ParentKey);
+                CaptureKeySnapshot(relation.ParentColumnNames, parentRow, violation.ParentKey);
 
                 violations.Add(violation);
             }
@@ -316,10 +316,10 @@ namespace PocoDataSet.Extensions
                 }
 
                 bool match = true;
-                for (int c = 0; c < relation.ParentColumns.Count; c++)
+                for (int c = 0; c < relation.ParentColumnNames.Count; c++)
                 {
-                    string parentCol = relation.ParentColumns[c];
-                    string childCol = relation.ChildColumns[c];
+                    string parentCol = relation.ParentColumnNames[c];
+                    string childCol = relation.ChildColumnNames[c];
 
                     object? parentVal = parentRow[parentCol];
                     object? childVal = childRow[childCol];
@@ -342,10 +342,10 @@ namespace PocoDataSet.Extensions
 
         public static bool ChildMatchesParent(IDataRelation relation, IDataRow parentRow, IDataRow childRow)
         {
-            for (int c = 0; c < relation.ParentColumns.Count; c++)
+            for (int c = 0; c < relation.ParentColumnNames.Count; c++)
             {
-                string parentCol = relation.ParentColumns[c];
-                string childCol = relation.ChildColumns[c];
+                string parentCol = relation.ParentColumnNames[c];
+                string childCol = relation.ChildColumnNames[c];
 
                 object? parentVal = parentRow[parentCol];
                 object? childVal = childRow[childCol];
