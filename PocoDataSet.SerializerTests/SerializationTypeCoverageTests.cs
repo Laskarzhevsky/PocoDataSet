@@ -7,7 +7,7 @@ using PocoDataSet.Serializer;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationTypeCoverageTests
+    public class SerializationTypeCoverageTests
     {
         [Fact]
         public void JsonRoundTrip_Preserves_Guid_DateTime_Decimal_AndNullables()

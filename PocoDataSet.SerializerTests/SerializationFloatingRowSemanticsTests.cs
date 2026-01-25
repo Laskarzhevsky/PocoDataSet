@@ -9,7 +9,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationFloatingRowSemanticsTests
+    public class SerializationFloatingRowSemanticsTests
     {
         [Fact]
         public void JsonRoundTrip_FloatingRow_PreservesMissingFieldDistinctFromExplicitNull()

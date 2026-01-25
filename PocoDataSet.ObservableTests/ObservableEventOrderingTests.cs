@@ -56,7 +56,7 @@ namespace PocoDataSet.ObservableTests
         #endregion
 
         #region Private Types
-        private sealed class EventOrderRecorder
+        private class EventOrderRecorder
         {
             public const string DATA_FIELD_VALUE_CHANGED = "DataFieldValueChanged";
             public const string ROW_STATE_CHANGED = "RowStateChanged";

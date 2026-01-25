@@ -77,7 +77,7 @@ namespace PocoDataSet.ObservableTests
         #endregion
 
         #region Private Types
-        private sealed class DataFieldValueChangedCapture
+        private class DataFieldValueChangedCapture
         {
             public int Count { get; private set; }
 
@@ -93,7 +93,7 @@ namespace PocoDataSet.ObservableTests
             }
         }
 
-        private sealed class RowStateChangedCapture
+        private class RowStateChangedCapture
         {
             public int Count { get; private set; }
 

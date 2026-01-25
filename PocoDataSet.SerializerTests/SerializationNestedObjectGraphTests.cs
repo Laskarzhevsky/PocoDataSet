@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationNestedObjectGraphTests
+    public class SerializationNestedObjectGraphTests
     {
         [Fact]
         public void JsonRoundTrip_ObjectColumn_Preserves_NestedDictionaryAndArrayGraph_AsPrimitives()

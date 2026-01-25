@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetCopyToPocoApplier_CompositeKey_Tests
+public class EfChangesetCopyToPocoApplier_CompositeKey_Tests
 {
     [Fact]
     public void ApplyTableAndSave_UpdatesAndDeletes_CompositeKey()

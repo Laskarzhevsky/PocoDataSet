@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_Tests
+public class EfChangesetToPocoApplier_Tests
 {
     [Fact]
     public void ApplyTableAndSave_InsertsUpdatesDeletes_Detached()

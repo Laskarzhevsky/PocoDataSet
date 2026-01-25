@@ -8,7 +8,7 @@ using PocoDataSet.Serializer;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationBinaryRoundTripTests
+    public class SerializationBinaryRoundTripTests
     {
         [Fact]
         public void JsonRoundTrip_Preserves_BinaryByteArray_Content()

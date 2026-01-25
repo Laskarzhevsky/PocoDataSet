@@ -2,7 +2,7 @@
 
 namespace PocoDataSet.ObservableTests
 {
-    internal sealed class RowsChangedCounter
+    internal class RowsChangedCounter
     {
         public int Count
         {

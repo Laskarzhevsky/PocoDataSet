@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationJsonMutationNormalizationTests
+    public class SerializationJsonMutationNormalizationTests
     {
         [Fact]
         public void FromJsonString_Converts_NumberStrings_ToNumericTypes_BasedOnSchema()

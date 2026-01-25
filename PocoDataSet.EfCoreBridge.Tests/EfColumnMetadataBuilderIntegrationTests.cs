@@ -12,7 +12,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests
 {
-    public sealed class EfColumnMetadataBuilderIntegrationTests
+    public class EfColumnMetadataBuilderIntegrationTests
     {
         [Fact]
         public void ToDataTable_Sets_PrimaryKey_Metadata_And_TablePrimaryKeys()
@@ -144,7 +144,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             return new ShadowKeyDbContext(options);
         }
 
-        private sealed class TestDbContext : DbContext
+        private class TestDbContext : DbContext
         {
             public TestDbContext(DbContextOptions<TestDbContext> options)
                 : base(options)
@@ -181,7 +181,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class ShadowKeyDbContext : DbContext
+        private class ShadowKeyDbContext : DbContext
         {
             public ShadowKeyDbContext(DbContextOptions<ShadowKeyDbContext> options)
                 : base(options)
@@ -202,13 +202,13 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class Department
+        private class Department
         {
             public int Id { get; set; }
             public string Name { get; set; } = string.Empty;
         }
 
-        private sealed class Employee
+        private class Employee
         {
             public int Id { get; set; }
             public string Name { get; set; } = string.Empty;
@@ -216,7 +216,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             public decimal Salary { get; set; }
         }
 
-        private sealed class ShadowEntity
+        private class ShadowEntity
         {
             public string? Name { get; set; }
         }

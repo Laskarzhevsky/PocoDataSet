@@ -13,7 +13,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetCopyToPocoApplier_FloatingSemantics_Tests
+public class EfChangesetCopyToPocoApplier_FloatingSemantics_Tests
 {
     [Fact]
     public void ApplyTableAndSave_ModifiedRow_MissingField_DoesNotOverwriteDatabaseValue()

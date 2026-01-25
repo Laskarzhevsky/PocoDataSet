@@ -9,7 +9,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationNoJsonElementTests
+    public class SerializationNoJsonElementTests
     {
         [Fact]
         public void FromJsonString_DoesNotProduce_JsonElement_InNestedObjectGraph()

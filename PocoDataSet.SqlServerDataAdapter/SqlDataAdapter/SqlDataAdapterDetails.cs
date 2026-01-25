@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
 using PocoDataSet.Data;
+using PocoDataSet.Extensions;
+using PocoDataSet.Extensions.Relations;
 using PocoDataSet.IData;
 
 using PocoDataRowState = PocoDataSet.IData.DataRowState;
@@ -32,6 +34,18 @@ namespace PocoDataSet.SqlServerDataAdapter
             {
                 return 0;
             }
+
+            // Enforce referential integrity rules (Restrict) before any database work.
+            // Changesets are often sparse (PATCH payloads), so we do NOT run orphan checks here:
+            // the referenced parent rows may legitimately exist in the database but not be included in the changeset.
+            // We still validate relation definitions and delete-restrict within the provided changeset.
+            RelationValidationOptions relationValidationOptions = new RelationValidationOptions();
+            relationValidationOptions.EnforceOrphanChecks = false;
+            relationValidationOptions.EnforceDeleteRestrict = true;
+            relationValidationOptions.ReportInvalidRelationDefinitions = true;
+            relationValidationOptions.TreatNullForeignKeysAsNotSet = true;
+
+            changeset.EnsureRelationsValid(relationValidationOptions);
 
             bool hasAnyRows = false;
             foreach (KeyValuePair<string, IDataTable> kv in changeset.Tables)
@@ -188,7 +202,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 			return false;
 		}
 
-		sealed class ForeignKeyEdge
+		class ForeignKeyEdge
 		{
 			public string ParentTable
 			{
@@ -368,7 +382,7 @@ WHERE parent.is_ms_shipped = 0
 
 
 
-		sealed class TableWriteMetadata
+		class TableWriteMetadata
 		{
 			public string TableName
 			{

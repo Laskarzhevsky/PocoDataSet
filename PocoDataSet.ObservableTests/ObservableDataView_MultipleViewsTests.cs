@@ -11,7 +11,7 @@ using Xunit;
 
 namespace PocoDataSet.ObservableTests
 {
-    public sealed class ObservableMerge_MultipleSubscribersTests
+    public class ObservableMerge_MultipleSubscribersTests
     {
         [Fact]
         public void Merge_Refresh_RemovesRow_RaisesRowsRemoved_ForMultipleSubscribers()
@@ -65,7 +65,7 @@ namespace PocoDataSet.ObservableTests
             return r;
         }
 
-        private sealed class RowsRemovedCounter
+        private class RowsRemovedCounter
         {
             public int Count;
 

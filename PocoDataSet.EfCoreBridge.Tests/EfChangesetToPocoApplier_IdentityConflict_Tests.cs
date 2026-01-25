@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_IdentityConflict_Tests
+public class EfChangesetToPocoApplier_IdentityConflict_Tests
 {
     [Fact]
     public void ApplyTableAndSave_PatchesTrackedEntity_WhenDbContextAlreadyTracksSameKey()

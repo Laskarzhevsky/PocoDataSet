@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PocoDataSet.ObservableTests
 {
-    public sealed class ObservableClearCopyFromTests
+    public class ObservableClearCopyFromTests
     {
         [Fact]
         public void Clear_RemovesAllRows_ButKeepsTablesAndColumns()

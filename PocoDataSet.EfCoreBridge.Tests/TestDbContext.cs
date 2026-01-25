@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class TestDbContext : DbContext
+public class TestDbContext : DbContext
 {
     public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
     {
@@ -31,7 +31,7 @@ public sealed class TestDbContext : DbContext
     }
 }
 
-public sealed class Department
+public class Department
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -43,7 +43,7 @@ public sealed class Department
     public byte[]? RowVersion { get; set; }
 }
 
-public sealed class OrderLine
+public class OrderLine
 {
     public int OrderId { get; set; }
     public int LineNo { get; set; }

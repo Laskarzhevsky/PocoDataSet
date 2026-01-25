@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetCopyToPocoApplier_Guardrails_Tests
+public class EfChangesetCopyToPocoApplier_Guardrails_Tests
 {
     [Fact]
     public void ApplyTable_Throws_WhenPrimaryKeyColumnIsMissingFromRowValues()

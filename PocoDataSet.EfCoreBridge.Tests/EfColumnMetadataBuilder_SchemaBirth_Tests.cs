@@ -13,7 +13,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests
 {
-    public sealed class EfColumnMetadataBuilder_SchemaBirth_Tests
+    public class EfColumnMetadataBuilder_SchemaBirth_Tests
     {
         [Fact]
         public void ToDataTable_Sets_PrimaryKey_Flags_And_TablePrimaryKeys_For_SingleKey()
@@ -268,7 +268,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             return new KeylessDbContext(options);
         }
 
-        private sealed class SingleKeyDbContext : DbContext
+        private class SingleKeyDbContext : DbContext
         {
             public SingleKeyDbContext(DbContextOptions<SingleKeyDbContext> options)
                 : base(options)
@@ -288,7 +288,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class CompositeKeyDbContext : DbContext
+        private class CompositeKeyDbContext : DbContext
         {
             public CompositeKeyDbContext(DbContextOptions<CompositeKeyDbContext> options)
                 : base(options)
@@ -308,7 +308,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class ForeignKeyDbContext : DbContext
+        private class ForeignKeyDbContext : DbContext
         {
             public ForeignKeyDbContext(DbContextOptions<ForeignKeyDbContext> options)
                 : base(options)
@@ -338,7 +338,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class NullabilityDbContext : DbContext
+        private class NullabilityDbContext : DbContext
         {
             public NullabilityDbContext(DbContextOptions<NullabilityDbContext> options)
                 : base(options)
@@ -360,7 +360,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class ShadowKeyDbContext : DbContext
+        private class ShadowKeyDbContext : DbContext
         {
             public ShadowKeyDbContext(DbContextOptions<ShadowKeyDbContext> options)
                 : base(options)
@@ -381,7 +381,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class KeylessDbContext : DbContext
+        private class KeylessDbContext : DbContext
         {
             public KeylessDbContext(DbContextOptions<KeylessDbContext> options)
                 : base(options)
@@ -401,7 +401,7 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class RelationalDbContext : DbContext
+        private class RelationalDbContext : DbContext
         {
             public RelationalDbContext(DbContextOptions<RelationalDbContext> options)
                 : base(options)
@@ -424,44 +424,44 @@ namespace PocoDataSet.EfCoreBridge.Tests
             }
         }
 
-        private sealed class Department
+        private class Department
         {
             public int DepartmentId { get; set; }
             public string? Name { get; set; }
         }
 
-        private sealed class Employee
+        private class Employee
         {
             public int EmployeeId { get; set; }
             public int DepartmentId { get; set; }
             public string? Name { get; set; }
         }
 
-        private sealed class TenantEntity
+        private class TenantEntity
         {
             public int TenantId { get; set; }
             public string Code { get; set; } = string.Empty;
             public string? Name { get; set; }
         }
 
-        private sealed class Person
+        private class Person
         {
             public int PersonId { get; set; }
             public string RequiredName { get; set; } = string.Empty;
             public string? OptionalNick { get; set; }
         }
 
-        private sealed class ShadowEntity
+        private class ShadowEntity
         {
             public string? Name { get; set; }
         }
 
-        private sealed class ReportRow
+        private class ReportRow
         {
             public string? Name { get; set; }
         }
 
-        private sealed class RelationalEntity
+        private class RelationalEntity
         {
             public int RelationalEntityId { get; set; }
             public string? Name { get; set; }

@@ -16,7 +16,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
     /// while remaining compatible with full (non-floating) rows.
     /// These tests do NOT hit a database; they use reflection to call internal builders.
     /// </summary>
-    public sealed class SqlCommandBuilderFloatingRowsTests
+    public class SqlCommandBuilderFloatingRowsTests
     {
         [Fact]
         public void BuildUpdateCommand_ModifiedRow_SetsOnlyProvidedColumns_WhenRowIsSparse()

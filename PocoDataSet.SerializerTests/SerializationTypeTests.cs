@@ -8,7 +8,7 @@ using PocoDataSet.Serializer;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationTypeTests
+    public class SerializationTypeTests
     {
         [Fact]
         public void JsonRoundTrip_PreservesGuidType()

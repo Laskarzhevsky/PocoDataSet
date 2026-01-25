@@ -5,7 +5,7 @@ using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
-    sealed class DefaultMergePolicy : IObservableMergePolicy
+    class DefaultMergePolicy : IObservableMergePolicy
     {
         #region Properties
         /// <summary>

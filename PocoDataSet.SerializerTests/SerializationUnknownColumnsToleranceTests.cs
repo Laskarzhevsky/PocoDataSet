@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationUnknownColumnsToleranceTests
+    public class SerializationUnknownColumnsToleranceTests
     {
         [Fact]
         public void FromJsonString_IgnoresUnknownRowFields_WhenPresentInJson()

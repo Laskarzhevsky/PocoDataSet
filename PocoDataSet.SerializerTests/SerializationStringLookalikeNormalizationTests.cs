@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationStringLookalikeNormalizationTests
+    public class SerializationStringLookalikeNormalizationTests
     {
         [Fact]
         public void JsonRoundTrip_StringColumn_GuidLikeString_RemainsString_AndIsSemanticallySameGuid()

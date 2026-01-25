@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PocoDataSet.SqlServerDataAdapterTests
 {
-    public sealed class SqlDataAdapterBaselineTests
+    public class SqlDataAdapterBaselineTests
     {
         [Fact]
         public async Task FillAsync_InvalidConnectionString_Throws()

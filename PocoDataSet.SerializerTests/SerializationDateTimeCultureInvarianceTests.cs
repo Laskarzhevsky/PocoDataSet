@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationDateTimeCultureInvarianceTests
+    public class SerializationDateTimeCultureInvarianceTests
     {
         [Fact]
         public void FromJsonString_Parses_DateTime_IndependentlyOfCurrentCulture()

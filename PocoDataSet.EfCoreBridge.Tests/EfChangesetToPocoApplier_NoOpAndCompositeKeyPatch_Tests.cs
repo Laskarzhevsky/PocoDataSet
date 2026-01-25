@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_NoOpAndCompositeKeyPatch_Tests
+public class EfChangesetToPocoApplier_NoOpAndCompositeKeyPatch_Tests
 {
     [Fact]
     public void ApplyTableAndSave_NoOpModifiedRow_DoesNotChangeEntity()

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_FloatingPatch_Tests
+public class EfChangesetToPocoApplier_FloatingPatch_Tests
 {
     [Fact]
     public void ApplyTableAndSave_UpdatesTrackedEntity_AndDoesNotOverwriteUnprovidedColumns()

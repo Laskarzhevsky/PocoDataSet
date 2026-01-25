@@ -6,7 +6,7 @@ using PocoDataSet.Serializer;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationNormalizationEdgeCasesTests
+    public class SerializationNormalizationEdgeCasesTests
     {
         [Fact]
         public void JsonRoundTrip_Distinguishes_EmptyString_From_Null()

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
+public class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
 {
     [Fact]
     public void ApplyTableAndSave_ModifiedRows_MultipleEntities_AppliesPatchesForEachRow()

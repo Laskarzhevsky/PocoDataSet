@@ -10,7 +10,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationFloatingChangesetSparsityTests
+    public class SerializationFloatingChangesetSparsityTests
     {
         [Fact]
         public void JsonRoundTrip_FloatingRow_PreservesMissingKeys()

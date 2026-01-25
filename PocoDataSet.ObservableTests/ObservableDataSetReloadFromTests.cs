@@ -12,7 +12,7 @@ using PocoDataSet.ObservableExtensions;
 
 namespace PocoDataSet.ObservableTests
 {
-    public sealed class ObservableDataSetReloadFromTests
+    public class ObservableDataSetReloadFromTests
     {
         [Fact]
         public void ReloadFrom_ReplacesRows_AndAssignsClientKey_AndLeavesRowsUnchanged()

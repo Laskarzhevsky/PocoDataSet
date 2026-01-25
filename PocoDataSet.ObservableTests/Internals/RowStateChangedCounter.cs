@@ -2,7 +2,7 @@ using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableTests
 {
-    internal sealed class RowStateChangedCounter
+    internal class RowStateChangedCounter
     {
         public int Count
         {

@@ -5,7 +5,7 @@ namespace PocoDataSet.SqlServerDataAdapter
     /// <summary>
     /// Exception thrown when an optimistic concurrency check fails.
     /// </summary>
-    public sealed class PocoConcurrencyException : Exception
+    public class PocoConcurrencyException : Exception
     {
         #region Constructors
         /// <summary>

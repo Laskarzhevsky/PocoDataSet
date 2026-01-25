@@ -145,7 +145,7 @@ namespace PocoDataSet.ObservableTests
             return row;
         }
 
-        private sealed class RowStateChangedCounter
+        private class RowStateChangedCounter
         {
             public int Count
             {

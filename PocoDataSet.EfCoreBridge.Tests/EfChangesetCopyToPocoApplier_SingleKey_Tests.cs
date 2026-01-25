@@ -12,7 +12,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetCopyToPocoApplier_SingleKey_Tests
+public class EfChangesetCopyToPocoApplier_SingleKey_Tests
 {
     [Fact]
     public void ApplyTableAndSave_InsertsUpdatesDeletes_SingleKey()

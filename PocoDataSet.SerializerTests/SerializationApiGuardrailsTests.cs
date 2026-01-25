@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationApiGuardrailsTests
+    public class SerializationApiGuardrailsTests
     {
         [Fact]
         public void FromJsonString_ReturnsNull_WhenInputIsNull()

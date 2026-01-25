@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationNumericNormalizationTests
+    public class SerializationNumericNormalizationTests
     {
         [Fact]
         public void JsonRoundTrip_Preserves_Int16_Int64_Byte_Single_And_Double()

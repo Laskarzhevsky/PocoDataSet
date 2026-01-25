@@ -5,7 +5,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationRoundTripTests
+    public class SerializationRoundTripTests
     {
         [Fact]
         public void JsonRoundTrip_PreservesRowsValuesAndStates()

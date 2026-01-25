@@ -13,7 +13,7 @@ using Xunit;
 
 namespace PocoDataSet.EfCoreBridge.Tests;
 
-public sealed class EfChangesetToPocoApplier_AdditionalFloatingPatch_Tests
+public class EfChangesetToPocoApplier_AdditionalFloatingPatch_Tests
 {
     [Fact]
     public void ApplyTableAndSave_ModifiedRow_ConcurrencyTokenOmitted_DoesNotThrow_AndAppliesPatch()

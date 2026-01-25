@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PocoDataSet.SerializerTests
 {
-    public sealed class SerializationBinaryBase64NormalizationTests
+    public class SerializationBinaryBase64NormalizationTests
     {
         [Fact]
         public void FromJsonString_Converts_Base64String_ToByteArray_ForBinaryColumn()
