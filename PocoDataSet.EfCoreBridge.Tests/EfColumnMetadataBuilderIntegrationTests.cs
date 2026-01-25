@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 using PocoDataSet.IData;
 using PocoDataSet.Extensions;
-using PocoDataSet.EfCoreBridge;
 
 using Xunit;
 

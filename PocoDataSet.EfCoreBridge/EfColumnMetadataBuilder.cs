@@ -32,6 +32,9 @@ namespace PocoDataSet.EfCoreBridge
 
             IKey? primaryKey = entityType.FindPrimaryKey();
 
+            StoreObjectIdentifier? storeObject = TryGetStoreObjectIdentifier(entityType);
+
+
             List<IForeignKey> foreignKeys = new List<IForeignKey>();
             foreach (IForeignKey fk in entityType.GetForeignKeys())
             {
@@ -60,7 +63,7 @@ namespace PocoDataSet.EfCoreBridge
                 }
 
                 ColumnMetadata column = new ColumnMetadata();
-                column.ColumnName = property.Name;
+                column.ColumnName = GetRelationalColumnNameOrFallback(property, storeObject);
                 column.DataType = MapClrTypeToDataTypeName(GetNonNullableClrType(property.ClrType));
                 column.IsNullable = property.IsNullable;
 
@@ -120,7 +123,9 @@ namespace PocoDataSet.EfCoreBridge
                         // If single-column FK, try to populate referenced table/column.
                         if (foreignKey.PrincipalKey.Properties.Count == 1)
                         {
-                            columnMetadata.ReferencedColumnName = foreignKey.PrincipalKey.Properties[0].Name;
+                            StoreObjectIdentifier? principalStoreObject = TryGetStoreObjectIdentifier(foreignKey.PrincipalEntityType);
+
+                            columnMetadata.ReferencedColumnName = GetRelationalColumnNameOrFallback(foreignKey.PrincipalKey.Properties[0], principalStoreObject);
                         }
 
                         // Table name may require relational provider; fall back to CLR name.
@@ -325,7 +330,57 @@ namespace PocoDataSet.EfCoreBridge
         /// </summary>
         /// <param name="entityType">Entity type</param>
         /// <returns>Relational table name</returns>
-        private static string? TryGetRelationalTableName(IEntityType entityType)
+        
+        private static StoreObjectIdentifier? TryGetStoreObjectIdentifier(IEntityType entityType)
+        {
+            try
+            {
+                string? tableName = entityType.GetTableName();
+                if (string.IsNullOrWhiteSpace(tableName))
+                {
+                    return null;
+                }
+
+                string? schema = null;
+                try
+                {
+                    schema = entityType.GetSchema();
+                }
+                catch
+                {
+                    schema = null;
+                }
+
+                return StoreObjectIdentifier.Table(tableName, schema);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string GetRelationalColumnNameOrFallback(IProperty property, StoreObjectIdentifier? storeObject)
+        {
+            if (storeObject.HasValue)
+            {
+                try
+                {
+                    string? col = property.GetColumnName(storeObject.Value);
+                    if (!string.IsNullOrWhiteSpace(col))
+                    {
+                        return col;
+                    }
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+
+            return property.Name;
+        }
+
+private static string? TryGetRelationalTableName(IEntityType entityType)
         {
             try
             {

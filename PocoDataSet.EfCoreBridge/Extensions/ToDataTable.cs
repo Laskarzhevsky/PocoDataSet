@@ -13,7 +13,7 @@ namespace PocoDataSet.EfCoreBridge
     /// <summary>
     /// EF Core bridge helpers for projecting query results into PocoDataSet.
     /// </summary>
-    public static class EfCoreBridgeExtensions
+    public static partial class EfCoreBridgeExtensions
     {
         #region Public Methods
         /// <summary>
