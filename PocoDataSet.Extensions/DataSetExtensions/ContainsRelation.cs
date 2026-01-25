@@ -11,12 +11,12 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Checks
+        /// Checks whether data set contains relation
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="relationName">Relation name</param>
-        /// <returns></returns>
-        public static bool RelationExists(this IDataSet? dataSet, string relationName)
+        /// <returns>True if data set contains relation, otherwise false</returns>
+        public static bool ContainsRelation(this IDataSet? dataSet, string relationName)
         {
             if (dataSet == null)
             {

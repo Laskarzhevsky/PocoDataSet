@@ -122,10 +122,6 @@ namespace PocoDataSet.SqlServerDataAdapter
 		}
 
 		/// <summary>
-		/// Builds ordered list of tables that contain changes, ordered by foreign keys.
-		/// </summary>
-		
-		/// <summary>
 		/// Builds ordered list of tables that contain changes (Added/Modified/Deleted),
 		/// ordered automatically by SQL Server foreign key relationships.
 		/// </summary>
@@ -1337,13 +1333,18 @@ ORDER BY ic.key_ordinal;";
 
                 // Relation name must be unique within the dataset.
                 string relationName = foreignKeyGroup.ForeignKeyName;
-                if (dataSet.RelationExists(relationName))
+                if (dataSet.Relations != null && dataSet.ContainsRelation(relationName))
                 {
                     continue;
                 }
 
                 // Parent = referenced table, Child = dependent table
-                dataSet.AddRelation(relationName, foreignKeyGroup.ReferencedTableName, foreignKeyGroup.ReferencedColumnNames, foreignKeyGroup.ParentTableName, foreignKeyGroup.ParentColumnNames);
+                dataSet.AddRelation(
+                    relationName: relationName,
+                    parentTableName: foreignKeyGroup.ReferencedTableName,
+                    parentColumnNames: foreignKeyGroup.ReferencedColumnNames,
+                    childTableName: foreignKeyGroup.ParentTableName,
+                    childColumnNames: foreignKeyGroup.ParentColumnNames);
             }
         }
 
@@ -1422,8 +1423,6 @@ ORDER BY ic.key_ordinal;";
 
             return result;
         }
-
-
 
         /// <summary>
         /// Loads data table foreign keys
