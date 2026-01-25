@@ -11,23 +11,23 @@ using PocoDataSet.IData;
 namespace PocoDataSet.EfCoreBridge
 {
     /// <summary>
-    /// Builds PocoDataSet column metadata from EF Core model metadata.
+    /// Provides Entiry Framework column mMetadata builder functionality
     /// </summary>
     internal static class EfColumnMetadataBuilder
     {
-        public static List<IColumnMetadata> Build<TEntity>(DbContext dbContext)
-            where TEntity : class
+        #region Public Methods
+        /// <summary>
+        /// Builds PocoDataSet column metadata from EF Core model metadata
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="dbContext">Db context</param>
+        /// <returns>Built PocoDataSet column metadata from EF Core model metadata</returns>
+        public static List<IColumnMetadata> Build<TEntity>(DbContext dbContext) where TEntity : class
         {
-            if (dbContext == null)
-            {
-                throw new ArgumentNullException(nameof(dbContext));
-            }
-
             IEntityType? entityType = dbContext.Model.FindEntityType(typeof(TEntity));
             if (entityType == null)
             {
-                throw new InvalidOperationException(
-                    "EF Core model does not contain entity type '" + typeof(TEntity).FullName + "'.");
+                throw new InvalidOperationException("EF Core model does not contain entity type '" + typeof(TEntity).FullName + "'.");
             }
 
             IKey? primaryKey = entityType.FindPrimaryKey();
@@ -94,7 +94,162 @@ namespace PocoDataSet.EfCoreBridge
 
             return result;
         }
+        #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Applies foreign key info
+        /// </summary>
+        /// <param name="columnMetadata">Column metadata</param>
+        /// <param name="property">Property</param>
+        /// <param name="foreignKeys">Foreign keys</param>
+        private static void ApplyForeignKeyInfo(ColumnMetadata columnMetadata, IProperty property, List<IForeignKey> foreignKeys)
+        {
+            columnMetadata.IsForeignKey = false;
+            columnMetadata.ReferencedTableName = null;
+            columnMetadata.ReferencedColumnName = null;
+
+            foreach (IForeignKey foreignKey in foreignKeys)
+            {
+                foreach (IProperty depProp in foreignKey.Properties)
+                {
+                    if (string.Equals(depProp.Name, property.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        columnMetadata.IsForeignKey = true;
+
+                        // If single-column FK, try to populate referenced table/column.
+                        if (foreignKey.PrincipalKey.Properties.Count == 1)
+                        {
+                            columnMetadata.ReferencedColumnName = foreignKey.PrincipalKey.Properties[0].Name;
+                        }
+
+                        // Table name may require relational provider; fall back to CLR name.
+                        string? tableName = TryGetRelationalTableName(foreignKey.PrincipalEntityType);
+                        if (string.IsNullOrWhiteSpace(tableName))
+                        {
+                            tableName = foreignKey.PrincipalEntityType.ClrType != null
+                                ? foreignKey.PrincipalEntityType.ClrType.Name
+                                : foreignKey.PrincipalEntityType.Name;
+                        }
+
+                        columnMetadata.ReferencedTableName = tableName;
+
+                        return;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets byte
+        /// </summary>
+        /// <param name="value">Value for conversion</param>
+        /// <returns>Value converted into byte</returns>
+        private static byte? GetByteOrNull(int? value)
+        {
+            if (!value.HasValue)
+            {
+                return null;
+            }
+
+            if (value.Value < 0 || value.Value > 255)
+            {
+                return null;
+            }
+
+            return (byte)value.Value;
+        }
+
+        /// <summary>
+        /// Gets property comment
+        /// </summary>
+        /// <param name="property">Property to inspect</param>
+        /// <returns>Property comment</returns>
+        private static string? GetCommentOrNull(IProperty property)
+        {
+            try
+            {
+                return property.GetComment();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets property max length
+        /// </summary>
+        /// <param name="property">Property to inspect</param>
+        /// <returns>Property max length</returns>
+        private static int? GetMaxLengthOrNull(IProperty property)
+        {
+            try
+            {
+                return property.GetMaxLength();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets non-nullable CLR type
+        /// </summary>
+        /// <param name="clrType">CLR type</param>
+        /// <returns>Non-nullable CLR type</returns>
+        private static Type GetNonNullableClrType(Type clrType)
+        {
+            Type? underlying = Nullable.GetUnderlyingType(clrType);
+            if (underlying != null)
+            {
+                return underlying;
+            }
+
+            return clrType;
+        }
+
+        /// <summary>
+        /// Gets property precision
+        /// </summary>
+        /// <param name="property">Property to inspect</param>
+        /// <returns>Property precision</returns>
+        private static int? GetPrecisionOrNull(IProperty property)
+        {
+            try
+            {
+                return property.GetPrecision();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets property scale
+        /// </summary>
+        /// <param name="property">Property to inspect</param>
+        /// <returns>Property scale</returns>
+        private static int? GetScaleOrNull(IProperty property)
+        {
+            try
+            {
+                return property.GetScale();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Checks whether property is a primary key
+        /// </summary>
+        /// <param name="primaryKey">Primary key</param>
+        /// <param name="property">Property to check</param>
+        /// <returns>True if property is a primary key, otherwise false</returns>
         private static bool IsPrimaryKeyProperty(IKey? primaryKey, IProperty property)
         {
             if (primaryKey == null)
@@ -113,57 +268,11 @@ namespace PocoDataSet.EfCoreBridge
             return false;
         }
 
-        private static void ApplyForeignKeyInfo(
-            ColumnMetadata column,
-            IProperty property,
-            List<IForeignKey> foreignKeys)
-        {
-            column.IsForeignKey = false;
-            column.ReferencedTableName = null;
-            column.ReferencedColumnName = null;
-
-            foreach (IForeignKey fk in foreignKeys)
-            {
-                foreach (IProperty depProp in fk.Properties)
-                {
-                    if (string.Equals(depProp.Name, property.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        column.IsForeignKey = true;
-
-                        // If single-column FK, try to populate referenced table/column.
-                        if (fk.PrincipalKey.Properties.Count == 1)
-                        {
-                            column.ReferencedColumnName = fk.PrincipalKey.Properties[0].Name;
-                        }
-
-                        // Table name may require relational provider; fall back to CLR name.
-                        string? tableName = TryGetRelationalTableName(fk.PrincipalEntityType);
-                        if (string.IsNullOrWhiteSpace(tableName))
-                        {
-                            tableName = fk.PrincipalEntityType.ClrType != null
-                                ? fk.PrincipalEntityType.ClrType.Name
-                                : fk.PrincipalEntityType.Name;
-                        }
-
-                        column.ReferencedTableName = tableName;
-
-                        return;
-                    }
-                }
-            }
-        }
-
-        private static Type GetNonNullableClrType(Type clrType)
-        {
-            Type? underlying = Nullable.GetUnderlyingType(clrType);
-            if (underlying != null)
-            {
-                return underlying;
-            }
-
-            return clrType;
-        }
-
+        /// <summary>
+        /// Maps CLR type to data type name
+        /// </summary>
+        /// <param name="clrType">CLR type</param>
+        /// <returns>Mapped CLR type to data type name</returns>
         private static string MapClrTypeToDataTypeName(Type clrType)
         {
             if (clrType == typeof(byte[]))
@@ -211,69 +320,11 @@ namespace PocoDataSet.EfCoreBridge
             return DataTypeNames.OBJECT;
         }
 
-        private static int? GetMaxLengthOrNull(IProperty property)
-        {
-            try
-            {
-                return property.GetMaxLength();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static int? GetPrecisionOrNull(IProperty property)
-        {
-            try
-            {
-                return property.GetPrecision();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static int? GetScaleOrNull(IProperty property)
-        {
-            try
-            {
-                return property.GetScale();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static string? GetCommentOrNull(IProperty property)
-        {
-            try
-            {
-                return property.GetComment();
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static byte? GetByteOrNull(int? value)
-        {
-            if (!value.HasValue)
-            {
-                return null;
-            }
-
-            if (value.Value < 0 || value.Value > 255)
-            {
-                return null;
-            }
-
-            return (byte)value.Value;
-        }
-
+        /// <summary>
+        /// Tries to get relational table name
+        /// </summary>
+        /// <param name="entityType">Entity type</param>
+        /// <returns>Relational table name</returns>
         private static string? TryGetRelationalTableName(IEntityType entityType)
         {
             try
@@ -285,5 +336,6 @@ namespace PocoDataSet.EfCoreBridge
                 return null;
             }
         }
+        #endregion
     }
 }

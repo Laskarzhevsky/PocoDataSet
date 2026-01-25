@@ -3,17 +3,22 @@ using System.Collections.Generic;
 
 using PocoDataSet.IData;
 
-namespace PocoDataSet.EfCoreBridge.Internal
+namespace PocoDataSet.EfCoreBridge
 {
+    /// <summary>
+    /// Provides relation table sorter functionality
+    /// </summary>
     internal static class RelationTableSorter
     {
-        public static List<string> SortTablesByRelations(
-            IDataSet changeset,
-            IEnumerable<string> tableNames)
+        #region Public Methods
+        /// <summary>
+        /// Sorts tables by relations
+        /// </summary>
+        /// <param name="changeset">Changeset with tables</param>
+        /// <param name="tableNames">Table names</param>
+        /// <returns>Sorted tables by relations</returns>
+        public static List<string> SortTablesByRelations(IDataSet changeset, IEnumerable<string> tableNames)
         {
-            if (changeset == null) throw new ArgumentNullException(nameof(changeset));
-            if (tableNames == null) throw new ArgumentNullException(nameof(tableNames));
-
             HashSet<string> present = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<string> originalOrder = new List<string>();
 
@@ -137,7 +142,15 @@ namespace PocoDataSet.EfCoreBridge.Internal
 
             return result;
         }
+        #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Checks whether list contains value
+        /// </summary>
+        /// <param name="list">List to inspect</param>
+        /// <param name="value">Value to find</param>
+        /// <returns>True if list contains value, otherwise false</returns>
         private static bool ContainsIgnoreCase(List<string> list, string value)
         {
             for (int i = 0; i < list.Count; i++)
@@ -151,6 +164,12 @@ namespace PocoDataSet.EfCoreBridge.Internal
             return false;
         }
 
+        /// <summary>
+        /// Gets index of value in the list
+        /// </summary>
+        /// <param name="list">List to inspect</param>
+        /// <param name="value">Value to find</param>
+        /// <returns>Index of value in the list</returns>
         private static int IndexOf(List<string> list, string value)
         {
             for (int i = 0; i < list.Count; i++)
@@ -163,5 +182,6 @@ namespace PocoDataSet.EfCoreBridge.Internal
 
             return int.MaxValue;
         }
+        #endregion
     }
 }

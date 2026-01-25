@@ -14,17 +14,22 @@ namespace PocoDataSet.EfCoreBridge
     /// 2) EF table name mapping (from [Table] or fluent mapping)
     /// 3) CLR type name
     /// </summary>
-    public sealed class EfModelEntityTypeResolver : IEntityTypeResolver
+    public class EfModelEntityTypeResolver : IEntityTypeResolver
     {
+        #region Data Fields
+        /// <summary>
+        /// Holds types by name
+        /// </summary>
         private readonly Dictionary<string, Type> _byName;
+        #endregion
 
+        #region Constructors
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="dbContext">Db context</param>
         public EfModelEntityTypeResolver(DbContext dbContext)
         {
-            if (dbContext == null)
-            {
-                throw new ArgumentNullException(nameof(dbContext));
-            }
-
             _byName = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
 
             IModel model = dbContext.Model;
@@ -60,26 +65,40 @@ namespace PocoDataSet.EfCoreBridge
                 AddMapping(clrType.Name, clrType);
             }
         }
+        #endregion
 
-        public bool TryResolveEntityType(string tableName, out Type entityType)
+        #region Public Methods
+        /// <summary>
+        /// Tries to resolve entity type
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        /// <param name="resolvedEntityType">Resolved entity type</param>
+        /// <returns></returns>
+        public bool TryResolveEntityType(string tableName, out Type resolvedEntityType)
         {
             if (string.IsNullOrWhiteSpace(tableName))
             {
-                entityType = typeof(object);
+                resolvedEntityType = typeof(object);
                 return false;
             }
 
             Type? resolved;
             if (_byName.TryGetValue(tableName, out resolved))
             {
-                entityType = resolved;
+                resolvedEntityType = resolved;
                 return true;
             }
 
-            entityType = typeof(object);
+            resolvedEntityType = typeof(object);
             return false;
         }
+        #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Adds table attribute from changeset
+        /// </summary>
+        /// <param name="clrType">CLR type</param>
         private void AddFromChangesetTableAttribute(Type clrType)
         {
             object[] attributes = clrType.GetCustomAttributes(typeof(ChangesetTableAttribute), false);
@@ -102,6 +121,11 @@ namespace PocoDataSet.EfCoreBridge
             AddMapping(attribute.TableName, clrType);
         }
 
+        /// <summary>
+        /// Adds mapping between name and CLR type
+        /// </summary>
+        /// <param name="name">Name to map</param>
+        /// <param name="clrType">CLR type</param>
         private void AddMapping(string name, Type clrType)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -117,5 +141,6 @@ namespace PocoDataSet.EfCoreBridge
 
             _byName.Add(name, clrType);
         }
+        #endregion
     }
 }

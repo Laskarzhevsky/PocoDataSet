@@ -20,34 +20,45 @@ namespace PocoDataSet.EfCoreBridge
     /// </summary>
     public static class EfChangesetToPocoApplier
     {
-        public static void ApplyTable<TEntity>(
-            DbContext dbContext,
-            DbSet<TEntity> dbSet,
-            IDataTable changesetTable)
-            where TEntity : class, new()
+        #region Public Methods
+        /// <summary>
+        /// Applies table
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="dbContext">Db context</param>
+        /// <param name="dbSet">Db set</param>
+        /// <param name="changesetTable">Changeset table</param>
+        public static void ApplyTable<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable) where TEntity : class, new()
         {
             EfChangesetCopyToPocoApplier.ApplyTable(dbContext, dbSet, changesetTable);
         }
 
-        public static void ApplyTableAndSave<TEntity>(
-            DbContext dbContext,
-            DbSet<TEntity> dbSet,
-            IDataTable changesetTable)
-            where TEntity : class, new()
+        /// <summary>
+        /// Applies table and saves
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="dbContext">Db context</param>
+        /// <param name="dbSet">Db set</param>
+        /// <param name="changesetTable">Changeset table</param>
+        public static void ApplyTableAndSave<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable) where TEntity : class, new()
         {
             ApplyTable(dbContext, dbSet, changesetTable);
             dbContext.SaveChanges();
         }
 
-        public static async Task ApplyTableAndSaveAsync<TEntity>(
-            DbContext dbContext,
-            DbSet<TEntity> dbSet,
-            IDataTable changesetTable,
-            CancellationToken cancellationToken = default)
-            where TEntity : class, new()
+        /// <summary>
+        /// Applies table and saves asynchronously
+        /// </summary>
+        /// <typeparam name="TEntity">Entity type</typeparam>
+        /// <param name="dbContext">Db context</param>
+        /// <param name="dbSet">Db set</param>
+        /// <param name="changesetTable">Changeset table</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        public static async Task ApplyTableAndSaveAsync<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable, CancellationToken cancellationToken = default) where TEntity : class, new()
         {
             ApplyTable(dbContext, dbSet, changesetTable);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
+        #endregion
     }
 }
