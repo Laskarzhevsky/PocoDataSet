@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.Extensions.Relations;
+using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableExtensions
@@ -14,33 +15,65 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Data Fields
         /// <summary>
-        /// Holds referenct to observable data set
+        /// Guards against re-entrant validation (validation may indirectly trigger more events).
+        /// </summary>
+        private bool _isValidating;
+
+        /// <summary>
+        /// Holds reference to observable data set
         /// </summary>
         private readonly IObservableDataSet _observableDataSet;
 
         /// <summary>
-        /// Holds referenct to relation validation options
+        /// Cache of column names participating in any relation (parent or child columns).
+        /// Used to reduce validation noise.
+        /// </summary>
+        private readonly HashSet<string> _relationColumnNames;
+
+        /// <summary>
+        /// Cache of table names participating in any relation (parent or child).
+        /// Used to reduce validation noise.
+        /// </summary>
+        private readonly HashSet<string> _relationTableNames;
+
+        /// <summary>
+        /// Holds relation validation options
         /// </summary>
         private readonly RelationValidationOptions _relationValidationOptions;
         #endregion
 
         #region Events
         /// <summary>
-        /// RelationValidationFailed event
+        /// Raised when relation validation detects any violations during editing.
         /// </summary>
         public event EventHandler<ObservableRelationValidationFailedEventArgs>? RelationValidationFailed;
         #endregion
 
         #region Constructors
         /// <summary>
-        /// Default constructor
+        /// Initializes a new instance of ObservableRelationIntegrityEnforcer class
         /// </summary>
-        /// <param name="observableDataSet">Observable data set.</param>
+        /// <param name="observableDataSet">Observable data set</param>
         /// <param name="relationValidationOptions">Relation validation options</param>
         public ObservableRelationIntegrityEnforcer(IObservableDataSet observableDataSet, RelationValidationOptions relationValidationOptions)
         {
+            if (observableDataSet == null)
+            {
+                throw new ArgumentNullException(nameof(observableDataSet));
+            }
+
+            if (relationValidationOptions == null)
+            {
+                throw new ArgumentNullException(nameof(relationValidationOptions));
+            }
+
             _observableDataSet = observableDataSet;
             _relationValidationOptions = relationValidationOptions;
+
+            _relationTableNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            _relationColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            BuildRelationCaches();
 
             _observableDataSet.DataFieldValueChanged += ObservableDataSet_DataFieldValueChanged;
             _observableDataSet.RowAdded += ObservableDataSet_RowAdded;
@@ -52,85 +85,234 @@ namespace PocoDataSet.ObservableExtensions
 
         #region Private Methods
         /// <summary>
-        /// Validates the integrity of data relations and raises the RelationValidationFailed event if any violations are detected.
+        /// Builds caches of relation table/column names for noise reduction.
         /// </summary>
-        /// <remarks>This method checks for relation integrity violations in the underlying data set. If
-        /// violations are found and there are subscribers to the RelationValidationFailed event, the event is raised
-        /// with details of the violations. If no violations are found or there are no subscribers, the method returns
-        /// without raising the event.</remarks>
-        /// <param name="handledEventName">The name of the event being handled, used to identify the context in which relation validation is performed.</param>
+        private void BuildRelationCaches()
+        {
+            IDataSet innerDataSet = _observableDataSet.InnerDataSet;
+            if (innerDataSet == null)
+            {
+                return;
+            }
+
+            List<IDataRelation> relations = innerDataSet.Relations;
+            if (relations == null)
+            {
+                return;
+            }
+
+            foreach (IDataRelation relation in relations)
+            {
+                if (relation == null)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(relation.ParentTable))
+                {
+                    _relationTableNames.Add(relation.ParentTable);
+                }
+
+                if (!string.IsNullOrWhiteSpace(relation.ChildTable))
+                {
+                    _relationTableNames.Add(relation.ChildTable);
+                }
+
+                AddColumnsToCache(relation.ParentColumns);
+                AddColumnsToCache(relation.ChildColumns);
+            }
+        }
+
+        /// <summary>
+        /// Adds column names to column cache.
+        /// </summary>
+        /// <param name="columns">List of column names</param>
+        private void AddColumnsToCache(IReadOnlyList<string>? columns)
+        {
+            if (columns == null)
+            {
+                return;
+            }
+
+            foreach (string columnName in columns)
+            {
+                if (string.IsNullOrWhiteSpace(columnName))
+                {
+                    continue;
+                }
+
+                _relationColumnNames.Add(columnName);
+            }
+        }
+
+        /// <summary>
+        /// Validates the integrity of data relations and raises RelationValidationFailed event if any violations are detected.
+        /// </summary>
+        /// <remarks>
+        /// This method checks for relation integrity violations in the underlying data set. If violations are found and there
+        /// are subscribers to the RelationValidationFailed event, the event is raised with details of the violations.
+        /// </remarks>
+        /// <param name="handledEventName">The name of the event that triggered validation.</param>
         private void ValidateAndRaiseRelationValidationFailedEvent(string handledEventName)
         {
-            IReadOnlyList<RelationIntegrityViolation> violations = _observableDataSet.InnerDataSet.ValidateRelations(_relationValidationOptions);
-
-            if (violations == null)
+            if (_isValidating)
             {
                 return;
             }
 
-            if (violations.Count == 0)
-            {
-                return;
-            }
+            _isValidating = true;
 
-            if (RelationValidationFailed == null)
+            try
             {
-                return;
-            }
+                IReadOnlyList<RelationIntegrityViolation> violations = _observableDataSet.InnerDataSet.ValidateRelations(_relationValidationOptions);
 
-            RelationValidationFailed(this, new ObservableRelationValidationFailedEventArgs(handledEventName, violations));
+                if (violations == null)
+                {
+                    return;
+                }
+
+                if (violations.Count == 0)
+                {
+                    return;
+                }
+
+                EventHandler<ObservableRelationValidationFailedEventArgs>? handler = RelationValidationFailed;
+                if (handler == null)
+                {
+                    return;
+                }
+
+                handler(this, new ObservableRelationValidationFailedEventArgs(handledEventName, violations));
+            }
+            finally
+            {
+                _isValidating = false;
+            }
         }
-        #endregion
 
-        #region Event Handlers
         /// <summary>
         /// Handles ObservableDataSet.DataFieldValueChanged event
+        /// Noise reduction: validates only when a relation column changes.
         /// </summary>
-        /// <param name="sender">Event source</param>
-        /// <param name="e">Event srguments</param>
         private void ObservableDataSet_DataFieldValueChanged(object? sender, DataFieldValueChangedEventArgs e)
         {
-            ValidateAndRaiseRelationValidationFailedEvent("DataFieldValueChanged");
+            if (e == null)
+            {
+                return;
+            }
+
+            string columnName = e.ColumnName;
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                return;
+            }
+
+            if (!_relationColumnNames.Contains(columnName))
+            {
+                return;
+            }
+
+            ValidateAndRaiseRelationValidationFailedEvent("RelationColumnChanged: " + columnName);
         }
 
         /// <summary>
         /// Handles ObservableDataSet.RowAdded event
+        /// Noise reduction: validates only when the table participates in relations.
         /// </summary>
-        /// <param name="sender">Event source</param>
-        /// <param name="e">Event srguments</param>
         private void ObservableDataSet_RowAdded(object? sender, RowsChangedEventArgs e)
         {
-            ValidateAndRaiseRelationValidationFailedEvent("RowAdded");
+            if (e == null)
+            {
+                return;
+            }
+
+            string tableName = e.TableName;
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return;
+            }
+
+            if (!_relationTableNames.Contains(tableName))
+            {
+                return;
+            }
+
+            ValidateAndRaiseRelationValidationFailedEvent("RowAdded: " + tableName);
         }
 
         /// <summary>
         /// Handles ObservableDataSet.RowRemoved event
+        /// Noise reduction: validates only when the table participates in relations.
         /// </summary>
-        /// <param name="sender">Event source</param>
-        /// <param name="e">Event srguments</param>
         private void ObservableDataSet_RowRemoved(object? sender, RowsChangedEventArgs e)
         {
-            ValidateAndRaiseRelationValidationFailedEvent("RowRemoved");
+            if (e == null)
+            {
+                return;
+            }
+
+            string tableName = e.TableName;
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return;
+            }
+
+            if (!_relationTableNames.Contains(tableName))
+            {
+                return;
+            }
+
+            ValidateAndRaiseRelationValidationFailedEvent("RowRemoved: " + tableName);
         }
 
         /// <summary>
         /// Handles ObservableDataSet.TableAdded event
+        /// Noise reduction: validates only when the table participates in relations.
         /// </summary>
-        /// <param name="sender">Event source</param>
-        /// <param name="e">Event srguments</param>
         private void ObservableDataSet_TableAdded(object? sender, TablesChangedEventArgs e)
         {
-            ValidateAndRaiseRelationValidationFailedEvent("TableAdded");
+            if (e == null)
+            {
+                return;
+            }
+
+            string tableName = e.TableName;
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return;
+            }
+
+            if (!_relationTableNames.Contains(tableName))
+            {
+                return;
+            }
+
+            ValidateAndRaiseRelationValidationFailedEvent("TableAdded: " + tableName);
         }
 
         /// <summary>
         /// Handles ObservableDataSet.TableRemoved event
+        /// Noise reduction: validates only when the table participates in relations.
         /// </summary>
-        /// <param name="sender">Event source</param>
-        /// <param name="e">Event srguments</param>
         private void ObservableDataSet_TableRemoved(object? sender, TablesChangedEventArgs e)
         {
-            ValidateAndRaiseRelationValidationFailedEvent("TableRemoved");
+            if (e == null)
+            {
+                return;
+            }
+
+            string tableName = e.TableName;
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                return;
+            }
+
+            if (!_relationTableNames.Contains(tableName))
+            {
+                return;
+            }
+
+            ValidateAndRaiseRelationValidationFailedEvent("TableRemoved: " + tableName);
         }
         #endregion
 

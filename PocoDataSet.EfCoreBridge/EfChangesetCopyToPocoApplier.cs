@@ -18,15 +18,61 @@ namespace PocoDataSet.EfCoreBridge
     /// </summary>
     public static class EfChangesetCopyToPocoApplier
     {
+
+        private enum ApplyTableMode
+        {
+            All,
+            NonDeletesOnly,
+            DeletesOnly
+        }
+
+
         public static void ApplyTable<TEntity>(
             DbContext dbContext,
             DbSet<TEntity> dbSet,
             IDataTable changesetTable)
             where TEntity : class, new()
         {
-            if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
-            if (dbSet == null) throw new ArgumentNullException(nameof(dbSet));
-            if (changesetTable == null) throw new ArgumentNullException(nameof(changesetTable));
+            ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.All);
+        }
+
+        /// <summary>
+        /// Applies only Added and Modified rows (skips Deleted rows).
+        /// </summary>
+        internal static void ApplyTableNonDeletesOnly<TEntity>(
+            DbContext dbContext,
+            DbSet<TEntity> dbSet,
+            IDataTable changesetTable)
+            where TEntity : class, new()
+        {
+            ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.NonDeletesOnly);
+        }
+
+        /// <summary>
+        /// Applies only Deleted rows (skips Added/Modified rows).
+        /// </summary>
+        internal static void ApplyTableDeletesOnly<TEntity>(
+            DbContext dbContext,
+            DbSet<TEntity> dbSet,
+            IDataTable changesetTable)
+            where TEntity : class, new()
+        {
+            ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.DeletesOnly);
+        }
+
+        private static void ApplyTableInternal<TEntity>(
+            DbContext dbContext,
+            DbSet<TEntity> dbSet,
+            IDataTable changesetTable,
+            ApplyTableMode mode)
+            where TEntity : class, new()
+        {
+            if (dbContext == null)
+                throw new ArgumentNullException(nameof(dbContext));
+            if (dbSet == null)
+                throw new ArgumentNullException(nameof(dbSet));
+            if (changesetTable == null)
+                throw new ArgumentNullException(nameof(changesetTable));
 
             if (changesetTable.PrimaryKeys == null || changesetTable.PrimaryKeys.Count == 0)
             {
@@ -46,7 +92,7 @@ namespace PocoDataSet.EfCoreBridge
             {
                 IDataRow row = changesetTable.Rows[i];
 
-                if (row.DataRowState == DataRowState.Added)
+                if (mode != ApplyTableMode.DeletesOnly && row.DataRowState == DataRowState.Added)
                 {
                     TEntity entity = new TEntity();
                     row.CopyToPoco(entity);
@@ -56,7 +102,7 @@ namespace PocoDataSet.EfCoreBridge
 
                 object[] keyValues = BuildKeyValues(row, changesetTable.PrimaryKeys);
 
-                if (row.DataRowState == DataRowState.Modified)
+                if (mode != ApplyTableMode.DeletesOnly && row.DataRowState == DataRowState.Modified)
                 {
                     TEntity? tracked = dbSet.Find(keyValues);
                     if (tracked == null)
@@ -74,7 +120,7 @@ namespace PocoDataSet.EfCoreBridge
                     continue;
                 }
 
-                if (row.DataRowState == DataRowState.Deleted)
+                if (mode != ApplyTableMode.NonDeletesOnly && row.DataRowState == DataRowState.Deleted)
                 {
                     TEntity? tracked = dbSet.Find(keyValues);
 
@@ -93,7 +139,9 @@ namespace PocoDataSet.EfCoreBridge
                     continue;
                 }
             }
+
         }
+
 
         public static void ApplyTableAndSave<TEntity>(
             DbContext dbContext,
