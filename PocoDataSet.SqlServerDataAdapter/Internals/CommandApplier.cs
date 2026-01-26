@@ -20,14 +20,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="tableWriteMetadataCache">Table write metadata cache</param>
         /// <param name="sqlConnection">SQL connection</param>
         /// <param name="sqlTransaction">SQL transaction</param>
-        public static async Task<int> ApplyDeletesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public static async Task<int> ApplyDeletesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
         {
             int affected = 0;
 
             for (int t = orderedTables.Count - 1; t >= 0; t--)
             {
                 IDataTable table = orderedTables[t];
-                TableWriteMetadata metadata = tableWriteMetadataCache[table.TableName];
+                TableWriteMetadata metadata = GetMetadataOrThrow(tableWriteMetadataCache, table.TableName);
 
                 for (int i = 0; i < table.Rows.Count; i++)
                 {
@@ -63,14 +63,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="sqlConnection">SQL connection</param>
         /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Number of affected rows</returns>
-        public static async Task<int> ApplyInsertsAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public static async Task<int> ApplyInsertsAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
         {
             int affected = 0;
 
             for (int t = 0; t < orderedTables.Count; t++)
             {
                 IDataTable table = orderedTables[t];
-                TableWriteMetadata metadata = tableWriteMetadataCache[table.TableName];
+                TableWriteMetadata metadata = GetMetadataOrThrow(tableWriteMetadataCache, table.TableName);
 
                 List<string> outputColumnsForTable = ColumnsBuilder.BuildInsertOutputColumns(metadata);
 
@@ -120,14 +120,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="sqlConnection">SQL connection</param>
         /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Number of affected rows</returns>
-        public static async Task<int> ApplyUpdatesAsync(List<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public static async Task<int> ApplyUpdatesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
         {
             int affected = 0;
 
             for (int t = 0; t < orderedTables.Count; t++)
             {
                 IDataTable table = orderedTables[t];
-                TableWriteMetadata metadata = tableWriteMetadataCache[table.TableName];
+                TableWriteMetadata metadata = GetMetadataOrThrow(tableWriteMetadataCache, table.TableName);
 
                 List<string> outputColumnsForTable = ColumnsBuilder.BuildUpdateOutputColumns(metadata);
 
@@ -201,6 +201,31 @@ namespace PocoDataSet.SqlServerDataAdapter
                     dataRow[outputColumns[i]] = value;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets metadata for a table from the cache or throws a clear error.
+        /// </summary>
+        /// <param name="tableWriteMetadataCache">Table metadata cache</param>
+        /// <param name="tableName">Table name</param>
+        static TableWriteMetadata GetMetadataOrThrow(Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, string tableName)
+        {
+            if (tableWriteMetadataCache == null)
+            {
+                throw new ArgumentNullException(nameof(tableWriteMetadataCache));
+            }
+
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                throw new ArgumentException("Table name is not specified.", nameof(tableName));
+            }
+
+            if (!tableWriteMetadataCache.TryGetValue(tableName, out TableWriteMetadata? metadata) || metadata == null)
+            {
+                throw new InvalidOperationException("Missing metadata for table '" + tableName + "'. Ensure MetadataLoader has populated the cache before applying commands.");
+            }
+
+            return metadata;
         }
         #endregion
     }

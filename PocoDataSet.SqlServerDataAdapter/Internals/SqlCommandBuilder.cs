@@ -18,7 +18,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="dataRow">Data row</param>
         /// <param name="sqlConnection">SQL connection</param>
         /// <param name="sqlTransaction">SQL transaction</param>
-        /// <returns>Built INSERT command</returns>
+        /// <returns>Built DELETE command</returns>
         internal static SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction)
         {
             PrimaryKeyProcessor.ValidatePrimaryKeysExistence(tableWriteMetadata, table.TableName);
