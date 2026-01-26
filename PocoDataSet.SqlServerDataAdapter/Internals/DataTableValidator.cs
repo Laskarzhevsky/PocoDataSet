@@ -37,12 +37,12 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             if (dataTable.Columns == null)
             {
-                throw new InvalidOperationException("Columns collection is null for table '" + dataTable.TableName + "'.");
+                throw new InvalidOperationException("Columns collection is null.");
             }
 
             if (dataTable.Rows == null)
             {
-                throw new InvalidOperationException("Rows collection is null for table '" + dataTable.TableName + "'.");
+                throw new InvalidOperationException("Rows collection is null.");
             }
         }
         #endregion

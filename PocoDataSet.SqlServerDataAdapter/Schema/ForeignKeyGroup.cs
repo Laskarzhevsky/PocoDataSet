@@ -4,7 +4,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 {
     /// <summary>
     /// Represents a grouped foreign key definition (supports composite keys).
-    /// Parent = dependent table, Referenced = principal table.
+    /// Principal = principal (referenced) table, Referenced = dependent (referencing) table.
     /// </summary>
     internal sealed class ForeignKeyGroup
     {

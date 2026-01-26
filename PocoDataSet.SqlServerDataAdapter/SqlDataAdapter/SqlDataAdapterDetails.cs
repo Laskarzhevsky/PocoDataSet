@@ -92,7 +92,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             AddParametersToSqlCommand(parameters);
             try
             {
-                await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+                using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
                 {
                     SqlCommand!.Connection = sqlConnection;
                     await sqlConnection.OpenAsync().ConfigureAwait(false);
@@ -216,11 +216,11 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             int affectedRows = 0;
 
-            await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
                 await sqlConnection.OpenAsync().ConfigureAwait(false);
 
-                await using (SqlTransaction transaction = sqlConnection.BeginTransaction())
+                using (SqlTransaction transaction = sqlConnection.BeginTransaction())
                 {
                     try
                     {
