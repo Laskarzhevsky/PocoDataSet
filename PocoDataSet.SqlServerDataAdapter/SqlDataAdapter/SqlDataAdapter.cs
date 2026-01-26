@@ -23,33 +23,6 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
         #endregion
 
-        #region Internal Test Hook
-
-        /// <summary>
-        /// INTERNAL TEST HOOK.
-        /// Allows tests to bypass SQL Server access and provide an in-memory implementation
-        /// of FillAsync while still exercising the real public API.
-        /// This delegate MUST remain null in production.
-        /// </summary>
-        internal delegate Task<IDataSet> FillOverrideDelegate(
-            string baseQuery,
-            bool isStoredProcedure,
-            Dictionary<string, object?>? parameters,
-            List<string>? returnedTableNames,
-            string? connectionString,
-            IDataSet? existingDataSet);
-
-        /// <summary>
-        /// INTERNAL TEST HOOK.
-        /// When set, FillAsync delegates execution to this override instead of accessing SQL Server.
-        /// </summary>
-        internal FillOverrideDelegate? FillOverride
-        {
-            get; set;
-        }
-
-        #endregion
-
         #region Public Properties
         /// <summary>
         /// Gets or sets flag indicating whether relations should be populated from database schema
@@ -73,24 +46,12 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Fills data set
         /// </summary>
-        public async Task<IDataSet> FillAsync(
-            string baseQuery,
-            bool isStoredProcedure,
-            Dictionary<string, object?>? parameters,
-            List<string>? returnedTableNames,
-            string? connectionString,
-            IDataSet? dataSet)
+        public async Task<IDataSet> FillAsync(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString, IDataSet? dataSet)
         {
             // TEST SEAM: bypass SQL Server when FillOverride is provided
             if (FillOverride != null)
             {
-                return await FillOverride(
-                    baseQuery,
-                    isStoredProcedure,
-                    parameters,
-                    returnedTableNames,
-                    connectionString,
-                    dataSet).ConfigureAwait(false);
+                return await FillOverride(baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString, dataSet).ConfigureAwait(false);
             }
 
             InitializeComponent(returnedTableNames);
@@ -111,7 +72,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {
-                    await PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet)
+                    await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection)
                         .ConfigureAwait(false);
                 }
 
@@ -133,21 +94,9 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Fills an existing data set by adding one or more result-set tables into it.
         /// </summary>
-        public IDataSet FillIntoExistingDataSet(
-            IDataSet dataSet,
-            string baseQuery,
-            bool isStoredProcedure,
-            Dictionary<string, object?>? parameters,
-            List<string>? returnedTableNames,
-            string? connectionString)
+        public IDataSet FillIntoExistingDataSet(IDataSet dataSet, string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString)
         {
-            return FillIntoExistingDataSetAsync(
-                    dataSet,
-                    baseQuery,
-                    isStoredProcedure,
-                    parameters,
-                    returnedTableNames,
-                    connectionString)
+            return FillIntoExistingDataSetAsync(dataSet, baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -155,26 +104,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Fills an existing data set by adding one or more result-set tables into it.
         /// </summary>
-        public async Task<IDataSet> FillIntoExistingDataSetAsync(
-            IDataSet dataSet,
-            string baseQuery,
-            bool isStoredProcedure,
-            Dictionary<string, object?>? parameters,
-            List<string>? returnedTableNames,
-            string? connectionString)
+        public async Task<IDataSet> FillIntoExistingDataSetAsync(IDataSet dataSet, string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString)
         {
             if (dataSet == null)
             {
                 throw new ArgumentNullException(nameof(dataSet));
             }
 
-            return await FillAsync(
-                    baseQuery,
-                    isStoredProcedure,
-                    parameters,
-                    returnedTableNames,
-                    connectionString,
-                    dataSet)
+            return await FillAsync(baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString, dataSet)
                 .ConfigureAwait(false);
         }
 
@@ -211,6 +148,25 @@ namespace PocoDataSet.SqlServerDataAdapter
             changeset.MergeWith(changeset, MergeMode.PostSave);
 
             return affectedRows;
+        }
+        #endregion
+
+        #region Internal Test Hook
+        /// <summary>
+        /// INTERNAL TEST HOOK.
+        /// Allows tests to bypass SQL Server access and provide an in-memory implementation
+        /// of FillAsync while still exercising the real public API.
+        /// This delegate MUST remain null in production.
+        /// </summary>
+        internal delegate Task<IDataSet> FillOverrideDelegate(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString, IDataSet? existingDataSet);
+
+        /// <summary>
+        /// INTERNAL TEST HOOK.
+        /// When set, FillAsync delegates execution to this override instead of accessing SQL Server.
+        /// </summary>
+        internal FillOverrideDelegate? FillOverride
+        {
+            get; set;
         }
         #endregion
     }

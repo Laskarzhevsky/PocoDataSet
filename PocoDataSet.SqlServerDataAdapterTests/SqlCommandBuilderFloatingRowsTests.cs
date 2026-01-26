@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using Microsoft.Data.SqlClient;
-using Xunit;
 
 using PocoDataSet.IData;
+using PocoDataSet.SqlServerDataAdapter;
+
+using Xunit;
+
 using PocoSqlDataAdapter = PocoDataSet.SqlServerDataAdapter.SqlDataAdapter;
 
 namespace PocoDataSet.SqlServerDataAdapterTests
@@ -13,7 +16,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
     /// <summary>
     /// Tests command generation behavior needed for floating (sparse) delta rows,
     /// while remaining compatible with full (non-floating) rows.
-    /// These tests do NOT hit a database; they use reflection to call internal builders.
+    /// These tests do NOT hit a database; they call the extracted SqlCommandBuilder directly.
     /// </summary>
     public class SqlCommandBuilderFloatingRowsTests
     {
@@ -28,7 +31,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             List<string> primaryKeys = new List<string> { "Id" };
 
             IDataTable table = FakeDataTableProxy.Create(tableName, columns);
-            object metadata = CreateMetadata(adapter, tableName, columns, primaryKeys);
+            TableWriteMetadata metadata = CreateMetadata(tableName, columns, primaryKeys);
 
             // Sparse row: Id + Name only; Description is missing => TryGetValue returns false.
             Dictionary<string, object?> current = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
@@ -37,26 +40,21 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             Dictionary<string, object?> original = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             original["Id"] = 1;
-
             original["Name"] = "Alice";
             original["Description"] = "Dev";
+
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = InvokeBuildUpdateCommand(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
 
             // Assert
-            // Must generate a non-empty UPDATE statement.
             Assert.False(string.IsNullOrWhiteSpace(cmd.CommandText));
 
-            // Must set Name, must NOT set Description.
+            // Must set Name, must NOT set Description in SET clause.
             Assert.Contains("[Name]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // Description may appear in WHERE due to optimistic concurrency predicates.
-            // We only require that Description is NOT included in the SET clause.
             string cmdText = cmd.CommandText;
-
-            // SQL formatting can vary (newlines, multiple spaces). Find SET/WHERE tokens robustly.
             int setIndex = cmdText.IndexOf("SET", StringComparison.OrdinalIgnoreCase);
             Assert.True(setIndex >= 0);
 
@@ -69,17 +67,16 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             }
             else
             {
-                // If WHERE is absent/unexpected, treat everything after SET as the SET clause.
                 setClause = cmdText.Substring(setIndex);
             }
 
             Assert.DoesNotContain("[Description] =", setClause, StringComparison.OrdinalIgnoreCase);
-// Parameters:
+
+            // Parameters:
             // - One @p* parameter for Name
             // - One @pk0 parameter for Id
             Assert.Contains("@pk0", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // Ensure we did not create a parameter for Description
             Assert.Single(FindParameters(cmd, "@p"));
             Assert.True(cmd.Parameters.Count >= 2);
 
@@ -98,31 +95,29 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             List<string> primaryKeys = new List<string> { "Id" };
 
             IDataTable table = FakeDataTableProxy.Create(tableName, columns);
-            object metadata = CreateMetadata(adapter, tableName, columns, primaryKeys);
+            TableWriteMetadata metadata = CreateMetadata(tableName, columns, primaryKeys);
 
             // Provided null means "set NULL" (must be included in SET).
             Dictionary<string, object?> current = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             current["Id"] = 1;
-            current["Description"] = null; // explicitly provided null
+            current["Description"] = null;
 
             Dictionary<string, object?> original = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             original["Id"] = 1;
-
             original["Name"] = "Alice";
             original["Description"] = "Dev";
+
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = InvokeBuildUpdateCommand(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.Contains("[Description]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // Must have a SET parameter for Description (even if NULL) and pk parameter.
             Assert.Single(FindParameters(cmd, "@p"));
             Assert.True(cmd.Parameters.Count >= 2);
 
-            // Provider should translate null to DBNull.Value.
             List<SqlParameter> setParams = FindParameters(cmd, "@p");
             Assert.Equal(DBNull.Value, setParams[0].Value);
         }
@@ -138,7 +133,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             List<string> primaryKeys = new List<string> { "Id" };
 
             IDataTable table = FakeDataTableProxy.Create(tableName, columns);
-            object metadata = CreateMetadata(adapter, tableName, columns, primaryKeys);
+            TableWriteMetadata metadata = CreateMetadata(tableName, columns, primaryKeys);
 
             // Full row: all columns present => builder should include both non-PK columns.
             Dictionary<string, object?> current = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
@@ -154,13 +149,13 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = InvokeBuildUpdateCommand(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.Contains("[Name]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("[Description]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // Two SET parameters + one pk parameter.
+            // Two SET parameters + one pk parameter (and possibly concurrency params).
             Assert.True(cmd.Parameters.Count >= 3);
             Assert.Equal(2, FindParameters(cmd, "@p").Count);
         }
@@ -176,16 +171,20 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             List<string> primaryKeys = new List<string> { "Id" };
 
             IDataTable table = FakeDataTableProxy.Create(tableName, columns);
-            object metadata = CreateMetadata(adapter, tableName, columns, primaryKeys);
+            TableWriteMetadata metadata = CreateMetadata(tableName, columns, primaryKeys);
 
             // Sparse insert payload: only Name provided.
             Dictionary<string, object?> current = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             current["Name"] = "Alice";
 
-            IDataRow row = FakeDataRowProxy.Create(DataRowState.Added, current, new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase), false);
+            IDataRow row = FakeDataRowProxy.Create(
+                DataRowState.Added,
+                current,
+                new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase),
+                false);
 
             // Act
-            SqlCommand cmd = InvokeBuildInsertCommand(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildInsert(adapter, table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(cmd.CommandText));
@@ -193,78 +192,42 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             Assert.Contains("INSERT", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
             Assert.Contains("[Name]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // Must NOT include Description if missing.
             Assert.DoesNotContain("[Description]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
 
-            // One parameter only
             Assert.Single(cmd.Parameters);
             List<SqlParameter> setParams = FindParameters(cmd, "@p");
             Assert.Equal("Alice", setParams[0].Value);
         }
 
         // -----------------------
-        // Reflection helpers
+        // Builder helpers
         // -----------------------
 
-        static SqlCommand InvokeBuildUpdateCommand(PocoSqlDataAdapter adapter, IDataTable table, object metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
+        static SqlCommand BuildUpdate(PocoSqlDataAdapter adapter, IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
         {
-            MethodInfo? method = typeof(PocoSqlDataAdapter).GetMethod(
-                "BuildUpdateCommand",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-
-            Assert.NotNull(method);
-
-            object? result = method!.Invoke(adapter, new object?[] { table, metadata, row, tx, outputColumns });
-            Assert.NotNull(result);
-
-            return (SqlCommand)result!;
+            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildUpdateCommand(table, metadata, row, adapter.SqlConnection, tx, outputColumns);
         }
 
-        static SqlCommand InvokeBuildInsertCommand(PocoSqlDataAdapter adapter, IDataTable table, object metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
+        static SqlCommand BuildInsert(PocoSqlDataAdapter adapter, IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
         {
-            MethodInfo? method = typeof(PocoSqlDataAdapter).GetMethod(
-                "BuildInsertCommand",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-
-            Assert.NotNull(method);
-
-            object? result = method!.Invoke(adapter, new object?[] { table, metadata, row, tx, outputColumns });
-            Assert.NotNull(result);
-
-            return (SqlCommand)result!;
+            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildInsertCommand(table, metadata, row, adapter.SqlConnection, tx, outputColumns);
         }
 
-        static object CreateMetadata(PocoSqlDataAdapter adapter, string tableName, List<string> columnNames, List<string> primaryKeyColumns)
+        static TableWriteMetadata CreateMetadata(string tableName, List<string> columnNames, List<string> primaryKeyColumns)
         {
-            Type? metadataType = typeof(PocoSqlDataAdapter).GetNestedType("TableWriteMetadata", BindingFlags.NonPublic);
-            Assert.NotNull(metadataType);
+            TableWriteMetadata metadata = new TableWriteMetadata();
+            metadata.TableName = tableName;
 
-            object metadata = Activator.CreateInstance(metadataType!)!;
-            // TableName
-            metadataType!.GetProperty("TableName", BindingFlags.Instance | BindingFlags.Public)!.SetValue(metadata, tableName);
-
-            // ColumnNames HashSet<string>
-            HashSet<string> cols = (HashSet<string>)metadataType.GetProperty("ColumnNames")!.GetValue(metadata)!;
             for (int i = 0; i < columnNames.Count; i++)
             {
-                cols.Add(columnNames[i]);
+                metadata.ColumnNames.Add(columnNames[i]);
             }
 
-            // PrimaryKeyColumns List<string>
-            List<string> pkCols = (List<string>)metadataType.GetProperty("PrimaryKeyColumns")!.GetValue(metadata)!;
             for (int i = 0; i < primaryKeyColumns.Count; i++)
             {
-                pkCols.Add(primaryKeyColumns[i]);
+                metadata.PrimaryKeyColumns.Add(primaryKeyColumns[i]);
+                metadata.PrimaryKeys.Add(primaryKeyColumns[i]);
             }
-
-            // PrimaryKeys HashSet<string>
-            HashSet<string> pkSet = (HashSet<string>)metadataType.GetProperty("PrimaryKeys")!.GetValue(metadata)!;
-            for (int i = 0; i < primaryKeyColumns.Count; i++)
-            {
-                pkSet.Add(primaryKeyColumns[i]);
-            }
-
-            // Identity / Computed / RowVersion are empty by default.
 
             return metadata;
         }
@@ -332,7 +295,6 @@ namespace PocoDataSet.SqlServerDataAdapterTests
                     return _columns!;
                 }
 
-                // Not needed for these tests
                 throw new NotImplementedException("FakeDataTableProxy does not implement: " + targetMethod.Name);
             }
         }
@@ -360,10 +322,8 @@ namespace PocoDataSet.SqlServerDataAdapterTests
                     return _columnName!;
                 }
 
-                // Some implementations might ask for IsPrimaryKey during AddColumns, but in these tests we never call AddColumns.
                 if (targetMethod.Name.StartsWith("get_", StringComparison.Ordinal))
                 {
-                    // Safe defaults for any other getters.
                     if (targetMethod.ReturnType == typeof(bool)) return false;
                     if (targetMethod.ReturnType == typeof(int)) return 0;
                     if (targetMethod.ReturnType == typeof(int?)) return (int?)null;
@@ -405,23 +365,17 @@ namespace PocoDataSet.SqlServerDataAdapterTests
                     return _state;
                 }
 
-                
                 if (targetMethod.Name == "get_HasOriginalValues")
                 {
-                    // True if any original value exists. The adapter uses this to decide whether to add
-                    // original-values based concurrency predicates.
                     return _hasOriginalValues;
                 }
 
-
                 if (targetMethod.Name == "get_OriginalValues")
                 {
-                    // Adapter uses OriginalValues to build optimistic concurrency predicates.
-                    // Return our backing dictionary (matches interface type in your codebase).
                     return _original!;
                 }
 
-if (targetMethod.Name == "TryGetValue")
+                if (targetMethod.Name == "TryGetValue")
                 {
                     string key = (string)args![0]!;
                     object? val;

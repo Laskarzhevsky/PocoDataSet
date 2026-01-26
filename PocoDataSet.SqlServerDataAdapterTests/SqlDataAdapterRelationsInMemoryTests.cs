@@ -33,7 +33,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             groups.Add(group);
 
             // Act
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
+            RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
 
             // Assert
             Assert.NotNull(dataSet.Relations);
@@ -65,7 +65,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             groups.Add(group);
 
             // Act
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
+            RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
 
             // Assert (real contract)
             Assert.NotNull(dataSet.Relations);
@@ -109,7 +109,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             groups.Add(group);
 
             // Act
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
+            RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
 
             // Assert
             Assert.NotNull(dataSet.Relations);
@@ -152,8 +152,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             groups.Add(group);
 
             // Act
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
+            RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
 
             // Assert
             Assert.NotNull(dataSet.Relations);
@@ -211,7 +210,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
                 if (adapter.PopulateRelationsFromSchema)
                 {
-                    SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(ds, fkGroups);
+                    RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(ds, fkGroups);
                 }
 
                 return ds;

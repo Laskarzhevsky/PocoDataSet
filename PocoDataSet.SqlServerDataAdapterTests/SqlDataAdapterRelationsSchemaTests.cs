@@ -42,7 +42,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             groups.Add(group);
 
             // Act
-            SqlDataAdapter.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
+            RelationsManager.ApplyForeignKeyGroupsToDataSetRelations(dataSet, groups);
 
             // Assert (test real contract: IDataSet.Relations is List<IDataRelation>)
             Assert.NotNull(dataSet.Relations);

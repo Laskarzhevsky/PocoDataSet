@@ -1,6 +1,4 @@
-﻿using System;
-
-using PocoDataSet.IData;
+﻿using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
