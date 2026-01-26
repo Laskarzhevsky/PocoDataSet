@@ -41,6 +41,15 @@ namespace PocoDataSet.SqlServerDataAdapter
             List<string> orderedNames = OrderTableNamesByForeignKeys(namesOfTablesWithChanges, foreignKeyEdges, orderIndex);
 
             Dictionary<string, IDataTable> tableByName = new Dictionary<string, IDataTable>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < tablesWithChanges.Count; i++)
+            {
+                IDataTable table = tablesWithChanges[i];
+                if (!tableByName.ContainsKey(table.TableName))
+                {
+                    tableByName.Add(table.TableName, table);
+                }
+            }
+
             List<IDataTable> orderedTables = new List<IDataTable>();
             for (int i = 0; i < orderedNames.Count; i++)
             {
