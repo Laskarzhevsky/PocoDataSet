@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,6 +18,16 @@ namespace PocoDataSet.SqlServerDataAdapter
     /// </summary>
     public partial class SqlDataAdapter
     {
+        #region Internal Connection
+        /// <summary>
+        /// Gets current SQL connection for the active operation (internal for tests).
+        /// </summary>
+        internal SqlConnection? SqlConnection
+        {
+            get; set;
+        }
+        #endregion
+
         #region Methods
         /// <summary>
         /// Adds parameters to SQL command
@@ -82,11 +92,13 @@ namespace PocoDataSet.SqlServerDataAdapter
             AddParametersToSqlCommand(parameters);
             try
             {
-                SqlConnection = new SqlConnection(ConnectionString);
-                SqlCommand!.Connection = SqlConnection;
-                await SqlConnection.OpenAsync();
+                using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+                {
+                    SqlCommand!.Connection = sqlConnection;
+                    await sqlConnection.OpenAsync().ConfigureAwait(false);
 
-                return await SqlCommand.ExecuteNonQueryAsync();
+                    return await SqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                }
             }
             finally
             {
@@ -99,10 +111,12 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         async Task GetDataFromDatabaseAsync()
         {
-            SqlConnection = new SqlConnection(ConnectionString);
-            SqlCommand!.Connection = SqlConnection;
-            await SqlConnection.OpenAsync();
-            DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync();
+            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            SqlConnection = sqlConnection;
+
+            SqlCommand!.Connection = sqlConnection;
+            await sqlConnection.OpenAsync().ConfigureAwait(false);
+            DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
         }
 
 		/// <summary>
@@ -141,17 +155,17 @@ namespace PocoDataSet.SqlServerDataAdapter
                 DataTableCreator.SqlDataReader = null;
             }
 
+            if (SqlConnection is not null)
+            {
+                await SqlConnection.DisposeAsync().ConfigureAwait(false);
+                SqlConnection = null;
+            }
+
             if (SqlCommand is not null)
             {
                 SqlCommand.Connection = null;
                 await SqlCommand.DisposeAsync().ConfigureAwait(false);
                 SqlCommand = null;
-            }
-
-            if (SqlConnection is not null)
-            {
-                await SqlConnection.DisposeAsync().ConfigureAwait(false);
-                SqlConnection = null;
             }
         }
 
@@ -170,6 +184,16 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return 0;
             }
 
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                throw new InvalidOperationException("ConnectionString is not specified.");
+            }
+
             // Enforce referential integrity rules (Restrict) before any database work.
             // Changesets are often sparse (PATCH payloads), so we do NOT run orphan checks here:
             // the referenced parent rows may legitimately exist in the database but not be included in the changeset.
@@ -182,81 +206,66 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             changeset.EnsureRelationsValid(relationValidationOptions);
 
-            bool hasAnyRows = false;
-            foreach (KeyValuePair<string, IDataTable> kv in changeset.Tables)
-            {
-                IDataTable table = kv.Value;
-                if (table != null && table.Rows != null && table.Rows.Count > 0)
-                {
-                    hasAnyRows = true;
-                    break;
-                }
-            }
-
-            if (!hasAnyRows)
+            List<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);
+            if (tablesWithChanges.Count == 0)
             {
                 return 0;
             }
 
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                ConnectionString = connectionString;
-            }
-
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                throw new InvalidOperationException("ConnectionString is not specified.");
-            }
+            HashSet<string> namesOfTablesWithChanges = ChangesetProcessor.GetNamesOfTablesWithChanges(tablesWithChanges);
 
             int affectedRows = 0;
 
-            SqlConnection = new SqlConnection(ConnectionString);
-            await SqlConnection.OpenAsync().ConfigureAwait(false);
-
-            SqlTransaction transaction = SqlConnection.BeginTransaction();
-            try
+            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
-                Dictionary<string, TableWriteMetadata> metadataCache = new Dictionary<string, TableWriteMetadata>(StringComparer.OrdinalIgnoreCase);
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
 
-                List<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);
-                HashSet<string> namesOfTablesWithChanges = ChangesetProcessor.GetNamesOfTablesWithChanges(tablesWithChanges);
-                List<ForeignKeyEdge> edges = await MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, SqlConnection, transaction).ConfigureAwait(false);
-                tablesWithChanges = TableSorter.BuildOrderedTablesWithChangesByForeignKeys(changeset, tablesWithChanges, namesOfTablesWithChanges, edges);
-
-                for (int t = 0; t < tablesWithChanges.Count; t++)
+                using (SqlTransaction transaction = sqlConnection.BeginTransaction())
                 {
-                    IDataTable table = tablesWithChanges[t];
-                    DataTableValidator.ValidateTableForSave(table);
+                    try
+                    {
+                        Dictionary<string, TableWriteMetadata> metadataCache = new Dictionary<string, TableWriteMetadata>(StringComparer.OrdinalIgnoreCase);
 
-                    // Load and validate SQL Server schema once per table
-                    TableWriteMetadata metadata = await MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, table.TableName, SqlConnection, transaction).ConfigureAwait(false);
-                    DataTableValidator.ValidateTableExistsInSqlServer(metadata, table.TableName);
-                }
+                        List<ForeignKeyEdge> edges = await MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, sqlConnection, transaction).ConfigureAwait(false);
+                        tablesWithChanges = TableSorter.BuildOrderedTablesWithChangesByForeignKeys(changeset, tablesWithChanges, namesOfTablesWithChanges, edges);
 
-                affectedRows += await CommandApplier.ApplyDeletesAsync(tablesWithChanges, metadataCache, SqlConnection, transaction).ConfigureAwait(false);
-                affectedRows += await CommandApplier.ApplyInsertsAsync(tablesWithChanges, metadataCache, SqlConnection, transaction).ConfigureAwait(false);
-                affectedRows += await CommandApplier.ApplyUpdatesAsync(tablesWithChanges, metadataCache, SqlConnection, transaction).ConfigureAwait(false);
-                transaction.Commit();
-            }
-            catch
-            {
-                try
-                {
-                    transaction.Rollback();
-                }
-                catch
-                {
-                    // ignore rollback exceptions
-                }
-                throw;
-            }
-            finally
-            {
-                await transaction.DisposeAsync().ConfigureAwait(false);
-                await DisposeAsync().ConfigureAwait(false);
-            }
+                        for (int t = 0; t < tablesWithChanges.Count; t++)
+                        {
+                            IDataTable table = tablesWithChanges[t];
+                            DataTableValidator.ValidateTableForSave(table);
 
-            return affectedRows;
+                            // Load and validate SQL Server schema once per table
+                            TableWriteMetadata metadata = await MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, table.TableName, sqlConnection, transaction).ConfigureAwait(false);
+                            DataTableValidator.ValidateTableExistsInSqlServer(metadata, table.TableName);
+                        }
+
+                        affectedRows += await CommandApplier.ApplyDeletesAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
+                        affectedRows += await CommandApplier.ApplyInsertsAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
+                        affectedRows += await CommandApplier.ApplyUpdatesAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
+
+                        await transaction.CommitAsync().ConfigureAwait(false);
+
+                        return affectedRows;
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            await transaction.RollbackAsync().ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            // ignore rollback failures; original exception is more important
+                        }
+
+                        throw;
+                    }
+                    finally
+                    {
+                        await DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+            }
         }
         #endregion
 
@@ -284,14 +293,6 @@ namespace PocoDataSet.SqlServerDataAdapter
         {
             get; set;
         }
-
-        /// <summary>
-        /// Gets or sets SQL connection
-        /// </summary>
-        internal SqlConnection? SqlConnection
-        {
-            get; set;
-        }
         #endregion
 
         #region Event Handlers
@@ -302,8 +303,13 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="e">Event arguments</param>
         async Task DataTableCreator_LoadDataTableKeysInformationRequestAsync(object? sender, EventArgs e)
         {
-            await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, SqlConnection);
-            await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, SqlConnection);
+            if (DataTableCreator == null || SqlConnection == null)
+            {
+                return;
+            }
+
+            await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
+            await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
         }
         #endregion
     }

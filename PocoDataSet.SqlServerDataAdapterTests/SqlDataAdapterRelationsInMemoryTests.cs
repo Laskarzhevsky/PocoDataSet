@@ -24,9 +24,9 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             ForeignKeyGroup group = new ForeignKeyGroup();
             group.ForeignKeyName = "FK_Sale_Customer_Code";
-            group.ParentTableName = "Sale";
+            group.PrincipalTableName = "Sale";
             group.ReferencedTableName = "Customer";
-            group.ParentColumnNames.Add("CustomerCode");
+            group.PrincipalColumnNames.Add("CustomerCode");
             group.ReferencedColumnNames.Add("Code");
 
             List<ForeignKeyGroup> groups = new List<ForeignKeyGroup>();
@@ -56,9 +56,9 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             ForeignKeyGroup group = new ForeignKeyGroup();
             group.ForeignKeyName = "FK_Sale_Customer_Code";
-            group.ParentTableName = "Sale";
+            group.PrincipalTableName = "Sale";
             group.ReferencedTableName = "Customer";
-            group.ParentColumnNames.Add("CustomerCode");
+            group.PrincipalColumnNames.Add("CustomerCode");
             group.ReferencedColumnNames.Add("Code");
 
             List<ForeignKeyGroup> groups = new List<ForeignKeyGroup>();
@@ -98,10 +98,10 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             ForeignKeyGroup group = new ForeignKeyGroup();
             group.ForeignKeyName = "FK_OrderLine_Order";
-            group.ParentTableName = "OrderLine";
+            group.PrincipalTableName = "OrderLine";
             group.ReferencedTableName = "Order";
-            group.ParentColumnNames.Add("CompanyId");
-            group.ParentColumnNames.Add("OrderNo");
+            group.PrincipalColumnNames.Add("CompanyId");
+            group.PrincipalColumnNames.Add("OrderNo");
             group.ReferencedColumnNames.Add("CompanyId");
             group.ReferencedColumnNames.Add("OrderNo");
 
@@ -143,9 +143,9 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             ForeignKeyGroup group = new ForeignKeyGroup();
             group.ForeignKeyName = "FK_Sale_Customer_Code";
-            group.ParentTableName = "Sale";
+            group.PrincipalTableName = "Sale";
             group.ReferencedTableName = "Customer";
-            group.ParentColumnNames.Add("CustomerCode");
+            group.PrincipalColumnNames.Add("CustomerCode");
             group.ReferencedColumnNames.Add("Code");
 
             List<ForeignKeyGroup> groups = new List<ForeignKeyGroup>();
@@ -172,9 +172,9 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             // Parent = dependent (child) side, Referenced = principal (parent) side.
             ForeignKeyGroup fk = new ForeignKeyGroup();
             fk.ForeignKeyName = "FK_Employee_Department";
-            fk.ParentTableName = "Employee";
+            fk.PrincipalTableName = "Employee";
             fk.ReferencedTableName = "Department";
-            fk.ParentColumnNames.Add("DepartmentId");
+            fk.PrincipalColumnNames.Add("DepartmentId");
             fk.ReferencedColumnNames.Add("Id");
 
             List<ForeignKeyGroup> fkGroups = new List<ForeignKeyGroup>();

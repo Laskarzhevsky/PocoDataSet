@@ -19,7 +19,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Gets or sets dependent table name (parent table in sys.foreign_keys terminology)
         /// </summary>
-        public string ParentTableName
+        public string PrincipalTableName
         {
             get; set;
         } = string.Empty;
@@ -27,7 +27,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Gets dependent column names (ordered)
         /// </summary>
-        public List<string> ParentColumnNames
+        public List<string> PrincipalColumnNames
         {
             get;
         } = new List<string>();

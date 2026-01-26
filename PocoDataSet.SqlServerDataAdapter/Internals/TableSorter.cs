@@ -98,8 +98,8 @@ namespace PocoDataSet.SqlServerDataAdapter
                 ForeignKeyEdge edge = foreignKeyEdges[i];
 
                 // Parent -> Child
-                adjacency[edge.ParentTableName].Add(edge.ChildTableName);
-                indegree[edge.ChildTableName] = indegree[edge.ChildTableName] + 1;
+                adjacency[edge.PrincipalTableName].Add(edge.DependentTableName);
+                indegree[edge.DependentTableName] = indegree[edge.DependentTableName] + 1;
             }
 
             // Start nodes (indegree 0) - maintain stable order using orderIndex

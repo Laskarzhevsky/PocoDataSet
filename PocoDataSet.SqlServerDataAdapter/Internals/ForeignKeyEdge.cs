@@ -7,9 +7,9 @@
     {
         #region Public Properties
         /// <summary>
-        /// Gets or sets child table name
+        /// Gets or sets dependent table name
         /// </summary>
-        public string ChildTableName
+        public string DependentTableName
         {
             get; set;
         } = string.Empty;
@@ -23,9 +23,9 @@
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets parent table name
+        /// Gets or sets principal table name
         /// </summary>
-        public string ParentTableName
+        public string PrincipalTableName
         {
             get; set;
         } = string.Empty;

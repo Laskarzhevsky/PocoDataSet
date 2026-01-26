@@ -72,7 +72,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {
-                    await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection)
+                    await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
                         .ConfigureAwait(false);
                 }
 

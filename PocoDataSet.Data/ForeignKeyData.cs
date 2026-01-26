@@ -18,19 +18,19 @@ namespace PocoDataSet.Data
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets parent column name
+        /// Gets or sets principal column name
         /// IForeignKeyData interface implementation
         /// </summary>
-        public string ParentColumnName
+        public string PrincipalColumnName
         {
             get; set;
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets parent table name
+        /// Gets or sets principal table name
         /// IForeignKeyData interface implementation
         /// </summary>
-        public string ParentTableName
+        public string PrincipalTableName
         {
             get; set;
         } = string.Empty;

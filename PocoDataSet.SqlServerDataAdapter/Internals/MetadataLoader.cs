@@ -46,8 +46,8 @@ namespace PocoDataSet.SqlServerDataAdapter
             string sql = @"
 SELECT
 	fk.name AS ForeignKeyName,
-	parent.name AS ChildTable,
-	referenced.name AS ParentTable
+	parent.name AS DependentTable,
+	referenced.name AS PrincipalTable
 FROM sys.foreign_keys fk
 JOIN sys.tables parent ON parent.object_id = fk.parent_object_id
 JOIN sys.tables referenced ON referenced.object_id = fk.referenced_object_id
@@ -75,8 +75,8 @@ WHERE parent.is_ms_shipped = 0
 
                         ForeignKeyEdge edge = new ForeignKeyEdge();
                         edge.ForeignKeyName = fkName;
-                        edge.ChildTableName = child;
-                        edge.ParentTableName = parent;
+                        edge.DependentTableName = child;
+                        edge.PrincipalTableName = parent;
                         edges.Add(edge);
                     }
                 }

@@ -56,12 +56,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 IForeignKeyData foreignKeyData = new ForeignKeyData();
 
                 foreignKeyData.ForeignKeyName = sqlDataReader.GetString(0);
-                foreignKeyData.ParentTableName = sqlDataReader.GetString(1);
-                foreignKeyData.ParentColumnName = sqlDataReader.GetString(2);
+                foreignKeyData.PrincipalTableName = sqlDataReader.GetString(1);
+                foreignKeyData.PrincipalColumnName = sqlDataReader.GetString(2);
                 foreignKeyData.ReferencedTableName = sqlDataReader.GetString(3);
                 foreignKeyData.ReferencedColumnName = sqlDataReader.GetString(4);
 
-                foreignKeysData[foreignKeyData.ParentColumnName] = foreignKeyData;
+                foreignKeysData[foreignKeyData.PrincipalColumnName] = foreignKeyData;
             }
 
             dataTableCreator.ForeignKeysData = foreignKeysData;
@@ -158,7 +158,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                     continue;
                 }
 
-                if (!dataSet.Tables.ContainsKey(foreignKeyGroup.ParentTableName))
+                if (!dataSet.Tables.ContainsKey(foreignKeyGroup.PrincipalTableName))
                 {
                     continue;
                 }
@@ -168,22 +168,22 @@ namespace PocoDataSet.SqlServerDataAdapter
                     continue;
                 }
 
-                if (foreignKeyGroup.ParentColumnNames.Count == 0 || foreignKeyGroup.ReferencedColumnNames.Count == 0)
+                if (foreignKeyGroup.PrincipalColumnNames.Count == 0 || foreignKeyGroup.ReferencedColumnNames.Count == 0)
                 {
                     continue;
                 }
 
-                if (foreignKeyGroup.ParentColumnNames.Count != foreignKeyGroup.ReferencedColumnNames.Count)
+                if (foreignKeyGroup.PrincipalColumnNames.Count != foreignKeyGroup.ReferencedColumnNames.Count)
                 {
                     continue;
                 }
 
                 // Ensure all columns exist in both tables
-                IDataTable childTable = dataSet.Tables[foreignKeyGroup.ParentTableName];
+                IDataTable childTable = dataSet.Tables[foreignKeyGroup.PrincipalTableName];
                 IDataTable parentTable = dataSet.Tables[foreignKeyGroup.ReferencedTableName];
 
                 bool allChildColumnsExist = true;
-                foreach (string childColumnName in foreignKeyGroup.ParentColumnNames)
+                foreach (string childColumnName in foreignKeyGroup.PrincipalColumnNames)
                 {
                     if (!childTable.ContainsColumn(childColumnName))
                     {
@@ -224,8 +224,8 @@ namespace PocoDataSet.SqlServerDataAdapter
                     relationName: relationName,
                     parentTableName: foreignKeyGroup.ReferencedTableName,
                     parentColumnNames: foreignKeyGroup.ReferencedColumnNames,
-                    childTableName: foreignKeyGroup.ParentTableName,
-                    childColumnNames: foreignKeyGroup.ParentColumnNames);
+                    childTableName: foreignKeyGroup.PrincipalTableName,
+                    childColumnNames: foreignKeyGroup.PrincipalColumnNames);
             }
         }
 
@@ -288,12 +288,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 {
                     group = new ForeignKeyGroup();
                     group.ForeignKeyName = foreignKeyName;
-                    group.ParentTableName = parentTable;
+                    group.PrincipalTableName = parentTable;
                     group.ReferencedTableName = referencedTable;
                     groups[key] = group;
                 }
 
-                group.ParentColumnNames.Add(parentColumn);
+                group.PrincipalColumnNames.Add(parentColumn);
                 group.ReferencedColumnNames.Add(referencedColumn);
             }
 

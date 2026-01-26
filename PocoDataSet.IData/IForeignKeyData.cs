@@ -7,7 +7,7 @@
     {
         #region Properties
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets foreign key name
         /// </summary>
         string ForeignKeyName
         {
@@ -15,23 +15,23 @@
         }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets principal column name
         /// </summary>
-        string ParentColumnName
+        string PrincipalColumnName
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets principal table name
         /// </summary>
-        string ParentTableName
+        string PrincipalTableName
         {
             get; set;
         }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets referenced column name
         /// </summary>
         string ReferencedColumnName
         {
@@ -39,7 +39,7 @@
         }
 
         /// <summary>
-        /// Gets or sets 
+        /// Gets or sets referenced table name
         /// </summary>
         string ReferencedTableName
         {

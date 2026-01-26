@@ -33,9 +33,9 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             // In ForeignKeyGroup:
             // - ParentTableName/ParentColumnNames = dependent (child) side (Sale.CustomerCode)
             // - ReferencedTableName/ReferencedColumnNames = principal (parent) side (Customer.Code)
-            group.ParentTableName = "Sale";
+            group.PrincipalTableName = "Sale";
             group.ReferencedTableName = "Customer";
-            group.ParentColumnNames.Add("CustomerCode");
+            group.PrincipalColumnNames.Add("CustomerCode");
             group.ReferencedColumnNames.Add("Code");
 
             List<ForeignKeyGroup> groups = new List<ForeignKeyGroup>();

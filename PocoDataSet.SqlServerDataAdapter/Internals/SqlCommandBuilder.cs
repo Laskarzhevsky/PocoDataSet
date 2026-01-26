@@ -11,7 +11,7 @@ namespace PocoDataSet.SqlServerDataAdapter
     {
         #region Public Methods
         /// <summary>
-        /// Builds INSERT command
+        /// Builds DELETE command
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="tableWriteMetadata">Table write metadata</param>
@@ -19,7 +19,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="sqlConnection">SQL connection</param>
         /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Built INSERT command</returns>
-        public static SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction)
+        internal static SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction)
         {
             PrimaryKeyProcessor.ValidatePrimaryKeysExistence(tableWriteMetadata, table.TableName);
 
@@ -74,7 +74,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="sqlTransaction">SQL transaction</param>
         /// <param name="outputColumns">Output columns</param>
         /// <returns>Built INSERT command</returns>
-        public static SqlCommand BuildInsertCommand(IDataTable dataTable, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
+        internal static SqlCommand BuildInsertCommand(IDataTable dataTable, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
         {
             List<string> columnNames = new List<string>();
             List<string> parameterNames = new List<string>();
@@ -138,7 +138,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             return sqlCommand;
         }
 
-        public static string EscapeIdentifier(string identifier)
+        internal static string EscapeIdentifier(string identifier)
         {
             // Simple SQL Server escaping.
             return "[" + identifier.Replace("]", "]]") + "]";
@@ -154,7 +154,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="sqlTransaction">SQL transaction</param>
         /// <param name="outputColumns">Output columns</param>
         /// <returns>Built UPDATE command</returns>
-        public static SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
+        internal static SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
         {
             PrimaryKeyProcessor.ValidatePrimaryKeysExistence(tableWriteMetadata, table.TableName);
 
