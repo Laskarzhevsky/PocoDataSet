@@ -32,7 +32,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// Adds parameters to SQL command
         /// </summary>
         /// <param name="parameters">Parameters to add to SQL command</param>
-        void AddParametersToSqlCommand(Dictionary<string, object?>? parameters)
+        internal void AddParametersToSqlCommand(Dictionary<string, object?>? parameters)
         {
             if (parameters != null)
             {
@@ -59,7 +59,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         /// <param name="baseQuery">Base query</param>
         /// <param name="isStoredProcedure">Flag indicating whether base query is stored procedure</param>
-        void CreateSqlCommand(string baseQuery, bool isStoredProcedure)
+        internal void CreateSqlCommand(string baseQuery, bool isStoredProcedure)
         {
             SqlCommand = new SqlCommand();
             SqlCommand.CommandText = baseQuery;
@@ -86,17 +86,16 @@ namespace PocoDataSet.SqlServerDataAdapter
             {
                 ConnectionString = connectionString;
             }
-
-            CreateSqlCommand(baseQuery, isStoredProcedure);
-            AddParametersToSqlCommand(parameters);
             try
             {
                 await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
                 {
-                    SqlCommand!.Connection = sqlConnection;
-                    await sqlConnection.OpenAsync().ConfigureAwait(false);
-
-                    return await SqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    return await ExecutionEngine.ExecuteNonQueryAsync(
+                        baseQuery,
+                        isStoredProcedure,
+                        parameters,
+                        sqlConnection,
+                        null).ConfigureAwait(false);
                 }
             }
             finally
@@ -108,7 +107,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Gets data from database
         /// </summary>
-        async Task GetDataFromDatabaseAsync()
+        internal async Task GetDataFromDatabaseAsync()
         {
             SqlConnection sqlConnection = new SqlConnection(ConnectionString);
             SqlConnection = sqlConnection;
@@ -118,11 +117,35 @@ namespace PocoDataSet.SqlServerDataAdapter
             DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
         }
 
+/// <summary>
+/// Gets data from database using an existing open connection and optional transaction.
+/// </summary>
+internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+{
+    if (sqlConnection == null)
+    {
+        throw new ArgumentNullException(nameof(sqlConnection));
+    }
+
+    SqlConnection = sqlConnection;
+
+    SqlCommand!.Connection = sqlConnection;
+    SqlCommand.Transaction = sqlTransaction;
+
+    if (sqlConnection.State != System.Data.ConnectionState.Open)
+    {
+        await sqlConnection.OpenAsync().ConfigureAwait(false);
+    }
+
+    DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
+}
+
+
         /// <summary>
         /// Initializes component
         /// <param name="returnedTableNames">Returned table names</param>
         /// </summary>
-        void InitializeComponent(List<string>? returnedTableNames)
+        internal void InitializeComponent(List<string>? returnedTableNames)
         {
             DataTableCreator = new DataTableCreator();
             DataTableCreator.ListOfTableNames = returnedTableNames;
@@ -167,94 +190,6 @@ namespace PocoDataSet.SqlServerDataAdapter
                 SqlCommand = null;
             }
         }
-
-        /// <summary>
-        /// Saves changeset to SQL Server.
-        /// </summary>
-        /// <param name="changeset">Changeset to save</param>
-        /// <param name="options">Save changes options</param>
-        /// <param name="connectionString">Optional connection string override</param>
-        /// <returns>Total affected rows</returns>
-        async Task<int> SaveChangesInternalAsync(IDataSet changeset, string? connectionString)
-        {
-            // No-op for empty changeset (no DB work, no ConnectionString required).
-            if (changeset.Tables == null || changeset.Tables.Count == 0)
-            {
-                return 0;
-            }
-
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                ConnectionString = connectionString;
-            }
-
-            if (string.IsNullOrEmpty(ConnectionString))
-            {
-                throw new InvalidOperationException("ConnectionString is not specified.");
-            }
-
-            // Enforce referential integrity rules (Restrict) before any database work.
-            // Changesets are often sparse (PATCH payloads), so we do NOT run orphan checks here:
-            // the referenced parent rows may legitimately exist in the database but not be included in the changeset.
-            // We still validate relation definitions and delete-restrict within the provided changeset.
-            RelationValidationOptions relationValidationOptions = new RelationValidationOptions();
-            relationValidationOptions.EnforceOrphanChecks = false;
-            relationValidationOptions.EnforceDeleteRestrict = true;
-            relationValidationOptions.ReportInvalidRelationDefinitions = true;
-            relationValidationOptions.TreatNullForeignKeysAsNotSet = true;
-
-            changeset.EnsureRelationsValid(relationValidationOptions);
-
-            IReadOnlyList<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);
-
-            if (tablesWithChanges.Count == 0)
-            {
-                return 0;
-            }
-            int affectedRows = 0;
-
-            await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
-            {
-                await sqlConnection.OpenAsync().ConfigureAwait(false);
-
-                await using (SqlTransaction transaction = sqlConnection.BeginTransaction())
-                {
-                    try
-                    {
-
-                        SaveSqlConnection = sqlConnection;
-                        SqlTransaction = transaction;
-
-                        SaveChangesDataPersistenceLogicHandler handler = new SaveChangesDataPersistenceLogicHandler(this);
-                        affectedRows = await handler.SaveChangesAsync(changeset).ConfigureAwait(false);
-
-
-                        await transaction.CommitAsync().ConfigureAwait(false);
-
-                        return affectedRows;
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            await transaction.RollbackAsync().ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            // ignore rollback failures; original exception is more important
-                        }
-
-                        throw;
-                    }
-                    finally
-                    {
-                        SaveSqlConnection = null;
-                        SqlTransaction = null;
-                        await DisposeAsync().ConfigureAwait(false);
-                    }
-                }
-            }
-        }
         #endregion
 
         #region Properties
@@ -277,23 +212,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Gets or sets SQL command
         /// </summary>
-        SqlCommand? SqlCommand
+        internal SqlCommand? SqlCommand
         {
             get; set;
         }
-
-        /// <summary>
-        /// SaveChanges execution connection (valid only within SaveChangesAsync call).
-        /// </summary>
-        SqlConnection? SaveSqlConnection
-        {
-            get; set;
-        }
-
         /// <summary>
         /// Gets or sets SQL transaction
         /// </summary>
-        SqlTransaction? SqlTransaction
+        internal SqlTransaction? SqlTransaction
         {
             get; set;
         }
@@ -305,12 +231,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 throw new ArgumentNullException(nameof(sqlCommand));
             }
 
-            if (SaveSqlConnection == null)
+            if (SqlConnection == null)
             {
                 throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
             }
 
-            sqlCommand.Connection = SaveSqlConnection;
+            sqlCommand.Connection = SqlConnection;
             sqlCommand.Transaction = SqlTransaction;
 
             return sqlCommand.ExecuteNonQueryAsync();
@@ -323,12 +249,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 throw new ArgumentNullException(nameof(sqlCommand));
             }
 
-            if (SaveSqlConnection == null)
+            if (SqlConnection == null)
             {
                 throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
             }
 
-            sqlCommand.Connection = SaveSqlConnection;
+            sqlCommand.Connection = SqlConnection;
             sqlCommand.Transaction = SqlTransaction;
 
             return sqlCommand.ExecuteReaderAsync();
@@ -338,17 +264,17 @@ namespace PocoDataSet.SqlServerDataAdapter
             string tableName,
             Dictionary<string, TableWriteMetadata> metadataCache)
         {
-            if (SaveSqlConnection == null)
+            if (SqlConnection == null)
             {
                 throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
             }
 
-            return MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, tableName, SaveSqlConnection, SqlTransaction);
+            return MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, tableName, SqlConnection, SqlTransaction);
         }
 
         internal Task<List<ForeignKeyEdge>> LoadForeignKeyEdgesAsync(IDataSet changeset, List<IDataTable> tablesWithChanges, HashSet<string> namesOfTablesWithChanges)
         {
-            if (SaveSqlConnection == null)
+            if (SqlConnection == null)
             {
                 throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
             }
@@ -358,7 +284,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                 throw new InvalidOperationException("No active SaveChanges transaction. This method may only be used during SaveChangesAsync.");
             }
 
-            return MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, SaveSqlConnection, SqlTransaction);
+            return MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, SqlConnection, SqlTransaction);
         }
         #endregion
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using Microsoft.Data.SqlClient;
+
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
@@ -20,6 +22,18 @@ namespace PocoDataSet.SqlServerDataAdapter
         public SqlDataAdapter(string? connectionString)
         {
             ConnectionString = connectionString;
+            ExecutionEngine = new SqlExecutionEngine(this);
+        }
+        #endregion
+
+
+        #region Internal Properties
+        /// <summary>
+        /// Gets shared SQL execution engine (behavior); connection/transaction lifetime is owned by callers.
+        /// </summary>
+        internal SqlExecutionEngine ExecutionEngine
+        {
+            get;
         }
         #endregion
 
@@ -134,9 +148,73 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <summary>
         /// Saves data set changes to SQL Server.
         /// </summary>
+        /// <summary>
+        /// Begins a SQL Server transaction scope.
+        /// </summary>
+        /// <param name="connectionString">Optional connection string override</param>
+        public async Task<SqlDataAdapterTransaction> BeginTransactionAsync(string? connectionString = null)
+        {
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                throw new InvalidOperationException("ConnectionString is not set.");
+            }
+
+            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            await sqlConnection.OpenAsync().ConfigureAwait(false);
+
+            SqlTransaction sqlTransaction = sqlConnection.BeginTransaction();
+
+            return new SqlDataAdapterTransaction(this, sqlConnection, sqlTransaction, true);
+        }
+
+        /// <summary>
+        /// Saves data set changes to SQL Server.
+        /// </summary>
         public async Task<int> SaveChangesAsync(IDataSet changeset, string? connectionString = null)
         {
-            return await SaveChangesInternalAsync(changeset, connectionString);
+                        if (changeset == null)
+            {
+                throw new ArgumentNullException(nameof(changeset));
+            }
+
+            // No-op for empty changeset (no DB work, no ConnectionString required).
+            if (changeset.Tables == null || changeset.Tables.Count == 0)
+            {
+                return 0;
+            }
+
+SqlDataAdapterTransaction? transaction = null;
+
+            try
+            {
+                transaction = await BeginTransactionAsync(connectionString).ConfigureAwait(false);
+
+                int affectedRows = await transaction.SaveChangesAsync(changeset).ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
+
+                return affectedRows;
+            }
+            catch
+            {
+                if (transaction != null)
+                {
+                    await transaction.RollbackAsync().ConfigureAwait(false);
+                }
+
+                throw;
+            }
+            finally
+            {
+                if (transaction != null)
+                {
+                    await transaction.DisposeAsync().ConfigureAwait(false);
+                }
+            }
         }
 
         /// <summary>
