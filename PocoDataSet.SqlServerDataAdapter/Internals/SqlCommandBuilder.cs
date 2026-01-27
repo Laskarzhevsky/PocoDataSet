@@ -16,10 +16,8 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="dataTable">Data table</param>
         /// <param name="tableWriteMetadata">Table write metadata</param>
         /// <param name="dataRow">Data row</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Built DELETE command</returns>
-        internal static SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction)
+        internal static SqlCommand BuildDeleteCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow)
         {
             PrimaryKeyProcessor.ValidatePrimaryKeysExistence(tableWriteMetadata, table.TableName);
 
@@ -54,7 +52,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             string sql = "DELETE FROM " + SqlCommandBuilder.EscapeIdentifier(table.TableName) + " WHERE " + string.Join(" AND ", whereClauses);
-            SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction);
+            SqlCommand sqlCommand = new SqlCommand(sql);
 
             for (int i = 0; i < sqlParameters.Count; i++)
             {
@@ -70,11 +68,9 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="dataTable">Data table</param>
         /// <param name="tableWriteMetadata">Table write metadata</param>
         /// <param name="dataRow">Data row</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
         /// <param name="outputColumns">Output columns</param>
         /// <returns>Built INSERT command</returns>
-        internal static SqlCommand BuildInsertCommand(IDataTable dataTable, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
+        internal static SqlCommand BuildInsertCommand(IDataTable dataTable, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, List<string> outputColumns)
         {
             List<string> columnNames = new List<string>();
             List<string> parameterNames = new List<string>();
@@ -128,7 +124,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             string sql = "INSERT INTO " + EscapeIdentifier(dataTable.TableName) + " (" + string.Join(",", columnNames) + ")" + outputClause + "VALUES (" + string.Join(",", parameterNames) + ")";
-            SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction);
+            SqlCommand sqlCommand = new SqlCommand(sql);
 
             for (int i = 0; i < sqlParameters.Count; i++)
             {
@@ -150,11 +146,9 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="dataTable">Data table</param>
         /// <param name="tableWriteMetadata">Table write metadata</param>
         /// <param name="dataRow">Data row</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
         /// <param name="outputColumns">Output columns</param>
         /// <returns>Built UPDATE command</returns>
-        internal static SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, SqlConnection? sqlConnection, SqlTransaction? sqlTransaction, List<string> outputColumns)
+        internal static SqlCommand BuildUpdateCommand(IDataTable table, TableWriteMetadata tableWriteMetadata, IDataRow dataRow, List<string> outputColumns)
         {
             PrimaryKeyProcessor.ValidatePrimaryKeysExistence(tableWriteMetadata, table.TableName);
 
@@ -196,7 +190,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             if (setClauses.Count == 0)
             {
-                return new SqlCommand(string.Empty, sqlConnection, sqlTransaction);
+                return new SqlCommand(string.Empty);
             }
 
             List<string> whereClauses = new List<string>();
@@ -236,7 +230,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             string sql = "UPDATE " + SqlCommandBuilder.EscapeIdentifier(table.TableName) + " SET " + string.Join(", ", setClauses) + outputClause + "WHERE " + string.Join(" AND ", whereClauses);
-            SqlCommand sqlCommand = new SqlCommand(sql, sqlConnection, sqlTransaction);
+            SqlCommand sqlCommand = new SqlCommand(sql);
 
             for (int i = 0; i < sqlParameters.Count; i++)
             {

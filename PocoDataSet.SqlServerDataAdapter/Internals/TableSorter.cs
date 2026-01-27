@@ -41,6 +41,15 @@ namespace PocoDataSet.SqlServerDataAdapter
             List<string> orderedNames = OrderTableNamesByForeignKeys(namesOfTablesWithChanges, foreignKeyEdges, orderIndex);
 
             Dictionary<string, IDataTable> tableByName = new Dictionary<string, IDataTable>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < tablesWithChanges.Count; i++)
+            {
+                IDataTable table = tablesWithChanges[i];
+                if (!tableByName.ContainsKey(table.TableName))
+                {
+                    tableByName.Add(table.TableName, table);
+                }
+            }
+
             List<IDataTable> orderedTables = new List<IDataTable>();
             for (int i = 0; i < orderedNames.Count; i++)
             {
@@ -98,8 +107,8 @@ namespace PocoDataSet.SqlServerDataAdapter
                 ForeignKeyEdge edge = foreignKeyEdges[i];
 
                 // Parent -> Child
-                adjacency[edge.PrincipalTableName].Add(edge.ReferencedTableName);
-                indegree[edge.ReferencedTableName] = indegree[edge.ReferencedTableName] + 1;
+                adjacency[edge.PrincipalTableName].Add(edge.DependentTableName);
+                indegree[edge.DependentTableName] = indegree[edge.DependentTableName] + 1;
             }
 
             // Start nodes (indegree 0) - maintain stable order using orderIndex

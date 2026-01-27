@@ -75,7 +75,7 @@ WHERE parent.is_ms_shipped = 0
 
                         ForeignKeyEdge edge = new ForeignKeyEdge();
                         edge.ForeignKeyName = fkName;
-                        edge.ReferencedTableName = child;
+                        edge.DependentTableName = child;
                         edge.PrincipalTableName = parent;
                         edges.Add(edge);
                     }

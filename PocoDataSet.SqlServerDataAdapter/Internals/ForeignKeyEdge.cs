@@ -7,9 +7,9 @@
     {
         #region Public Properties
         /// <summary>
-        /// Gets or sets referenced table name
+        /// Gets or sets dependent table name
         /// </summary>
-        public string ReferencedTableName
+        public string DependentTableName
         {
             get; set;
         } = string.Empty;

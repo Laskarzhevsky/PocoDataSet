@@ -24,8 +24,6 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         public void BuildUpdateCommand_ModifiedRow_SetsOnlyProvidedColumns_WhenRowIsSparse()
         {
             // Arrange
-            PocoSqlDataAdapter adapter = new PocoSqlDataAdapter(null);
-
             string tableName = "Person";
             List<string> columns = new List<string> { "Id", "Name", "Description" };
             List<string> primaryKeys = new List<string> { "Id" };
@@ -46,7 +44,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(cmd.CommandText));
@@ -88,8 +86,6 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         public void BuildUpdateCommand_ModifiedRow_IncludesExplicitNull_WhenColumnIsProvidedAsNull()
         {
             // Arrange
-            PocoSqlDataAdapter adapter = new PocoSqlDataAdapter(null);
-
             string tableName = "Person";
             List<string> columns = new List<string> { "Id", "Name", "Description" };
             List<string> primaryKeys = new List<string> { "Id" };
@@ -110,7 +106,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.Contains("[Description]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
@@ -126,8 +122,6 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         public void BuildUpdateCommand_ModifiedRow_RemainsCompatible_WithFullRows()
         {
             // Arrange
-            PocoSqlDataAdapter adapter = new PocoSqlDataAdapter(null);
-
             string tableName = "Person";
             List<string> columns = new List<string> { "Id", "Name", "Description" };
             List<string> primaryKeys = new List<string> { "Id" };
@@ -149,7 +143,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataRow row = FakeDataRowProxy.Create(DataRowState.Modified, current, original, true);
 
             // Act
-            SqlCommand cmd = BuildUpdate(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildUpdate(table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.Contains("[Name]", cmd.CommandText, StringComparison.OrdinalIgnoreCase);
@@ -164,8 +158,6 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         public void BuildInsertCommand_AddedRow_InsertsOnlyProvidedColumns_WhenRowIsSparse()
         {
             // Arrange
-            PocoSqlDataAdapter adapter = new PocoSqlDataAdapter(null);
-
             string tableName = "Person";
             List<string> columns = new List<string> { "Id", "Name", "Description" };
             List<string> primaryKeys = new List<string> { "Id" };
@@ -184,7 +176,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
                 false);
 
             // Act
-            SqlCommand cmd = BuildInsert(adapter, table, metadata, row, null, new List<string>());
+            SqlCommand cmd = BuildInsert(table, metadata, row, null, new List<string>());
 
             // Assert
             Assert.False(string.IsNullOrWhiteSpace(cmd.CommandText));
@@ -203,14 +195,14 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         // Builder helpers
         // -----------------------
 
-        static SqlCommand BuildUpdate(PocoSqlDataAdapter adapter, IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
+        static SqlCommand BuildUpdate(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
         {
-            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildUpdateCommand(table, metadata, row, adapter.SqlConnection, tx, outputColumns);
+            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildUpdateCommand(table, metadata, row, outputColumns);
         }
 
-        static SqlCommand BuildInsert(PocoSqlDataAdapter adapter, IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
+        static SqlCommand BuildInsert(IDataTable table, TableWriteMetadata metadata, IDataRow row, SqlTransaction? tx, List<string> outputColumns)
         {
-            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildInsertCommand(table, metadata, row, adapter.SqlConnection, tx, outputColumns);
+            return PocoDataSet.SqlServerDataAdapter.SqlCommandBuilder.BuildInsertCommand(table, metadata, row, outputColumns);
         }
 
         static TableWriteMetadata CreateMetadata(string tableName, List<string> columnNames, List<string> primaryKeyColumns)

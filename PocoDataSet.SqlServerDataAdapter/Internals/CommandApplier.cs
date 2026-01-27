@@ -10,17 +10,22 @@ using PocoDataRowState = PocoDataSet.IData.DataRowState;
 
 namespace PocoDataSet.SqlServerDataAdapter
 {
-    internal static class CommandApplier
+    internal sealed class CommandApplier
     {
-        #region Public Methods
+        
+        private readonly SqlDataAdapter _adapter;
+
+        public CommandApplier(SqlDataAdapter adapter)
+        {
+            _adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+        }
+#region Public Methods
         /// <summary>
         /// Apply deletes async
         /// </summary>
         /// <param name="orderedTables">Ordered tables</param>
         /// <param name="tableWriteMetadataCache">Table write metadata cache</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
-        public static async Task<int> ApplyDeletesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public async Task<int> ApplyDeletesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache)
         {
             int affected = 0;
 
@@ -41,8 +46,8 @@ namespace PocoDataSet.SqlServerDataAdapter
                         continue;
                     }
 
-                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildDeleteCommand(table, metadata, row, sqlConnection, sqlTransaction);
-                    int localAffected = await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildDeleteCommand(table, metadata, row);
+                    int localAffected = await _adapter.ExecuteNonQueryAsync(sqlCommand).ConfigureAwait(false);
                     if (localAffected == 0)
                     {
                         throw new PocoConcurrencyException(table.TableName, "DELETE", PrimaryKeyProcessor.BuildPrimaryKeyText(metadata, row));
@@ -60,10 +65,8 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         /// <param name="orderedTables">Ordered tables</param>
         /// <param name="tableWriteMetadataCache">Table write metadata cache</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Number of affected rows</returns>
-        public static async Task<int> ApplyInsertsAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public async Task<int> ApplyInsertsAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache)
         {
             int affected = 0;
 
@@ -86,15 +89,15 @@ namespace PocoDataSet.SqlServerDataAdapter
                         continue;
                     }
 
-                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildInsertCommand(table, metadata, row, sqlConnection, sqlTransaction, outputColumnsForTable);
+                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildInsertCommand(table, metadata, row, outputColumnsForTable);
 
                     if (outputColumnsForTable.Count == 0)
                     {
-                        affected += await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        affected += await _adapter.ExecuteNonQueryAsync(sqlCommand).ConfigureAwait(false);
                         continue;
                     }
 
-                    using (SqlDataReader reader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+                    using (SqlDataReader reader = await _adapter.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false))
                     {
                         if (await reader.ReadAsync().ConfigureAwait(false))
                         {
@@ -117,10 +120,8 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         /// <param name="orderedTables">Ordered tables</param>
         /// <param name="tableWriteMetadataCache">Table write metadata cache</param>
-        /// <param name="sqlConnection">SQL connection</param>
-        /// <param name="sqlTransaction">SQL transaction</param>
         /// <returns>Number of affected rows</returns>
-        public static async Task<int> ApplyUpdatesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache, SqlConnection sqlConnection, SqlTransaction? sqlTransaction)
+        public async Task<int> ApplyUpdatesAsync(IReadOnlyList<IDataTable> orderedTables, Dictionary<string, TableWriteMetadata> tableWriteMetadataCache)
         {
             int affected = 0;
 
@@ -143,7 +144,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                         continue;
                     }
 
-                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildUpdateCommand(table, metadata, row, sqlConnection, sqlTransaction, outputColumnsForTable);
+                    using SqlCommand sqlCommand = SqlCommandBuilder.BuildUpdateCommand(table, metadata, row, outputColumnsForTable);
                     if (sqlCommand.CommandText.Length == 0)
                     {
                         continue;
@@ -151,7 +152,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 
                     if (outputColumnsForTable.Count == 0)
                     {
-                        int localAffected = await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                        int localAffected = await _adapter.ExecuteNonQueryAsync(sqlCommand).ConfigureAwait(false);
                         if (localAffected == 0)
                         {
                             throw new PocoConcurrencyException(table.TableName, "UPDATE", PrimaryKeyProcessor.BuildPrimaryKeyText(metadata, row));
@@ -161,7 +162,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                         continue;
                     }
 
-                    using (SqlDataReader reader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+                    using (SqlDataReader reader = await _adapter.ExecuteReaderAsync(sqlCommand).ConfigureAwait(false))
                     {
                         if (await reader.ReadAsync().ConfigureAwait(false))
                         {

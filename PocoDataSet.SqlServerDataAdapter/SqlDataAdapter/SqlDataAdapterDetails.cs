@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Data.SqlClient;
 
-using PocoDataSet.Data;
 using PocoDataSet.Extensions;
 using PocoDataSet.Extensions.Relations;
 using PocoDataSet.IData;
@@ -92,7 +91,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             AddParametersToSqlCommand(parameters);
             try
             {
-                using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+                await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
                 {
                     SqlCommand!.Connection = sqlConnection;
                     await sqlConnection.OpenAsync().ConfigureAwait(false);
@@ -119,16 +118,16 @@ namespace PocoDataSet.SqlServerDataAdapter
             DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
         }
 
-		/// <summary>
-		/// Initializes component
-		/// <param name="returnedTableNames">Returned table names</param>
-		/// </summary>
-		void InitializeComponent(List<string>? returnedTableNames)
-		{
-			DataTableCreator = new DataTableCreator();
-			DataTableCreator.ListOfTableNames = returnedTableNames;
-			DataTableCreator.LoadDataTableKeysInformationRequest += DataTableCreator_LoadDataTableKeysInformationRequestAsync;
-		}
+        /// <summary>
+        /// Initializes component
+        /// <param name="returnedTableNames">Returned table names</param>
+        /// </summary>
+        void InitializeComponent(List<string>? returnedTableNames)
+        {
+            DataTableCreator = new DataTableCreator();
+            DataTableCreator.ListOfTableNames = returnedTableNames;
+            DataTableCreator.LoadDataTableKeysInformationRequest += DataTableCreator_LoadDataTableKeysInformationRequestAsync;
+        }
 
         /// <summary>
         /// Releases resources
@@ -206,42 +205,29 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             changeset.EnsureRelationsValid(relationValidationOptions);
 
-            List<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);
+            IReadOnlyList<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);
+
             if (tablesWithChanges.Count == 0)
             {
                 return 0;
             }
-
-            HashSet<string> namesOfTablesWithChanges = ChangesetProcessor.GetNamesOfTablesWithChanges(tablesWithChanges);
-
             int affectedRows = 0;
 
-            using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
             {
                 await sqlConnection.OpenAsync().ConfigureAwait(false);
 
-                using (SqlTransaction transaction = sqlConnection.BeginTransaction())
+                await using (SqlTransaction transaction = sqlConnection.BeginTransaction())
                 {
                     try
                     {
-                        Dictionary<string, TableWriteMetadata> metadataCache = new Dictionary<string, TableWriteMetadata>(StringComparer.OrdinalIgnoreCase);
 
-                        List<ForeignKeyEdge> edges = await MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, sqlConnection, transaction).ConfigureAwait(false);
-                        tablesWithChanges = TableSorter.BuildOrderedTablesWithChangesByForeignKeys(changeset, tablesWithChanges, namesOfTablesWithChanges, edges);
+                        SaveSqlConnection = sqlConnection;
+                        SqlTransaction = transaction;
 
-                        for (int t = 0; t < tablesWithChanges.Count; t++)
-                        {
-                            IDataTable table = tablesWithChanges[t];
-                            DataTableValidator.ValidateTableForSave(table);
+                        SaveChangesDataPersistenceLogicHandler handler = new SaveChangesDataPersistenceLogicHandler(this);
+                        affectedRows = await handler.SaveChangesAsync(changeset).ConfigureAwait(false);
 
-                            // Load and validate SQL Server schema once per table
-                            TableWriteMetadata metadata = await MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, table.TableName, sqlConnection, transaction).ConfigureAwait(false);
-                            DataTableValidator.ValidateTableExistsInSqlServer(metadata, table.TableName);
-                        }
-
-                        affectedRows += await CommandApplier.ApplyDeletesAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
-                        affectedRows += await CommandApplier.ApplyInsertsAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
-                        affectedRows += await CommandApplier.ApplyUpdatesAsync(tablesWithChanges, metadataCache, sqlConnection, transaction).ConfigureAwait(false);
 
                         await transaction.CommitAsync().ConfigureAwait(false);
 
@@ -262,6 +248,8 @@ namespace PocoDataSet.SqlServerDataAdapter
                     }
                     finally
                     {
+                        SaveSqlConnection = null;
+                        SqlTransaction = null;
                         await DisposeAsync().ConfigureAwait(false);
                     }
                 }
@@ -292,6 +280,85 @@ namespace PocoDataSet.SqlServerDataAdapter
         SqlCommand? SqlCommand
         {
             get; set;
+        }
+
+        /// <summary>
+        /// SaveChanges execution connection (valid only within SaveChangesAsync call).
+        /// </summary>
+        SqlConnection? SaveSqlConnection
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets or sets SQL transaction
+        /// </summary>
+        SqlTransaction? SqlTransaction
+        {
+            get; set;
+        }
+
+        internal Task<int> ExecuteNonQueryAsync(SqlCommand sqlCommand)
+        {
+            if (sqlCommand == null)
+            {
+                throw new ArgumentNullException(nameof(sqlCommand));
+            }
+
+            if (SaveSqlConnection == null)
+            {
+                throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
+            }
+
+            sqlCommand.Connection = SaveSqlConnection;
+            sqlCommand.Transaction = SqlTransaction;
+
+            return sqlCommand.ExecuteNonQueryAsync();
+        }
+
+        internal Task<SqlDataReader> ExecuteReaderAsync(SqlCommand sqlCommand)
+        {
+            if (sqlCommand == null)
+            {
+                throw new ArgumentNullException(nameof(sqlCommand));
+            }
+
+            if (SaveSqlConnection == null)
+            {
+                throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
+            }
+
+            sqlCommand.Connection = SaveSqlConnection;
+            sqlCommand.Transaction = SqlTransaction;
+
+            return sqlCommand.ExecuteReaderAsync();
+        }
+
+        internal Task<TableWriteMetadata> GetOrLoadTableWriteMetadataAsync(
+            string tableName,
+            Dictionary<string, TableWriteMetadata> metadataCache)
+        {
+            if (SaveSqlConnection == null)
+            {
+                throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
+            }
+
+            return MetadataLoader.GetOrLoadTableWriteMetadataAsync(metadataCache, tableName, SaveSqlConnection, SqlTransaction);
+        }
+
+        internal Task<List<ForeignKeyEdge>> LoadForeignKeyEdgesAsync(IDataSet changeset, List<IDataTable> tablesWithChanges, HashSet<string> namesOfTablesWithChanges)
+        {
+            if (SaveSqlConnection == null)
+            {
+                throw new InvalidOperationException("No active SaveChanges connection. This method may only be used during SaveChangesAsync.");
+            }
+
+            if (SqlTransaction == null)
+            {
+                throw new InvalidOperationException("No active SaveChanges transaction. This method may only be used during SaveChangesAsync.");
+            }
+
+            return MetadataLoader.LoadForeignKeyEdgesAsync(namesOfTablesWithChanges, SaveSqlConnection, SqlTransaction);
         }
         #endregion
 
