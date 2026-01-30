@@ -52,6 +52,20 @@ namespace PocoDataSet.IObservableData
         IObservableDataRow AddRow(IDataRow dataRow);
 
         /// <summary>
+        /// Gets flag indicating whether table observable contains specified row
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        /// <returns>True if observable table contains specified row, otherwise false</returns>
+        bool ContainsRow(IObservableDataRow observableDataRow);
+
+        /// <summary>
+        /// Removes row
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        void RemoveRow(IObservableDataRow observableDataRow);
+
+        /// <summary>
         /// Removes row at position specified by row index
         /// </summary>
         /// <param name="rowIndex">Row index</param>

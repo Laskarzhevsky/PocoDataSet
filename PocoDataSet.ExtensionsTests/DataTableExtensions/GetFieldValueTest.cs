@@ -35,7 +35,7 @@ namespace PocoDataSet.ExtensionsTests
 
             // Act
             // 4. Call GetFieldValue method to get a value from the FirstName field of the first row, expected "John"
-            string? firstName = employeeDataTable.GetFieldValue<string>(0, "FirstName");
+            string? firstName = employeeDataTable.GetFieldValue<string>(0, "firstname");
 
             // Assert
             Assert.Equal("John", firstName);

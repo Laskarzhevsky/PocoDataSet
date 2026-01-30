@@ -100,6 +100,14 @@ namespace PocoDataSet.IObservableData
         {
             get; set;
         }
+
+        /// <summary>
+        /// Gets or sets flag indicating whether data row is selected
+        /// </summary>
+        bool Selected
+        {
+            get; set;
+        }
         #endregion
     }
 }

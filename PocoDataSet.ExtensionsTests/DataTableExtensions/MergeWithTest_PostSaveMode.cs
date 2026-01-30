@@ -11,7 +11,7 @@ namespace PocoDataSet.ExtensionsTests
     public partial class DataTableExtensionsTests
     {
         [Fact]
-        public void MergeWithTest_PostSaveModeCopy()
+        public void MergeWithTest_PostSaveMode()
         {
             // Arrange
             // 1. Create a current table with a newly added row (client-side)

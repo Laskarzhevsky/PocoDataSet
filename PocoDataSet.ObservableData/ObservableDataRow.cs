@@ -211,6 +211,22 @@ namespace PocoDataSet.ObservableData
         {
             get; set;
         }
+
+        /// <summary>
+        /// Gets or sets flag indicating whether data row is selected
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        public bool Selected
+        {
+            get
+            {
+                return _innerDataRow.Selected;
+            }
+            set
+            {
+                _innerDataRow.Selected = value;
+            }
+        }
         #endregion
 
         #region Methods

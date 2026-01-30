@@ -16,7 +16,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataTable">Data table</param>
         /// <param name="mergeOptions">Merge options</param>
         /// <returns>Primary keys</returns>
-        public static List<string> GetPrimaryKeyColumnNames(this IDataTable? dataTable, IMergeOptions? mergeOptions)
+        public static List<string> GetPrimaryKeyColumnNames(this IDataTable? dataTable, IMergeOptions? mergeOptions = null)
         {
             List<string> listOfPrimaryKeys = new List<string>();
             if (dataTable == null)

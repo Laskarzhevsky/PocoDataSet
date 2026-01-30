@@ -10,13 +10,13 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Gets field value from row at rowIndex
+        /// Gets field value from row at row with specified index
         /// </summary>
         /// <typeparam name="T">Value type</typeparam>
         /// <param name="observableDataTable">Observable data table</param>
         /// <param name="rowIndex">Row index</param>
         /// <param name="columnName">Column name</param>
-        /// <returns>Value</returns>
+        /// <returns>Field value from row at row with specified index</returns>
         public static T? GetFieldValue<T>(this IObservableDataTable? observableDataTable, int rowIndex, string columnName)
         {
             if (observableDataTable == null)

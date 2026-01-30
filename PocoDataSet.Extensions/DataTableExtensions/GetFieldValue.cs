@@ -33,13 +33,28 @@ namespace PocoDataSet.Extensions
                 throw new ArgumentOutOfRangeException(nameof(rowIndex));
             }
 
+            // ContainsColumn is case-insensitive. Resolve the canonical column name
+            // so downstream field access uses the actual casing from metadata.
             if (!dataTable.ContainsColumn(columnName))
             {
                 throw new KeyNotFoundException(nameof(columnName));
             }
 
+            string resolvedColumnName = columnName;
+
+            string columnNameToLowerInvariant = columnName.ToLowerInvariant();
+            for (int i = 0; i < dataTable.Columns.Count; i++)
+            {
+                IColumnMetadata columnMetadata = dataTable.Columns[i];
+                if (columnMetadata.ColumnName.ToLowerInvariant() == columnNameToLowerInvariant)
+                {
+                    resolvedColumnName = columnMetadata.ColumnName;
+                    break;
+                }
+            }
+
             IDataRow dataRow = dataTable.Rows[rowIndex];
-            return DataRowExtensions.GetDataFieldValue<T>(dataRow, columnName);
+            return DataRowExtensions.GetDataFieldValue<T>(dataRow, resolvedColumnName);
         }
         #endregion
     }

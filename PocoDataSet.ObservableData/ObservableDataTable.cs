@@ -116,6 +116,16 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// Gets flag indicating whether table observable contains specified row
+        /// </summary>
+        /// <param name="observableDataRow">Observable data row</param>
+        /// <returns>True if observable table contains specified row, otherwise false</returns>
+        public bool ContainsRow(IObservableDataRow observableDataRow)
+        {
+            return _observableDataRows.Contains(observableDataRow);
+        }
+
+        /// <summary>
         /// Removes row
         /// IObservableDataTable interface implementation
         /// </summary>
