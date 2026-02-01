@@ -9,6 +9,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Merging\ObservableDataRowDefaultMergeHandler_.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />

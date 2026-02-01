@@ -42,7 +42,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             Assert.Equal(1, departmentObservableDataRow["Id"]);
             Assert.Equal("Marketing", departmentObservableDataRow["Name"]);
 
-            Assert.True(dataFieldValueChangedEventHandler.GetEventCount("Name") == 1);
+            Assert.True(dataFieldValueChangedEventHandler.GetEventCount(departmentObservableDataRow, "Name") == 1);
             Assert.True(rowStateChangedEventHandler.GetEventCount(departmentObservableDataRow, DataRowState.Unchanged, DataRowState.Modified) == 1);
         }
     }

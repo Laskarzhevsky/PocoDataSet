@@ -1,4 +1,5 @@
 ﻿using PocoDataSet.IObservableData;
+using PocoDataSet.ObservableExtensionsTests.Internals;
 
 namespace PocoDataSet.ObservableExtensionsTests
 {
@@ -11,7 +12,7 @@ namespace PocoDataSet.ObservableExtensionsTests
         /// <summary>
         /// Holds references to handled DataFieldValueChanged event arguments
         /// </summary>
-        private readonly System.Collections.Generic.List<DataFieldValueChangedEventArgs> _handledDataFieldValueChangedEvents = new System.Collections.Generic.List<DataFieldValueChangedEventArgs>();
+        private readonly System.Collections.Generic.List<DataFieldValueChangedEventHandlerEntry> _handledDataFieldValueChangedEvents = new System.Collections.Generic.List<DataFieldValueChangedEventHandlerEntry>();
         #endregion
 
         #region Public Methods
@@ -20,19 +21,25 @@ namespace PocoDataSet.ObservableExtensionsTests
         /// </summary>
         /// <param name="columnName">Column name</param>
         /// <returns>Event count</returns>
-        public int GetEventCount(string? columnName = null)
+        public int GetEventCount(IObservableDataRow observableDataRow, string? columnName = null)
         {
-            if (string.IsNullOrEmpty(columnName))
-            {
-                return _handledDataFieldValueChangedEvents.Count;
-            }
-
             int count = 0;
             for (int i = 0; i < _handledDataFieldValueChangedEvents.Count; i++)
             {
-                if (_handledDataFieldValueChangedEvents[i].ColumnName == columnName)
+                IObservableDataRow? handledObservableDataRow = _handledDataFieldValueChangedEvents[i].ObservableDataRow;
+                if (handledObservableDataRow == observableDataRow)
                 {
-                    count++;
+                    if (string.IsNullOrEmpty(columnName))
+                    {
+                        count++;
+                    }
+                    else
+                    {
+                        if (_handledDataFieldValueChangedEvents[i].DataFieldValueChangedEventArgs.ColumnName == columnName)
+                        {
+                            count++;
+                        }
+                    }
                 }
             }
 
@@ -48,7 +55,7 @@ namespace PocoDataSet.ObservableExtensionsTests
         /// <param name="e">Event arguments</param>
         public void Handle(object? sender, DataFieldValueChangedEventArgs e)
         {
-            _handledDataFieldValueChangedEvents.Add(e);
+            _handledDataFieldValueChangedEvents.Add(new DataFieldValueChangedEventHandlerEntry((IObservableDataRow)sender, e));
         }
         #endregion
     }

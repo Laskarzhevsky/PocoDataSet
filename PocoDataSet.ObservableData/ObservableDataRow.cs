@@ -30,6 +30,8 @@ namespace PocoDataSet.ObservableData
         /// Holds reference to IDataRow
         /// </summary>
         readonly IDataRow _innerDataRow;
+
+        int _rowStateChangedSuppressionCount;
         #endregion
 
         #region Constructors
@@ -242,6 +244,37 @@ namespace PocoDataSet.ObservableData
                 DataFieldValueChanged(this, new DataFieldValueChangedEventArgs(columnName, requestor));
             }
         }
+        
+        /// <summary>
+        /// Suppresses RowStateChanged notifications for the lifetime of the returned scope.
+        /// This is used by merge operations (e.g., Refresh mode) where values may be updated
+        /// and then committed back to Unchanged state, and intermediate state flips are not
+        /// semantically meaningful to observers.
+        /// </summary>
+        /// <returns>Disposable scope that re-enables RowStateChanged when disposed</returns>
+        public System.IDisposable SuppressRowStateChanged()
+        {
+            _rowStateChangedSuppressionCount++;
+            return new RowStateChangedSuppressionScope(this);
+        }
+
+        sealed class RowStateChangedSuppressionScope : System.IDisposable
+        {
+            readonly ObservableDataRow _owner;
+
+            public RowStateChangedSuppressionScope(ObservableDataRow owner)
+            {
+                _owner = owner;
+            }
+
+            public void Dispose()
+            {
+                if (_owner._rowStateChangedSuppressionCount > 0)
+                {
+                    _owner._rowStateChangedSuppressionCount--;
+                }
+            }
+        }
 
         /// <summary>
         /// Raises RowStateChangedEventIfNeeded event
@@ -252,6 +285,12 @@ namespace PocoDataSet.ObservableData
         void RaiseRowStateChangedEvent(DataRowState oldState, DataRowState newState, object? requestor)
         {
             if (oldState == newState)
+            {
+                return;
+            }
+
+            
+            if (_rowStateChangedSuppressionCount > 0)
             {
                 return;
             }

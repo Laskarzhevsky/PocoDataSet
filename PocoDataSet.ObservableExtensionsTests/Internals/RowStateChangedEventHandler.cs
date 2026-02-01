@@ -32,11 +32,6 @@ namespace PocoDataSet.ObservableExtensionsTests
             for (int i = 0; i < _handledRowStateChangedEvents.Count; i++)
             {
                 IObservableDataRow? handledObservableDataRow = _handledRowStateChangedEvents[i].ObservableDataRow;
-                if (handledObservableDataRow == null)
-                {
-                    continue;
-                }
-
                 if (handledObservableDataRow == observableDataRow)
                 {
                     if (oldState == null && newState == null)

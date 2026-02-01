@@ -61,33 +61,9 @@ namespace PocoDataSet.ObservableExtensions
 
             // Refresh mode should notify value changes but not emit RowStateChanged transitions
             // (rows typically flip Unchanged -> Modified -> Unchanged internally).
-            // PostSave mode should suppress RowStateChanged only for baseline Unchanged rows; other rows may legitimately change state.
-            bool suppressRowStateChanged = false;
-
-            if (currentObservableDataRow is ObservableDataRow observableDataRow)
+            if (observableMergeOptions.MergeMode == MergeMode.Refresh && currentObservableDataRow is ObservableDataRow observableDataRow)
             {
-                if (observableMergeOptions.MergeMode == MergeMode.Refresh)
-                {
-                    suppressRowStateChanged = true;
-                }
-                else if (observableMergeOptions.MergeMode == MergeMode.PostSave &&
-                         currentObservableDataRow.InnerDataRow.DataRowState == DataRowState.Unchanged)
-                {
-                    suppressRowStateChanged = true;
-                }
-
-                if (suppressRowStateChanged)
-                {
-                    using (observableDataRow.SuppressRowStateChanged())
-                    {
-                        rowValueChanged = ApplyValues(currentObservableDataRow, refreshedDataRow, listOfColumnMetadata);
-                        if (policy.ShouldAcceptChangesAfterMerge)
-                        {
-                            currentObservableDataRow.AcceptChanges();
-                        }
-                    }
-                }
-                else
+                using (observableDataRow.SuppressRowStateChanged())
                 {
                     rowValueChanged = ApplyValues(currentObservableDataRow, refreshedDataRow, listOfColumnMetadata);
                     if (policy.ShouldAcceptChangesAfterMerge)

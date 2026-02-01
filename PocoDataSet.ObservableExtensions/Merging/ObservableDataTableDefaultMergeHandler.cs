@@ -267,6 +267,23 @@ namespace PocoDataSet.ObservableExtensions
                 IObservableDataRow observableDataRow = currentObservableDataTable.Rows[i];
                 string currentPkValue = observableDataRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
 
+                // PostSave semantics: finalize deletes.
+                // Deleted rows are removed from the current table regardless of whether the server returned
+                // a corresponding row. Additionally, if a matching server row exists, it is considered
+                // "processed" so it will not be re-added later.
+                if (policy.Mode == MergeMode.PostSave && observableDataRow.InnerDataRow.DataRowState == DataRowState.Deleted)
+                {
+                    // Mark any matching refreshed row (by PK) as processed to prevent re-add.
+                    if (refreshedIndex.ContainsKey(currentPkValue))
+                    {
+                        processedRefreshedPrimaryKeys.Add(currentPkValue);
+                    }
+
+                    IObservableDataRow removed = currentObservableDataTable.RemoveRowAt(i);
+                    observableMergeOptions.ObservableDataSetMergeResult.DeletedObservableDataRows.Add(new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, removed));
+                    continue;
+                }
+
                 IDataRow? refreshedDataRow = null;
                 refreshedIndex.TryGetValue(currentPkValue, out refreshedDataRow);
 
