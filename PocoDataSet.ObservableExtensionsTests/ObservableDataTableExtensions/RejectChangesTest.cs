@@ -10,7 +10,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
     public partial class ObservableDataTableExtensionsTests
     {
         [Fact]
-        public void AcceptChangesTest()
+        public void RejectChangesTest()
         {
             // Arrange
             // 1. Create observable data set
@@ -29,7 +29,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             // Row in Deleted state
             IObservableDataRow departmentObservableDataRow2 = departmentObservableDataTable.AddNewRow();
             departmentObservableDataRow2["Id"] = 2;
-            departmentObservableDataRow2["Name"] = "Emergency";
+            departmentObservableDataRow2["Name"] = "Sales";
             departmentObservableDataRow2.AcceptChanges();
             departmentObservableDataRow2.Delete();
 
@@ -55,22 +55,22 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             departmentObservableDataRow3.RowStateChanged += rowStateChangedEventHandler.Handle;
 
             // Act
-            // 5. Accept changes at data set level
-            observableDataSet.AcceptChanges();
+            // 5. Reject changes
+            observableDataSet.RejectChanges();
 
             // Assert
-            // - Department: two Unchanged row (1, Reception and 3, Finance)
+            // - Department: two Unchanged row (2, Sales and 3, Emergency)
             Assert.Equal(2, departmentObservableDataTable.Rows.Count);
             Assert.Equal(1, rowsRemovedEventHandler.GetEventCount());
 
-            Assert.Equal(DataRowState.Unchanged, departmentObservableDataRow1.DataRowState);
-            Assert.Equal(1, departmentObservableDataRow1["Id"]);
-            Assert.Equal("Reception", departmentObservableDataRow1["Name"]);
-            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(departmentObservableDataRow1, DataRowState.Added, DataRowState.Unchanged));
+            Assert.Equal(DataRowState.Unchanged, departmentObservableDataRow2.DataRowState);
+            Assert.Equal(2, departmentObservableDataRow2["Id"]);
+            Assert.Equal("Sales", departmentObservableDataRow2["Name"]);
+            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(departmentObservableDataRow2, DataRowState.Deleted, DataRowState.Unchanged));
 
             Assert.Equal(DataRowState.Unchanged, departmentObservableDataRow3.DataRowState);
             Assert.Equal(3, departmentObservableDataRow3["Id"]);
-            Assert.Equal("Finance", departmentObservableDataRow3["Name"]);
+            Assert.Equal("Emergency", departmentObservableDataRow3["Name"]);
             Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(departmentObservableDataRow3, DataRowState.Modified, DataRowState.Unchanged));
         }
     }

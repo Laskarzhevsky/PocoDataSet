@@ -21,8 +21,13 @@ namespace PocoDataSet.ObservableExtensionsTests
         /// </summary>
         /// <param name="columnName">Column name</param>
         /// <returns>Event count</returns>
-        public int GetEventCount(IObservableDataRow observableDataRow, string? columnName = null)
+        public int GetEventCount(IObservableDataRow? observableDataRow = null, string? columnName = null)
         {
+            if (observableDataRow == null)
+            {
+                return _handledDataFieldValueChangedEvents.Count;
+            }
+
             int count = 0;
             for (int i = 0; i < _handledDataFieldValueChangedEvents.Count; i++)
             {
