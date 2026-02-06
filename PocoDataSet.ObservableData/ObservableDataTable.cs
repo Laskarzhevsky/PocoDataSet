@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -14,10 +16,20 @@ namespace PocoDataSet.ObservableData
     {
         #region Events
         /// <summary>
+        /// Standard .NET collection change notification (rows added/removed/reset).
+        /// </summary>
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+        /// <summary>
         /// DataFieldValueChanged event
         /// IObservableDataTable interface implementation
         /// </summary>
         public event EventHandler<DataFieldValueChangedEventArgs>? DataFieldValueChanged;
+
+        /// <summary>
+        /// Standard .NET property change notification (Count, Rows, etc.).
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// RowsAdded event
@@ -276,6 +288,30 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// Raises CollectionChanged event.
+        /// </summary>
+        /// <param name="args">Event arguments</param>
+        void RaiseCollectionChanged(NotifyCollectionChangedEventArgs args)
+        {
+            if (CollectionChanged != null)
+            {
+                CollectionChanged(this, args);
+            }
+        }
+
+        /// <summary>
+        /// Raises PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">Property name</param>
+        void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        /// <summary>
         /// Raises RowAdded event
         /// </summary>
         /// <param name="rowIndex">Row index</param>
@@ -286,6 +322,10 @@ namespace PocoDataSet.ObservableData
             {
                 RowsAdded(this, new RowsChangedEventArgs(this.TableName, rowIndex, observableDataRow));
             }
+
+            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, observableDataRow, rowIndex));
+            RaisePropertyChanged("Count");
+            RaisePropertyChanged(nameof(Rows));
         }
 
         /// <summary>
@@ -299,6 +339,10 @@ namespace PocoDataSet.ObservableData
             {
                 RowsRemoved(this, new RowsChangedEventArgs(this.TableName, rowIndex, observableDataRow));
             }
+
+            RaiseCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, observableDataRow, rowIndex));
+            RaisePropertyChanged("Count");
+            RaisePropertyChanged(nameof(Rows));
         }
         #endregion
 

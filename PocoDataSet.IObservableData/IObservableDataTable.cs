@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 using PocoDataSet.IData;
 
 namespace PocoDataSet.IObservableData
 {
-    public interface IObservableDataTable
+    public interface IObservableDataTable : INotifyCollectionChanged, INotifyPropertyChanged
     {
         #region Events
         /// <summary>

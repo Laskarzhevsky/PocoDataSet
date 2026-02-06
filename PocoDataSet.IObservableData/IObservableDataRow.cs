@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 using PocoDataSet.IData;
 
@@ -7,7 +8,7 @@ namespace PocoDataSet.IObservableData
     /// <summary>
     /// Defines observable DataRow functionality
     /// </summary>
-    public interface IObservableDataRow
+    public interface IObservableDataRow : INotifyPropertyChanged
     {
         #region Events
         /// <summary>

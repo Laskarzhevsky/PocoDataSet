@@ -12,12 +12,13 @@ namespace PocoDataSet.ObservableExtensions
     public static partial class ObservableDataTableExtensions
     {
         /// <summary>
-        /// Returns a shallow copy of the table's observable rows.
-        /// Keeping a copy avoids accidental mutation while iterating/sorting.
+        /// Gets list of observable data rows
         /// </summary>
-        public static List<IObservableDataRow> ToList(this IObservableDataTable table)
+        /// <param name="observableDataTable">Observable data table</param>
+        /// <returns>List of observable data rows</returns>
+        public static List<IObservableDataRow> ToList(this IObservableDataTable observableDataTable)
         {
-            return new List<IObservableDataRow>(table.Rows);
+            return new List<IObservableDataRow>(observableDataTable.Rows);
         }
 
         /// <summary>
@@ -32,11 +33,6 @@ namespace PocoDataSet.ObservableExtensions
             }
 
             List<TInterface> list = new List<TInterface>();
-
-            // Assumes IObservableDataTable.Rows is enumerable of IObservableDataRow and that
-            // IObservableDataRow implements IDataRow (recommended). If so, the 'foreach (IDataRow ...)'
-            // cast is valid. If your IObservableDataRow does NOT implement IDataRow, expose the inner
-            // IDataRow (e.g., .Inner) and adjust below accordingly.
             foreach (ObservableDataRow observableDataRow in table.Rows)
             {
                 IDataRow dataRow = observableDataRow.InnerDataRow;
@@ -47,7 +43,6 @@ namespace PocoDataSet.ObservableExtensions
 
                     if (nameMap == null)
                     {
-                        // If your Initialize signature is Initialize(IDataRow, IDictionary<string,string>?)
                         handler.Initialize(dataRow, null);
                     }
                     else

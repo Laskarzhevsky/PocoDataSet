@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.ComponentModel;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -17,6 +18,14 @@ namespace PocoDataSet.ObservableData
         /// IObservableDataRow interface implementation
         /// </summary>
         public event EventHandler<DataFieldValueChangedEventArgs>? DataFieldValueChanged;
+
+        /// <summary>
+        /// Standard .NET property change notification (interop for WPF/WinUI/MAUI, etc.).
+        /// For column updates performed through the indexer, ObservableDataRow raises:
+        /// - PropertyChanged(columnName)
+        /// - PropertyChanged("Item[]") to signal indexer updates.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Row state changed notification
@@ -141,6 +150,12 @@ namespace PocoDataSet.ObservableData
             if (dataFieldValueUpdated)
             {
                 RaiseDataFieldValueChangedEvent(columnName, requestor);
+
+                // Interop: notify that the "property" named by the column key has changed.
+                // Also notify the conventional indexer name used by some binding engines.
+                RaisePropertyChanged(columnName);
+                RaisePropertyChanged("Item[]");
+
                 DataRowState newState = _innerDataRow.DataRowState;
                 RaiseRowStateChangedEvent(oldState, newState, requestor);
             }
@@ -226,7 +241,14 @@ namespace PocoDataSet.ObservableData
             }
             set
             {
+                bool oldValue = _innerDataRow.Selected;
+                if (oldValue == value)
+                {
+                    return;
+                }
+
                 _innerDataRow.Selected = value;
+                RaisePropertyChanged(nameof(Selected));
             }
         }
         #endregion
@@ -244,7 +266,19 @@ namespace PocoDataSet.ObservableData
                 DataFieldValueChanged(this, new DataFieldValueChangedEventArgs(columnName, requestor));
             }
         }
-        
+
+        /// <summary>
+        /// Raises PropertyChanged event.
+        /// </summary>
+        /// <param name="propertyName">Property name</param>
+        void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
         /// <summary>
         /// Suppresses RowStateChanged notifications for the lifetime of the returned scope.
         /// This is used by merge operations (e.g., Refresh mode) where values may be updated
@@ -299,6 +333,9 @@ namespace PocoDataSet.ObservableData
             {
                 RowStateChanged(this, new RowStateChangedEventArgs(oldState, newState, requestor));
             }
+
+            // Interop: notify standard property change listeners.
+            RaisePropertyChanged(nameof(DataRowState));
         }
         #endregion
     }
