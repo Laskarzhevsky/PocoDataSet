@@ -21,14 +21,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="PocoDataSet.Data" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.IData" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.24" />
-    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.24" />
+    <PackageReference Include="PocoDataSet.Data" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.Extensions" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.IData" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.IObservableData" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.ObservableData" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.Serializer" Version="1.0.25" />
+    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="1.0.25" />
   </ItemGroup>
 </Project>
