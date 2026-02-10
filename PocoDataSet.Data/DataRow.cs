@@ -41,7 +41,7 @@ namespace PocoDataSet.Data
         /// </summary>
         [JsonConstructor]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [System.Obsolete("Use DataRowExtensions.CreateRowFromColumns, DataRowExtensions.CreateRowFromColumnsWithDefaultValues, or DataTableExtension.AddNewRow instead.", false)]
+        [System.Obsolete("Call DataRowFactory.CreateEmpty method to create a new data row", false)]
         public DataRow()
         {
             _values = new Dictionary<string, object?>(StringComparer.Ordinal);
@@ -67,6 +67,26 @@ namespace PocoDataSet.Data
         {
             get; private set;
         } = DataRowState.Detached;
+
+
+        /// <summary>
+        /// Gets row kind discriminator for JSON round-tripping.
+        /// Regular rows return "regular". Floating rows override to "floating".
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("$rowKind")]
+        public virtual string RowKind
+        {
+            get
+            {
+                return "regular";
+            }
+            protected set
+            {
+                // Setter exists for JSON deserialization compatibility.
+                // Value is ignored because the actual runtime type is determined by the serializer converter.
+            }
+        }
 
         /// <summary>
         /// Gets flag indicating whether snapshot of original values exists
@@ -268,20 +288,7 @@ namespace PocoDataSet.Data
             _stateBeforeDelete = DataRowState;
             DataRowState = DataRowState.Deleted;
         }
-/*
-        /// <summary>
-        /// Returns values enumerator
-        /// </summary>
-        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
-        {
-            return _values.GetEnumerator();
-        }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _values.GetEnumerator();
-        }
-*/
         /// <summary>
         /// Reverts to baseline rows which are in Deleted or Modified state
         /// It does nothing for rows in Detached or Unchanged state

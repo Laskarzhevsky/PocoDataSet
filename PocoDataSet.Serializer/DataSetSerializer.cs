@@ -28,7 +28,7 @@ namespace PocoDataSet.Serializer
 
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataSet, DataSet>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataTable, DataTable>());
-            jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataRow, DataRow>());
+            jsonSerializerOptions.Converters.Add(new DataRowPolymorphicConverter());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IColumnMetadata, ColumnMetadata>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataRelation, DataRelation>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IForeignKeyData, ForeignKeyData>());
@@ -51,7 +51,7 @@ namespace PocoDataSet.Serializer
 
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataSet, DataSet>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataTable, DataTable>());
-            jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataRow, DataRow>());
+            jsonSerializerOptions.Converters.Add(new DataRowPolymorphicConverter());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IColumnMetadata, ColumnMetadata>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IDataRelation, DataRelation>());
             jsonSerializerOptions.Converters.Add(new ConcreteTypeConverter<IForeignKeyData, ForeignKeyData>());
