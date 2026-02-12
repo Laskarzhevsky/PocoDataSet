@@ -69,7 +69,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             DataRow row1 = new DataRow();
             row1["Id"] = 1;

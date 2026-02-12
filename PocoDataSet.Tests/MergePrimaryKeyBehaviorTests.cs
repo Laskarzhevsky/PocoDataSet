@@ -18,7 +18,6 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow currentRow = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             currentRow["Id"] = 2;
@@ -29,7 +28,6 @@ namespace PocoDataSet.Tests
             IDataTable refreshedTable = refreshed.AddNewTable("Department");
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
-            refreshedTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow refreshedRow = DataRowExtensions.CreateRowFromColumns(refreshedTable.Columns);
             refreshedRow["Id"] = 2;
@@ -61,7 +59,6 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             r1["Id"] = 1;
@@ -77,7 +74,6 @@ namespace PocoDataSet.Tests
             IDataTable refreshedTable = refreshed.AddNewTable("Department");
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
-            refreshedTable.PrimaryKeys = new List<string> { "Id" };
 
             // refreshed contains only Id=1; Id=2 is missing -> should be treated as deleted in refresh merge
             IDataRow rr1 = DataRowExtensions.CreateRowFromColumns(refreshedTable.Columns);
@@ -107,7 +103,6 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             // Baseline row (loaded from server earlier)
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
@@ -128,7 +123,6 @@ namespace PocoDataSet.Tests
             IDataTable refreshedTable = refreshed.AddNewTable("Department");
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
-            refreshedTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow rr1 = DataRowExtensions.CreateRowFromColumns(refreshedTable.Columns);
             rr1["Id"] = 1;
@@ -173,7 +167,6 @@ namespace PocoDataSet.Tests
             IDataTable currentTable = current.AddNewTable("Department");
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
             r1["Id"] = 1;
@@ -195,7 +188,6 @@ namespace PocoDataSet.Tests
             IDataTable refreshedTable = refreshed.AddNewTable("Department");
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
-            refreshedTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow rr1 = DataRowExtensions.CreateRowFromColumns(refreshedTable.Columns);
             rr1["Id"] = 1;

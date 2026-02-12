@@ -20,8 +20,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
-            table.PrimaryKeys = new List<string> { "Id" };
-
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;
             loaded["Name"] = "HR";
@@ -68,8 +66,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("DepartmentId", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-
-            table.PrimaryKeys = new List<string> { "CompanyId", "DepartmentId" };
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["CompanyId"] = 1;

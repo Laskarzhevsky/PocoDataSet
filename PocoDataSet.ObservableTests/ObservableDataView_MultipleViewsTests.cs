@@ -22,8 +22,6 @@ namespace PocoDataSet.ObservableTests
             t.AddColumn("Id", DataTypeNames.INT32, false, true, false);
             t.AddColumn("Name", DataTypeNames.STRING);
 
-            t.InnerDataTable.PrimaryKeys = new List<string> { "Id" };
-
             AddLoadedRow(t, 1, "A");
             AddLoadedRow(t, 2, "B");
 
@@ -38,7 +36,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable rt = refreshed.AddNewTable("T");
             rt.AddColumn("Id", DataTypeNames.INT32);
             rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow r = PocoDataSet.Extensions.DataRowExtensions.CreateRowFromColumns(rt.Columns);
             r["Id"] = 1;

@@ -16,7 +16,7 @@ namespace PocoDataSet.Extensions
         /// <param name="dataTable">Current data table</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         /// <returns>Built primary key index</returns>
-        public static Dictionary<string, IDataRow> BuildPrimaryKeyIndex(this IDataTable? dataTable, List<string> primaryKeyColumnNames)
+        public static Dictionary<string, IDataRow> BuildPrimaryKeyIndex(this IDataTable? dataTable, IReadOnlyList<string> primaryKeyColumnNames)
         {
             Dictionary<string, IDataRow> dataRowIndex = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
             if (dataTable == null)

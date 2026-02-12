@@ -22,7 +22,6 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys = new List<string> { "Id" };
 
             // Add initial loaded rows (server-origin)
             int nextId = 1;
@@ -248,14 +247,6 @@ namespace PocoDataSet.Tests
 
             // Schema
             t.AddColumns(currentTable.Columns);
-
-            // PK definition
-            List<string> pk = new List<string>();
-            for (int i = 0; i < currentTable.PrimaryKeys.Count; i++)
-            {
-                pk.Add(currentTable.PrimaryKeys[i]);
-            }
-            t.PrimaryKeys = pk;
 
             for (int i = 0; i < currentTable.Rows.Count; i++)
             {

@@ -133,8 +133,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Description", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
-            table.PrimaryKeys = new List<string> { "Id" };
-
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;
             loaded["Name"] = "Before";
@@ -191,8 +189,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
-            table.PrimaryKeys = new List<string> { "CompanyId", "DepartmentId" };
-
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["CompanyId"] = 1;
             loaded["DepartmentId"] = 2;
@@ -230,12 +226,10 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
 
             IDataTable table = dataSet.AddNewTable("Department");
-            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-
-            table.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 1;
@@ -290,12 +284,10 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
 
             IDataTable table = dataSet.AddNewTable("Department");
-            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-
-            table.PrimaryKeys = new List<string> { "Id" };
 
             // Row 1
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(table.Columns);
@@ -371,11 +363,9 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
 
             IDataTable table = dataSet.AddNewTable("Department");
-            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-
-            table.PrimaryKeys = new List<string> { "Id" };
 
             // Create a row that has current values but no original baseline
             // (Added row manually switched to Modified)
@@ -418,11 +408,9 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
 
             IDataTable table = dataSet.AddNewTable("Department");
-            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
-
-            table.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 5;

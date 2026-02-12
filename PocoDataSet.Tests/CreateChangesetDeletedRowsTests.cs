@@ -18,7 +18,6 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;
@@ -70,7 +69,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("RowVersion", DataTypeNames.BINARY);
-            table.PrimaryKeys = new List<string> { "Id" };
 
             // Added row (insert scenario)
             IDataRow added = DataRowExtensions.CreateRowFromColumns(table.Columns);

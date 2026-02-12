@@ -17,7 +17,6 @@ namespace PocoDataSet.Tests
             IDataTable t = current.AddNewTable("T");
             t.AddColumn("Id", DataTypeNames.INT32);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow row = DataRowExtensions.CreateRowFromColumns(t.Columns);
             row["Id"] = 1;
@@ -30,7 +29,6 @@ namespace PocoDataSet.Tests
             IDataTable rt = refreshed.AddNewTable("T");
             rt.AddColumn("Id", DataTypeNames.INT32);
             rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
             r1["Id"] = 1;
@@ -53,7 +51,6 @@ namespace PocoDataSet.Tests
             IDataTable t = current.AddNewTable("T");
             t.AddColumn("Id", DataTypeNames.INT32);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow added = t.AddNewRow();
             added["Id"] = 100;
@@ -65,7 +62,6 @@ namespace PocoDataSet.Tests
             IDataTable rt = refreshed.AddNewTable("T");
             rt.AddColumn("Id", DataTypeNames.INT32);
             rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "Id" };
 
             // Act
             current.MergeWith(refreshed, MergeMode.Refresh);
@@ -84,7 +80,6 @@ namespace PocoDataSet.Tests
             IDataTable t = current.AddNewTable("T");
             t.AddColumn("Id", DataTypeNames.INT32);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow row = DataRowExtensions.CreateRowFromColumns(t.Columns);
             row["Id"] = 1;
@@ -98,7 +93,6 @@ namespace PocoDataSet.Tests
             IDataTable rt = refreshed.AddNewTable("T");
             rt.AddColumn("Id", DataTypeNames.INT32);
             rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "Id" };
 
             // Act
             current.MergeWith(refreshed, MergeMode.Refresh);
@@ -116,7 +110,6 @@ namespace PocoDataSet.Tests
             IDataTable t = current.AddNewTable("T");
             t.AddColumn("Id", DataTypeNames.INT32);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow row = DataRowExtensions.CreateRowFromColumns(t.Columns);
             row["Id"] = 1;
@@ -129,7 +122,6 @@ namespace PocoDataSet.Tests
             IDataSet refreshed = DataSetFactory.CreateDataSet();
             IDataTable rt = refreshed.AddNewTable("T");
             rt.AddColumns(t.Columns);
-            rt.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
             r1["Id"] = 1;

@@ -217,7 +217,7 @@ namespace PocoDataSet.ObservableData
         /// Gets list of primary key column names (delegates to inner data table)
         /// IObservableDataTable interface implementation
         /// </summary>
-        public List<string> PrimaryKeys
+        public IReadOnlyList<string> PrimaryKeys
         {
             get
             {

@@ -17,11 +17,11 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets or sets List of primary keys
+        /// Gets primary keys
         /// </summary>
-        List<string> PrimaryKeys
+        IReadOnlyList<string> PrimaryKeys
         {
-            get; set;
+            get;
         }
 
         /// <summary>

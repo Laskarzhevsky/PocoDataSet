@@ -27,7 +27,6 @@ public class EfChangesetToPocoApplier_IdentityConflict_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         // Baseline loaded row matches DB
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
@@ -71,7 +70,6 @@ public class EfChangesetToPocoApplier_IdentityConflict_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r["Id"] = 1;

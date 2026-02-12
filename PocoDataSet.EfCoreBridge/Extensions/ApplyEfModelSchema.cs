@@ -131,15 +131,16 @@ namespace PocoDataSet.EfCoreBridge
             }
 
             // Only set if different to avoid surprising callers that explicitly set a custom PK strategy.
+            // PrimaryKeys is exposed as IReadOnlyList, so we mutate the backing list (List<string>) rather than assigning.
             if (table.PrimaryKeys == null || table.PrimaryKeys.Count == 0)
             {
-                table.PrimaryKeys = pkColumns;
+                SetPrimaryKeysInternal(table, pkColumns);
                 return;
             }
 
             if (!AreSameColumns(table.PrimaryKeys, pkColumns))
             {
-                table.PrimaryKeys = pkColumns;
+                SetPrimaryKeysInternal(table, pkColumns);
             }
         }
 
@@ -314,6 +315,40 @@ namespace PocoDataSet.EfCoreBridge
 
             // Fallback: property name (works for InMemory and non-relational providers).
             return property.Name;
+        }
+
+
+        private static void SetPrimaryKeysInternal(IDataTable table, List<string> primaryKeys)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            if (primaryKeys == null)
+            {
+                throw new ArgumentNullException(nameof(primaryKeys));
+            }
+
+            // IDataTable.PrimaryKeys is exposed as IReadOnlyList<string> to consumers,
+            // but implementations are expected to back it with a mutable List<string>.
+            IList<string>? mutablePrimaryKeys = table.PrimaryKeys as IList<string>;
+            if (mutablePrimaryKeys == null)
+            {
+                throw new InvalidOperationException("IDataTable.PrimaryKeys must be backed by a mutable IList<string> in order to be populated by schema appliers.");
+            }
+
+            mutablePrimaryKeys.Clear();
+
+            foreach (string key in primaryKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    continue;
+                }
+
+                mutablePrimaryKeys.Add(key);
+            }
         }
 
         private static bool DoAllColumnsExist(IDataTable table, List<string> columns)

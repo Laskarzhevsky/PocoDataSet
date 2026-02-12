@@ -17,7 +17,6 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("T");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow row = DataRowExtensions.CreateRowFromColumns(table.Columns);
             row["Id"] = 1;
@@ -37,7 +36,6 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("T");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow row = DataRowExtensions.CreateRowFromColumns(table.Columns);
             row["Id"] = 1;

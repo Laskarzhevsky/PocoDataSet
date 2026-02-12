@@ -25,8 +25,6 @@ public class EfChangesetCopyToPocoApplier_Guardrails_Tests
         ct.AddColumn("Code", DataTypeNames.STRING);
         ct.AddColumn("Name", DataTypeNames.STRING);
 
-        ct.PrimaryKeys = new List<string> { "Id" };
-
         // Add a loaded row and mark it Deleted so the applier will try to resolve key values.
         IDataRow row = DataRowExtensions.CreateRowFromColumns(ct.Columns);
         row["Code"] = "D1";
@@ -52,7 +50,6 @@ public class EfChangesetCopyToPocoApplier_Guardrails_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         // Loaded baseline row Id=999 (not in DB)
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);

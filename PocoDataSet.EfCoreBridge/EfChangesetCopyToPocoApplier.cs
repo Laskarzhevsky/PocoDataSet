@@ -306,7 +306,7 @@ namespace PocoDataSet.EfCoreBridge
         /// <param name="dataRow">Data row</param>
         /// <param name="primaryKeys">Primary keys</param>
         /// <returns>Built key values</returns>
-        private static object[] BuildKeyValues(IDataRow dataRow, System.Collections.Generic.List<string> primaryKeys)
+        private static object[] BuildKeyValues(IDataRow dataRow, System.Collections.Generic.IReadOnlyList<string> primaryKeys)
         {
             object[] keyValues = new object[primaryKeys.Count];
             for (int i = 0; i < primaryKeys.Count; i++)
@@ -348,7 +348,7 @@ namespace PocoDataSet.EfCoreBridge
         /// <param name="entityType">Entity type</param>
         /// <param name="primaryKeys">Primary keys</param>
         /// <returns>Resolved key properties</returns>
-        private static PropertyInfo[] ResolveKeyProperties(Type entityType, System.Collections.Generic.List<string> primaryKeys)
+        private static PropertyInfo[] ResolveKeyProperties(Type entityType, System.Collections.Generic.IReadOnlyList<string> primaryKeys)
         {
             PropertyInfo[] props = new PropertyInfo[primaryKeys.Count];
             for (int i = 0; i < primaryKeys.Count; i++)

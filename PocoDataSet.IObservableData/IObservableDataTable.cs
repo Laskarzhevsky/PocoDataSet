@@ -103,7 +103,7 @@ namespace PocoDataSet.IObservableData
         /// <summary>
         /// Gets list of primary key column names (single source of truth for row identity)
         /// </summary>
-        List<string> PrimaryKeys
+        IReadOnlyList<string> PrimaryKeys
         {
             get;
         }

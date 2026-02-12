@@ -27,7 +27,6 @@ public class EfChangesetToPocoApplier_FloatingPatch_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow loaded = DataRowExtensions.CreateRowFromColumns(t.Columns);
         loaded["Id"] = 1;

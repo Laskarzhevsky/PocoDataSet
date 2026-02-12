@@ -29,7 +29,6 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         // Loaded row Id=1
         IDataRow r1 = DataRowExtensions.CreateRowFromColumns(t.Columns);
@@ -56,7 +55,6 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
 
         // changeset
         IDataSet cs = ds.CreateChangeset();
-        cs.Tables["Department"].PrimaryKeys = new List<string> { "Id" };
 
         // Act
         EfChangesetCopyToPocoApplier.ApplyTableAndSave(db, db.Departments, cs.Tables["Department"]);
@@ -87,7 +85,6 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow loaded = DataRowExtensions.CreateRowFromColumns(t.Columns);
         loaded["Id"] = 1;
@@ -99,7 +96,6 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
 
         IDataSet cs = ds.CreateChangeset();
         IDataTable ct = cs.Tables["Department"];
-        ct.PrimaryKeys = new List<string> { "Id" };
 
         // Act
         EfChangesetCopyToPocoApplier.ApplyTableAndSave(db, db.Departments, ct);
@@ -153,11 +149,7 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
         IDataTable ct = cs.Tables["Department"];
 
         // Ensure PrimaryKeys is empty
-        if (ct.PrimaryKeys != null)
-        {
-            ct.PrimaryKeys.Clear();
-        }
-        ct.PrimaryKeys = new List<string>();
+        ct.ClearPrimaryKeys();
 
         Assert.Throws<System.InvalidOperationException>(
             () => EfChangesetCopyToPocoApplier.ApplyTable(db, db.Departments, ct));

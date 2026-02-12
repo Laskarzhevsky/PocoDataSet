@@ -29,7 +29,6 @@ public class EfChangesetToPocoApplier_Tests
         IDataTable t = ds.AddNewTable("Department");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r1 = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r1["Id"] = 1;

@@ -32,7 +32,6 @@ public class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r1 = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r1["Id"] = 1;
@@ -78,7 +77,6 @@ public class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
         t.AddColumn("UnknownColumn", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = t.AddNewRow();
         r["Id"] = 10;
@@ -135,7 +133,6 @@ public class EfChangesetToPocoApplier_BatchAndDeleteConcurrency_Tests
         IDataTable ct = cs.AddNewTable("Department");
         ct.AddColumn("Id", DataTypeNames.INT32);
         ct.AddColumn("RowVersion", DataTypeNames.BINARY);
-        ct.PrimaryKeys = new List<string> { "Id" };
 
         // 1) Add as LOADED (Unchanged)
         IDataRow row = DataRowExtensions.CreateRowFromColumns(ct.Columns);

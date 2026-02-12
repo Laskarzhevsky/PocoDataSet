@@ -20,8 +20,6 @@ namespace PocoDataSet.Tests
             currentTable.AddColumn("Name", DataTypeNames.STRING);
             currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
-            currentTable.PrimaryKeys = new List<string> { "Id" };
-
             Guid clientKey = Guid.NewGuid();
 
             IDataRow uiRow = DataRowExtensions.CreateRowFromColumns(currentTable.Columns);
@@ -38,7 +36,6 @@ namespace PocoDataSet.Tests
             changesetTable.AddColumn("Id", DataTypeNames.INT32);
             changesetTable.AddColumn("Name", DataTypeNames.STRING);
             changesetTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-            changesetTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow serverRow = DataRowExtensions.CreateRowFromColumns(changesetTable.Columns);
             serverRow["Id"] = 123;
@@ -135,7 +132,6 @@ namespace PocoDataSet.Tests
             currentTable.AddColumn("Name", DataTypeNames.STRING);
             currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             currentTable.AddColumn("RowVersion", DataTypeNames.BINARY);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             Guid clientKey = Guid.NewGuid();
 
@@ -158,7 +154,6 @@ namespace PocoDataSet.Tests
             changesetTable.AddColumn("Name", DataTypeNames.STRING);
             changesetTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             changesetTable.AddColumn("RowVersion", DataTypeNames.BINARY);
-            changesetTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow serverRow = DataRowExtensions.CreateRowFromColumns(changesetTable.Columns);
             serverRow["Id"] = 10;
@@ -195,7 +190,6 @@ namespace PocoDataSet.Tests
             currentTable.AddColumn("Id", DataTypeNames.INT32);
             currentTable.AddColumn("Name", DataTypeNames.STRING);
             currentTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-            currentTable.PrimaryKeys = new List<string> { "Id" };
 
             Guid clientKey = Guid.NewGuid();
 
@@ -214,7 +208,6 @@ namespace PocoDataSet.Tests
             serverTable.AddColumn("Id", DataTypeNames.INT32);
             serverTable.AddColumn("Name", DataTypeNames.STRING);
             serverTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
-            serverTable.PrimaryKeys = new List<string> { "Id" };
 
             IDataRow saved = DataRowExtensions.CreateRowFromColumns(serverTable.Columns);
             saved["Id"] = 123;

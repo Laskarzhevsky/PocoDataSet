@@ -36,13 +36,11 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
         IDataTable parent = ds.AddNewTable("Parent");
         parent.AddColumn("Id", DataTypeNames.INT32);
         parent.AddColumn("Name", DataTypeNames.STRING);
-        parent.PrimaryKeys = new List<string> { "Id" };
 
         IDataTable child = ds.AddNewTable("Child");
         child.AddColumn("Id", DataTypeNames.INT32);
         child.AddColumn("ParentId", DataTypeNames.INT32);
         child.AddColumn("Name", DataTypeNames.STRING);
-        child.PrimaryKeys = new List<string> { "Id" };
 
         AddRelation(ds, "ParentChild", "Parent", new List<string> { "Id" }, "Child", new List<string> { "ParentId" });
 
@@ -90,13 +88,11 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
         IDataTable parent = ds.AddNewTable("Parent");
         parent.AddColumn("Id", DataTypeNames.INT32);
         parent.AddColumn("Name", DataTypeNames.STRING);
-        parent.PrimaryKeys = new List<string> { "Id" };
 
         IDataTable child = ds.AddNewTable("Child");
         child.AddColumn("Id", DataTypeNames.INT32);
         child.AddColumn("ParentId", DataTypeNames.INT32);
         child.AddColumn("Name", DataTypeNames.STRING);
-        child.PrimaryKeys = new List<string> { "Id" };
 
         AddRelation(ds, "ParentChild", "Parent", new List<string> { "Id" }, "Child", new List<string> { "ParentId" });
 
@@ -141,7 +137,6 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
         IDataTable t = ds.AddNewTable("Employee");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = t.AddNewRow();
         r["Id"] = 1;
@@ -172,7 +167,6 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
         IDataTable t = ds.AddNewTable("Employee");
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = t.AddNewRow();
         r["Id"] = 7;
@@ -202,7 +196,6 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
 
         IDataTable t = ds.AddNewTable("Unknown");
         t.AddColumn("Id", DataTypeNames.INT32);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = t.AddNewRow();
         r["Id"] = 1;

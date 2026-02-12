@@ -20,7 +20,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             // Seed initial loaded rows (represents data coming from DB)
             for (int i = 1; i <= 5; i++)

@@ -25,10 +25,9 @@ public class EfChangesetCopyToPocoApplier_CompositeKey_Tests
         // Build PocoDataSet baseline
         IDataSet ds = DataSetFactory.CreateDataSet();
         IDataTable t = ds.AddNewTable("OrderLine");
-        t.AddColumn("OrderId", DataTypeNames.INT32);
-        t.AddColumn("LineNo", DataTypeNames.INT32);
+        t.AddColumn("OrderId", DataTypeNames.INT32, false, true);
+        t.AddColumn("LineNo", DataTypeNames.INT32, false, true);
         t.AddColumn("Sku", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "OrderId", "LineNo" };
 
         // Loaded row (10,1)
         IDataRow r1 = DataRowExtensions.CreateRowFromColumns(t.Columns);
@@ -57,7 +56,6 @@ public class EfChangesetCopyToPocoApplier_CompositeKey_Tests
         r3["Sku"] = "ADD";
 
         IDataSet cs = ds.CreateChangeset();
-        cs.Tables["OrderLine"].PrimaryKeys = new List<string> { "OrderId", "LineNo" };
 
         // Act
         EfChangesetCopyToPocoApplier.ApplyTableAndSave(db, db.OrderLines, cs.Tables["OrderLine"]);

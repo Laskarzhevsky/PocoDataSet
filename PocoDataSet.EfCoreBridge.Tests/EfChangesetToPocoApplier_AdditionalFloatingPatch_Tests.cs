@@ -55,7 +55,6 @@ public class EfChangesetToPocoApplier_AdditionalFloatingPatch_Tests
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r["Id"] = 1;
@@ -104,7 +103,6 @@ public class EfChangesetToPocoApplier_AdditionalFloatingPatch_Tests
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
         t.AddColumn("RowVersion", DataTypeNames.BINARY);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r["Id"] = 1;
@@ -149,7 +147,6 @@ public class EfChangesetToPocoApplier_AdditionalFloatingPatch_Tests
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IDataRow r = DataRowExtensions.CreateRowFromColumns(t.Columns);
         r["Id"] = 1;

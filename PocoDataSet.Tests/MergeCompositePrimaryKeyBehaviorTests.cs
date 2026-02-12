@@ -15,10 +15,9 @@ namespace PocoDataSet.Tests
             // Arrange
             IDataSet current = DataSetFactory.CreateDataSet();
             IDataTable t = current.AddNewTable("T");
-            t.AddColumn("K1", DataTypeNames.INT32);
-            t.AddColumn("K2", DataTypeNames.INT32);
+            t.AddColumn("K1", DataTypeNames.INT32, false, true);
+            t.AddColumn("K2", DataTypeNames.INT32, false, true);
             t.AddColumn("Name", DataTypeNames.STRING);
-            t.PrimaryKeys = new List<string> { "K1", "K2" };
 
             // Current snapshot: (1,1)=A, (1,2)=B, (2,1)=C
             IDataRow c11 = DataRowExtensions.CreateRowFromColumns(t.Columns);
@@ -42,10 +41,9 @@ namespace PocoDataSet.Tests
             // Refreshed snapshot: (1,1)=A, (2,1)=C_UPDATED (and missing (1,2))
             IDataSet refreshed = DataSetFactory.CreateDataSet();
             IDataTable rt = refreshed.AddNewTable("T");
-            rt.AddColumn("K1", DataTypeNames.INT32);
-            rt.AddColumn("K2", DataTypeNames.INT32);
+            rt.AddColumn("K1", DataTypeNames.INT32, false, true);
+            rt.AddColumn("K2", DataTypeNames.INT32, false, true);
             rt.AddColumn("Name", DataTypeNames.STRING);
-            rt.PrimaryKeys = new List<string> { "K1", "K2" };
 
             IDataRow r11 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
             r11["K1"] = 1;

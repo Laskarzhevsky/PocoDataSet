@@ -18,7 +18,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             DataRow loadedRow1 = new DataRow();
             loadedRow1["Id"] = 1;
@@ -119,7 +118,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             DataRow loadedRow = new DataRow();
             loadedRow["Id"] = 1;
@@ -195,7 +193,6 @@ namespace PocoDataSet.ObservableTests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             DataRow r1 = new DataRow();
             r1["Id"] = 1;
@@ -264,13 +261,11 @@ namespace PocoDataSet.ObservableTests
             IDataTable department = dataSet.AddNewTable("Department");
             department.AddColumn("Id", DataTypeNames.INT32);
             department.AddColumn("Name", DataTypeNames.STRING);
-            department.PrimaryKeys.Add("Id");
 
             IDataTable employee = dataSet.AddNewTable("Employee");
             employee.AddColumn("Id", DataTypeNames.INT32);
             employee.AddColumn("DepartmentId", DataTypeNames.INT32);
             employee.AddColumn("Name", DataTypeNames.STRING);
-            employee.PrimaryKeys.Add("Id");
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 

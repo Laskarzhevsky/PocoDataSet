@@ -13,6 +13,11 @@ namespace PocoDataSet.Data
     {
         #region Data Fields
         /// <summary>
+        /// "PrimaryKeys" property data field
+        /// </summary>
+        readonly List<string> _primaryKeys = new();
+
+        /// <summary>
         /// "Rows" property data field
         /// </summary>
         readonly List<IDataRow> _rows = new();
@@ -29,13 +34,16 @@ namespace PocoDataSet.Data
         } = new();
 
         /// <summary>
-        /// Gets or sets primary key
+        /// Gets primary keys
         /// IDataTable interface implementation
         /// </summary>
-        public List<string> PrimaryKeys
+        public IReadOnlyList<string> PrimaryKeys
         {
-            get; set;
-        } = new();
+            get
+            {
+                return _primaryKeys;
+            }
+        }
 
         /// <summary>
         /// Gets rows
@@ -126,7 +134,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = true;
-                r.SetPrimaryKeyColumns(this.PrimaryKeys);
+                r.SetPrimaryKeyColumns(_primaryKeys);
             }
 
             // Physically attach row WITHOUT calling AddRow (AddRow is for client-added rows)
@@ -162,7 +170,7 @@ namespace PocoDataSet.Data
                 }
             }
 
-            PrimaryKeys.Add(columnName);
+            _primaryKeys.Add(columnName);
             MarkColumnAsPrimaryKey(columnName);
         }
 
@@ -206,7 +214,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = false;
-                r.SetPrimaryKeyColumns(this.PrimaryKeys);
+                r.SetPrimaryKeyColumns(_primaryKeys);
             }
 
             _rows.Add(dataRow);
@@ -218,7 +226,7 @@ namespace PocoDataSet.Data
         /// </summary>
         public void ClearPrimaryKeys()
         {
-            PrimaryKeys.Clear();
+            _primaryKeys.Clear();
 
             if (Columns != null)
             {
@@ -291,7 +299,7 @@ namespace PocoDataSet.Data
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         public void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
         {
-            PrimaryKeys.Clear();
+            _primaryKeys.Clear();
 
             if (Columns != null)
             {

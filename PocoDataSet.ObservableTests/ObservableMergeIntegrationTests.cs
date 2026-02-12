@@ -59,7 +59,6 @@ namespace PocoDataSet.ObservableTests
             table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.PrimaryKeys.Add("Id");
 
             // Use deterministic client keys so the refreshed data set can reference the same key.
             Guid clientKey1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -90,7 +89,6 @@ namespace PocoDataSet.ObservableTests
             refreshedTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             refreshedTable.AddColumn("Id", DataTypeNames.INT32);
             refreshedTable.AddColumn("Name", DataTypeNames.STRING);
-            refreshedTable.PrimaryKeys.Add("Id");
 
             // Keep the same client key for Id=1 so merge treats it as an update.
             // The value is copied from the current data set row by deterministic generation in this test.

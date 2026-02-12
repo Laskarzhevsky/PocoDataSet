@@ -26,7 +26,6 @@ public class EfChangesetToPocoApplier_NoOpAndCompositeKeyPatch_Tests
         t.AddColumn("Id", DataTypeNames.INT32);
         t.AddColumn("Name", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "Id" };
 
         IFloatingDataRow patchRow = DataRowExtensions.CreateFloatingRow();
         patchRow["Id"] = 1;
@@ -53,11 +52,10 @@ public class EfChangesetToPocoApplier_NoOpAndCompositeKeyPatch_Tests
 
         IDataSet cs = DataSetFactory.CreateDataSet();
         IDataTable t = cs.AddNewTable("OrderLine");
-        t.AddColumn("OrderId", DataTypeNames.INT32);
-        t.AddColumn("LineNo", DataTypeNames.INT32);
+        t.AddColumn("OrderId", DataTypeNames.INT32, false, true);
+        t.AddColumn("LineNo", DataTypeNames.INT32, false, true);
         t.AddColumn("Sku", DataTypeNames.STRING);
         t.AddColumn("Description", DataTypeNames.STRING);
-        t.PrimaryKeys = new List<string> { "OrderId", "LineNo" };
 
         IFloatingDataRow patchRow = DataRowExtensions.CreateFloatingRow();
         patchRow["OrderId"] = 10;
