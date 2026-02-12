@@ -335,7 +335,7 @@ namespace PocoDataSet.Data
             DataRowState = dataRowState;
         }
 
-        internal void SetPrimaryKeyColumns(List<string> primaryKeys)
+        internal void SetPrimaryKeyColumns(IReadOnlyList<string> primaryKeys)
         {
             PrimaryKeyColumns.Clear();
             if (primaryKeys == null)

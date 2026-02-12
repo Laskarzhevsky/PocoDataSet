@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+using PocoDataSet.Data.Internal;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Data
@@ -15,7 +16,7 @@ namespace PocoDataSet.Data
         /// <summary>
         /// "PrimaryKeys" property data field
         /// </summary>
-        readonly List<string> _primaryKeys = new();
+        readonly PrimaryKeys _primaryKeys = new();
 
         /// <summary>
         /// "Rows" property data field
@@ -41,7 +42,7 @@ namespace PocoDataSet.Data
         {
             get
             {
-                return _primaryKeys;
+                return _primaryKeys.Items;
             }
         }
 
@@ -134,7 +135,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = true;
-                r.SetPrimaryKeyColumns(_primaryKeys);
+                r.SetPrimaryKeyColumns(_primaryKeys.Items);
             }
 
             // Physically attach row WITHOUT calling AddRow (AddRow is for client-added rows)
@@ -154,24 +155,7 @@ namespace PocoDataSet.Data
         /// <param name="columnName">Column name</param>
         public void AddPrimaryKey(string columnName)
         {
-            if (string.IsNullOrWhiteSpace(columnName))
-            {
-                throw new ArgumentException("Primary key column name cannot be empty.", nameof(columnName));
-            }
-
-            EnsureColumnExists(columnName);
-
-            for (int i = 0; i < PrimaryKeys.Count; i++)
-            {
-                if (string.Equals(PrimaryKeys[i], columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    MarkColumnAsPrimaryKey(columnName);
-                    return;
-                }
-            }
-
-            _primaryKeys.Add(columnName);
-            MarkColumnAsPrimaryKey(columnName);
+            _primaryKeys.AddPrimaryKey(Columns, columnName, TableName);
         }
 
         /// <summary>
@@ -214,7 +198,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = false;
-                r.SetPrimaryKeyColumns(_primaryKeys);
+                r.SetPrimaryKeyColumns(_primaryKeys.Items);
             }
 
             _rows.Add(dataRow);
@@ -226,19 +210,7 @@ namespace PocoDataSet.Data
         /// </summary>
         public void ClearPrimaryKeys()
         {
-            _primaryKeys.Clear();
-
-            if (Columns != null)
-            {
-                for (int i = 0; i < Columns.Count; i++)
-                {
-                    IColumnMetadata columnMetadata = Columns[i];
-                    if (columnMetadata != null)
-                    {
-                        columnMetadata.IsPrimaryKey = false;
-                    }
-                }
-            }
+            _primaryKeys.ClearPrimaryKeys(Columns);
         }
 
         /// <summary>
@@ -299,82 +271,7 @@ namespace PocoDataSet.Data
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         public void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
         {
-            _primaryKeys.Clear();
-
-            if (Columns != null)
-            {
-                for (int i = 0; i < Columns.Count; i++)
-                {
-                    IColumnMetadata columnMetadata = Columns[i];
-                    if (columnMetadata != null)
-                    {
-                        columnMetadata.IsPrimaryKey = false;
-                    }
-                }
-            }
-
-            if (primaryKeyColumnNames == null || primaryKeyColumnNames.Count == 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i < primaryKeyColumnNames.Count; i++)
-            {
-                string columnName = primaryKeyColumnNames[i];
-                if (string.IsNullOrWhiteSpace(columnName))
-                {
-                    continue;
-                }
-
-                AddPrimaryKey(columnName);
-            }
-        }
-        #endregion
-
-        #region Private Methods
-        /// <summary>
-        /// Ensures that column exists
-        /// </summary>
-        /// <param name="columnName">Column name</param>
-        private void EnsureColumnExists(string columnName)
-        {
-            if (Columns == null)
-            {
-                throw new InvalidOperationException("Table columns are not initialized.");
-            }
-
-            for (int i = 0; i < Columns.Count; i++)
-            {
-                IColumnMetadata columnMetadata = Columns[i];
-                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException($"Primary key column '{columnName}' does not exist in table '{TableName}'.");
-        }
-
-        /// <summary>
-        /// Marks column as primary key
-        /// </summary>
-        /// <param name="columnName">Column name</param>
-        private void MarkColumnAsPrimaryKey(string columnName)
-        {
-            if (Columns == null)
-            {
-                return;
-            }
-
-            for (int i = 0; i < Columns.Count; i++)
-            {
-                IColumnMetadata columnMetadata = Columns[i];
-                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    columnMetadata.IsPrimaryKey = true;
-                    return;
-                }
-            }
+            _primaryKeys.SetPrimaryKeys(Columns, primaryKeyColumnNames, TableName);
         }
         #endregion
     }
