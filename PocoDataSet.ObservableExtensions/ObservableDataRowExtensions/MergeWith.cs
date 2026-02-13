@@ -20,7 +20,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        public static bool MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, string currentObservableDataTableName, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
+        public static bool MergeWith(this IDataRow currentDataRow, IDataRow refreshedDataRow, string currentObservableDataTableName, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
             IObservableDataRowMergeHandler observableDataRowMergeHandler = observableMergeOptions.GetObservableRowMergeHandler(currentObservableDataTableName);
             return observableDataRowMergeHandler.Merge(currentObservableDataTableName, currentDataRow, refreshedDataRow, listOfColumnMetadata, observableMergeOptions);
@@ -35,7 +35,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        public static bool MergeWith(this IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, string currentObservableDataTableName, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
+        public static bool MergeWith(this IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, string currentObservableDataTableName, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
             IObservableDataRowMergeHandler observableDataRowMergeHandler = observableMergeOptions.GetObservableRowMergeHandler(currentObservableDataTableName);
             return observableDataRowMergeHandler.Merge(currentObservableDataTableName, currentObservableDataRow, refreshedDataRow, listOfColumnMetadata, observableMergeOptions);

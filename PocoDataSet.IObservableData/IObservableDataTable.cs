@@ -79,7 +79,7 @@ namespace PocoDataSet.IObservableData
         /// <summary>
         /// Gets or sets list of columns
         /// </summary>
-        IList<IColumnMetadata> Columns
+        IReadOnlyList<IColumnMetadata> Columns
         {
             get;
         }

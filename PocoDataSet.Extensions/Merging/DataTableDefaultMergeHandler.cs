@@ -135,7 +135,7 @@ namespace PocoDataSet.Extensions
             return false;
         }
 
-        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IList<IColumnMetadata> targetColumns)
+        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
         {
             for (int c = 0; c < targetColumns.Count; c++)
             {
@@ -329,7 +329,7 @@ namespace PocoDataSet.Extensions
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        private static bool MergeDataRowFromRefreshedDataRow(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
+        private static bool MergeDataRowFromRefreshedDataRow(IDataRow currentDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
             // Refresh must never overwrite local edits.
             if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.Refresh)

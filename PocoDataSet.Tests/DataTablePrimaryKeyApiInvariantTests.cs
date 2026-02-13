@@ -23,12 +23,9 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
             IDataTable table = dataSet.AddNewTable("T");
 
-            table.AddColumn("Id", DataTypeNames.INT32, false, false);
-            table.AddColumn("Code", DataTypeNames.STRING, false, false);
+            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Code", DataTypeNames.STRING, false, true);
             table.AddColumn("Name", DataTypeNames.STRING, true, false);
-
-            // Act
-            table.SetPrimaryKeys(new List<string> { "Id", "Code" });
 
             // Assert (table-level truth)
             Assert.NotNull(table.PrimaryKeys);
@@ -49,10 +46,8 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
             IDataTable table = dataSet.AddNewTable("T");
 
-            table.AddColumn("Id", DataTypeNames.INT32, false, false);
-            table.AddColumn("Name", DataTypeNames.STRING, true, false);
-
-            table.SetPrimaryKeys(new List<string> { "Id" });
+            table.AddColumn("Id", DataTypeNames.INT32, false, true);
+            table.AddColumn("Name", DataTypeNames.STRING);
 
             // Sanity check
             Assert.Single(table.PrimaryKeys);
@@ -75,16 +70,13 @@ namespace PocoDataSet.Tests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
             IDataTable table = dataSet.AddNewTable("T");
 
-            table.AddColumn("Id", DataTypeNames.INT32, false, false);
-
-            // Act
-            table.AddPrimaryKey("Id");
+            table.AddColumn("Id", DataTypeNames.INT32, false, true);
 
             // Second call is allowed to be idempotent OR to throw,
             // but it must not result in duplicate key entries.
             try
             {
-                table.AddPrimaryKey("Id");
+                table.AddColumn("Id", DataTypeNames.INT32, false, true);
             }
             catch (Exception)
             {
@@ -105,19 +97,6 @@ namespace PocoDataSet.Tests
 
             Assert.Equal(1, idCount);
             Assert.True(GetColumn(table, "Id").IsPrimaryKey);
-        }
-
-        [Fact]
-        public void AddPrimaryKey_WhenColumnDoesNotExist_Throws()
-        {
-            // Arrange
-            IDataSet dataSet = DataSetFactory.CreateDataSet();
-            IDataTable table = dataSet.AddNewTable("T");
-
-            table.AddColumn("Name", DataTypeNames.STRING, true, false);
-
-            // Act + Assert
-            Assert.ThrowsAny<Exception>(() => table.AddPrimaryKey("Id"));
         }
 
         private static IColumnMetadata GetColumn(IDataTable table, string columnName)

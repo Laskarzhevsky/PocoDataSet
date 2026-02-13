@@ -125,5 +125,32 @@ namespace PocoDataSet.Data
             get; set;
         }
         #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Clones column metadata
+        /// </summary>
+        /// <returns>Cloned column metadata</returns>
+        public IColumnMetadata Clone()
+        {
+            IColumnMetadata clonedColumnMetadata = new ColumnMetadata();
+            clonedColumnMetadata.ColumnName = ColumnName;
+            clonedColumnMetadata.DataType = DataType;
+            clonedColumnMetadata.IsNullable = IsNullable;
+            clonedColumnMetadata.IsPrimaryKey = IsPrimaryKey;
+            clonedColumnMetadata.IsForeignKey = IsForeignKey;
+
+            clonedColumnMetadata.Description = Description;
+            clonedColumnMetadata.DisplayName = DisplayName;
+            clonedColumnMetadata.DisplayOrder = DisplayOrder;
+            clonedColumnMetadata.MaxLength = MaxLength;
+            clonedColumnMetadata.Precision = Precision;
+            clonedColumnMetadata.ReferencedColumnName = ReferencedColumnName;
+            clonedColumnMetadata.ReferencedTableName = ReferencedTableName;
+            clonedColumnMetadata.Scale = Scale;
+             
+            return clonedColumnMetadata;
+        }
+        #endregion
     }
 }

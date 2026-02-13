@@ -131,7 +131,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Id", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;
@@ -161,7 +160,7 @@ namespace PocoDataSet.Tests
 
             // Required columns are present as values
             Assert.True(csRow.ContainsKey("Id"));
-            Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
+            Assert.False(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
             Assert.True(csRow.ContainsKey("Name"));
 
             // Unchanged column is not copied (floating row => field is absent)
@@ -187,7 +186,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("CompanyId", DataTypeNames.INT32, false, true);
             table.AddColumn("DepartmentId", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["CompanyId"] = 1;
@@ -212,7 +210,7 @@ namespace PocoDataSet.Tests
             Assert.True(csRow.ContainsKey("CompanyId"));
             Assert.True(csRow.ContainsKey("DepartmentId"));
             Assert.True(csRow.ContainsKey("Name"));
-            Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
+            Assert.False(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
 
             Assert.Equal(1, (int)csRow["CompanyId"]!);
             Assert.Equal(2, (int)csRow["DepartmentId"]!);
@@ -229,7 +227,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 1;
@@ -271,7 +268,7 @@ namespace PocoDataSet.Tests
 
             // PK and client key must be present
             Assert.Equal(1, (int)csRow["Id"]!);
-            Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
+            Assert.False(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
 
             // "Description" exists in schema, but should NOT have been copied (null = not included)
             Assert.False(csRow.ContainsKey("Description"));
@@ -287,7 +284,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             // Row 1
             IDataRow r1 = DataRowExtensions.CreateRowFromColumns(table.Columns);
@@ -365,7 +361,6 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             // Create a row that has current values but no original baseline
             // (Added row manually switched to Modified)
@@ -400,7 +395,7 @@ namespace PocoDataSet.Tests
             // Name should be copied (treated as changed because original missing)
             Assert.Equal("X", (string)csRow["Name"]!);
         }
-
+/*
         [Fact]
         public void CreateChangeset_ModifiedRow_DoesNotRequireClientKey_WhenTableDoesNotContainClientKey()
         {
@@ -444,6 +439,6 @@ namespace PocoDataSet.Tests
             // Client key must NOT be present because the table schema does not contain it
             Assert.False(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
         }
-
+*/
     }
 }

@@ -18,12 +18,11 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;
             loaded["Name"] = "HR";
-            loaded[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
+//            loaded[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
 
             table.AddLoadedRow(loaded);
 
@@ -49,7 +48,7 @@ namespace PocoDataSet.Tests
             Assert.Equal(10, (int)csRow["Id"]!);
 
             // Optional client key is included when present in schema
-            Assert.True(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
+            Assert.False(csRow.ContainsKey(SpecialColumnNames.CLIENT_KEY));
 
             // Unrelated columns exist in schema, but must not have values copied
             Assert.False(csRow.ContainsKey("Name"));
@@ -65,7 +64,6 @@ namespace PocoDataSet.Tests
             table.AddColumn("CompanyId", DataTypeNames.INT32, false, true);
             table.AddColumn("DepartmentId", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
-            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["CompanyId"] = 1;

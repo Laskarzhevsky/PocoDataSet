@@ -23,7 +23,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        public bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
+        public bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions)
         {
             IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
             if (!policy.CanOverwriteRow(currentDataRow.DataRowState))
@@ -50,7 +50,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions) {
+        public bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions) {
             IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
             if (!policy.CanOverwriteRow(currentObservableDataRow.InnerDataRow.DataRowState))
             {
@@ -117,7 +117,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>True if at least one value had changed, otherwise false</returns>
-        static bool ApplyValues(IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        static bool ApplyValues(IDataRow currentDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             bool rowValueChanged = false;
 
@@ -150,7 +150,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="refreshedDataRow">Refreshed data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>True if at least one value had changed, otherwise false</returns>
-        static bool ApplyValues(IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        static bool ApplyValues(IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             bool rowValueChanged = false;
 

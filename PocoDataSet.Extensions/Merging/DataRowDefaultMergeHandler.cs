@@ -19,7 +19,7 @@ namespace PocoDataSet.Extensions
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="mergeOptions">Merge options</param>
         /// <returns>True if any value of row has changed, otherwise false</returns>
-        public bool MergeRow(string tableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
+        public bool MergeRow(string tableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IMergeOptions mergeOptions)
         {
             // Never overwrite user work
             if (currentDataRow.DataRowState == DataRowState.Modified || currentDataRow.DataRowState == DataRowState.Added || currentDataRow.DataRowState == DataRowState.Deleted)

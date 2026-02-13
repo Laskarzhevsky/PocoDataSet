@@ -9,11 +9,11 @@ namespace PocoDataSet.IData
     {
         #region Properties
         /// <summary>
-        /// Gets or sets list of columns
+        /// Gets columns
         /// </summary>
-        List<IColumnMetadata> Columns
+        IReadOnlyList<IColumnMetadata> Columns
         {
-            get; set;
+            get;
         }
 
         /// <summary>
@@ -43,18 +43,36 @@ namespace PocoDataSet.IData
 
         #region Methods
         /// <summary>
+        /// Adds column
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        /// <param name="dataType">Data type</param>
+        /// <param name="isNullable">Flag indicating whether column is nullable</param>
+        /// <param name="isPrimaryKey">Flag indicating whether column is primary key</param>
+        /// <param name="isForeignKey">Flag indicating whether column is foreign key</param>
+        /// <returns>Added column</returns>
+        /// <exception cref="KeyDuplicationException">Exception is thrown if a table contains a column with specified name already</exception>
+        IColumnMetadata AddColumn(string columnName, string dataType, bool? isNullable = null, bool? isPrimaryKey = null, bool? isForeignKey = null);
+
+        /// <summary>
+        /// Adds column
+        /// </summary>
+        /// <param name="columnMetadata">Column metadata</param>
+        void AddColumn(IColumnMetadata columnMetadata);
+
+        /// <summary>
+        /// Adds columns
+        /// </summary>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        void AddColumns(List<IColumnMetadata> listOfColumnMetadata);
+
+        /// <summary>
         /// Adds loaded row from data storage
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <param name="dataRow">Data row</param>
         /// <exception cref="InvalidOperationException">Exception is thrown if row in Deleted state</exception>
         void AddLoadedRow(IDataRow dataRow);
-
-        /// <summary>
-        /// Adds a primary key column name to the table.
-        /// </summary>
-        /// <param name="columnName">Column name</param>
-        void AddPrimaryKey(string columnName);
 
         /// <summary>
         /// Adds row
@@ -68,11 +86,23 @@ namespace PocoDataSet.IData
         void ClearPrimaryKeys();
 
         /// <summary>
+        /// Gets flag indicating whether data table contains column with specified name
+        /// </summary>
+        /// <param name="columnName">Column name</param>
+        /// <returns>Flag indicating whether data table contains column with specified name</returns>
+        bool ContainsColumn(string columnName);
+
+        /// <summary>
         /// Gets flag indicating whether table contains specified row
         /// </summary>
         /// <param name="dataRow">Data row</param>
         /// <returns>True if table contains specified row, otherwise false</returns>
         bool ContainsRow(IDataRow dataRow);
+
+        /// <summary>
+        /// Ensures  that ClientKey column exists
+        /// </summary>
+        void EnsureClientKeyColumnExists();
 
         /// <summary>
         /// Removes all rows

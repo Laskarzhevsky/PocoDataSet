@@ -102,7 +102,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                     columnMetadata.IsPrimaryKey = true;
                 }
 
-                DataTable!.Columns.Add(columnMetadata);
+                DataTable!.AddColumn(columnMetadata);
             }
         }
 

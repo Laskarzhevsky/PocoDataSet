@@ -21,6 +21,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
 
             // 2. Create Department observable table
             IObservableDataTable departmentObservableDataTable = observableDataSet.AddNewTable("Department");
+            departmentObservableDataTable.InnerDataTable.EnsureClientKeyColumnExists();
             departmentObservableDataTable.AddColumn("Id", DataTypeNames.INT32);
             departmentObservableDataTable.AddColumn("Name", DataTypeNames.STRING);
             departmentObservableDataTable.AddColumn("RowVersion", DataTypeNames.BINARY);
@@ -64,6 +65,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             // 2. Create a refreshed table containing server-generated values
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
+            postSaveDepartment.EnsureClientKeyColumnExists();
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32);
             postSaveDepartment.AddColumn("Name", DataTypeNames.STRING);
             postSaveDepartment.AddColumn("RowVersion", DataTypeNames.BINARY);

@@ -48,6 +48,10 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             employeeObservableDataTable.AddColumns(listOfColumnMetadata);
 
             // Assert
+            // - Employee table contins:
+            // Non-nullable primary key "Id" column
+            // Nullable "FirstName" column
+            // Nullable "LastName" column
             Assert.Equal(3, employeeObservableDataTable.Columns.Count);
         }
     }

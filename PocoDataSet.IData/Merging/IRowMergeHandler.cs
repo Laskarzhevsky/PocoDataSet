@@ -17,7 +17,7 @@ namespace PocoDataSet.IData
         /// <param name="columns">Columns collection</param>
         /// <param name="mergeOptions">Merge options</param>
         /// <returns>True if current row values changed</returns>
-        bool MergeRow(string tableName, IDataRow currentRow, IDataRow refreshedRow, IList<IColumnMetadata> columns, IMergeOptions mergeOptions);
+        bool MergeRow(string tableName, IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> columns, IMergeOptions mergeOptions);
         #endregion
     }
 }

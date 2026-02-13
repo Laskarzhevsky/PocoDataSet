@@ -156,6 +156,24 @@ namespace PocoDataSet.Tests
                     return null;
                 }
 
+                if (targetMethod.Name == "ContainsColumn")
+                {
+                    string columnName = (string)args![0]!;
+
+                    for (int i = 0; i < _columns!.Count; i++)
+                    {
+                        IColumnMetadata column = _columns[i];
+
+                        if (string.Equals(column.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+
                 throw new NotImplementedException("FakeDataTableProxy does not implement: " + targetMethod.Name);
             }
         }
@@ -301,8 +319,18 @@ namespace PocoDataSet.Tests
                     return _isNullable;
                 if (targetMethod.Name == "get_IsPrimaryKey")
                     return _isPrimaryKey;
+                if (targetMethod.Name == "set_IsPrimaryKey")
+                {
+                    _isPrimaryKey = (bool)args![0]!;
+                    return null;
+                }
                 if (targetMethod.Name == "get_IsForeignKey")
                     return _isForeignKey;
+                if (targetMethod.Name == "set_IsForeignKey")
+                {
+                    _isForeignKey = (bool)args![0]!;
+                    return null;
+                }
 
                 // Common optional metadata properties (safe defaults)
                 if (targetMethod.Name == "get_IsIdentity")

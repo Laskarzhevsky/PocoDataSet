@@ -19,7 +19,7 @@ namespace PocoDataSet.IObservableData
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions);
+        bool Merge(string currentObservableDataTableName, IDataRow currentDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions);
 
         /// <summary>
         /// Merges current observable data row with refreshed data row
@@ -30,7 +30,7 @@ namespace PocoDataSet.IObservableData
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
         /// <returns>True if any value of the current data row changed, otherwise false</returns>
-        bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions);
+        bool Merge(string currentObservableDataTableName, IObservableDataRow currentObservableDataRow, IDataRow refreshedDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IObservableMergeOptions observableMergeOptions);
         #endregion
     }
 }

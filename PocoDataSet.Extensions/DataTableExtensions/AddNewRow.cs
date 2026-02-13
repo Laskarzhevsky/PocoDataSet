@@ -1,6 +1,5 @@
 ﻿using System;
 
-using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
@@ -23,34 +22,12 @@ namespace PocoDataSet.Extensions
                 throw new System.ArgumentNullException(nameof(dataTable));
             }
 
-            EnsureClientKeyColumnExists(dataTable);
-
             IDataRow dataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
-            dataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
+//            dataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
             dataRow.SetDataRowState(DataRowState.Added);
             dataTable.AddRow(dataRow);
 
             return dataRow;
-        }
-
-        static void EnsureClientKeyColumnExists(IDataTable dataTable)
-        {
-            for (int i = 0; i < dataTable.Columns.Count; i++)
-            {
-                if (string.Equals(dataTable.Columns[i].ColumnName, SpecialColumnNames.CLIENT_KEY, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-            }
-
-            ColumnMetadata columnMetadata = new ColumnMetadata();
-            columnMetadata.ColumnName = SpecialColumnNames.CLIENT_KEY;
-            columnMetadata.DataType = DataTypeNames.GUID;
-            columnMetadata.IsNullable = false;
-            columnMetadata.IsPrimaryKey = false;
-            columnMetadata.DisplayName = null;
-            columnMetadata.Description = "Client-only key for changeset correlation.";
-            dataTable.Columns.Add(columnMetadata);
         }
         #endregion
     }

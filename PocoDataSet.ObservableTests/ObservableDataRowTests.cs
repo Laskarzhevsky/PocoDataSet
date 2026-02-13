@@ -134,7 +134,7 @@ namespace PocoDataSet.ObservableTests
             countColumn.ColumnName = "Count";
             countColumn.DataType = DataTypeNames.INT32;
 
-            table.Columns.Add(countColumn);
+            table.AddColumn(countColumn);
 
             DataRow row = new DataRow();
             row["Count"] = count;

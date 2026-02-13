@@ -21,37 +21,18 @@ namespace PocoDataSet.Data.Internal
         /// <summary>
         /// Adds a primary key column name to the table.
         /// </summary>
-        /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="columnName">Column name</param>
-        /// <param name="tableName">Table name</param>
         /// <exception cref="ArgumentException"></exception>
-        public void AddPrimaryKey(List<IColumnMetadata> listOfColumnMetadata, string columnName, string tableName)
+        public void AddPrimaryKey(string columnName)
         {
-            if (string.IsNullOrWhiteSpace(columnName))
-            {
-                throw new ArgumentException("Primary key column name cannot be empty.", nameof(columnName));
-            }
-
-            EnsureColumnExists(listOfColumnMetadata, columnName, tableName);
-
-            for (int i = 0; i < _items.Count; i++)
-            {
-                if (string.Equals(_items[i], columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    MarkColumnAsPrimaryKey(listOfColumnMetadata, columnName);
-                    return;
-                }
-            }
-
             _items.Add(columnName);
-            MarkColumnAsPrimaryKey(listOfColumnMetadata, columnName);
         }
 
         /// <summary>
         /// Clears primary keys
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public void ClearPrimaryKeys(List<IColumnMetadata> listOfColumnMetadata)
+        public void ClearPrimaryKeys(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             _items.Clear();
 
@@ -74,7 +55,7 @@ namespace PocoDataSet.Data.Internal
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         /// <param name="tableName">Table name</param>
-        public void SetPrimaryKeys(List<IColumnMetadata> listOfColumnMetadata, IList<string> primaryKeyColumnNames, string tableName)
+        public void SetPrimaryKeys(IReadOnlyList<IColumnMetadata> listOfColumnMetadata, IList<string> primaryKeyColumnNames, string tableName)
         {
             _items.Clear();
 
@@ -100,7 +81,7 @@ namespace PocoDataSet.Data.Internal
                     continue;
                 }
 
-                AddPrimaryKey(listOfColumnMetadata, columnName, tableName);
+                AddPrimaryKey(columnName);
             }
         }
         #endregion
@@ -114,51 +95,6 @@ namespace PocoDataSet.Data.Internal
             get
             {
                 return _items;
-            }
-        }
-        #endregion
-
-        #region Private Methods
-        /// <summary>
-        /// Ensures that column exists
-        /// </summary>
-        /// <param name="listOfColumnMetadata">List of column metadata</param>
-        /// <param name="columnName">Column name</param>
-        /// <param name="tableName">Table name</param>
-        void EnsureColumnExists(List<IColumnMetadata> listOfColumnMetadata, string columnName, string tableName)
-        {
-            for (int i = 0; i < listOfColumnMetadata.Count; i++)
-            {
-                IColumnMetadata columnMetadata = listOfColumnMetadata[i];
-                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-            }
-
-            throw new InvalidOperationException($"Primary key column '{columnName}' does not exist in table '{tableName}'.");
-        }
-
-        /// <summary>
-        /// Marks column as primary key
-        /// </summary>
-        /// <param name="listOfColumnMetadata">List of column metadata</param>
-        /// <param name="columnName">Column name</param>
-        void MarkColumnAsPrimaryKey(List<IColumnMetadata> listOfColumnMetadata, string columnName)
-        {
-            if (listOfColumnMetadata == null)
-            {
-                return;
-            }
-
-            for (int i = 0; i < listOfColumnMetadata.Count; i++)
-            {
-                IColumnMetadata columnMetadata = listOfColumnMetadata[i];
-                if (columnMetadata != null && string.Equals(columnMetadata.ColumnName, columnName, StringComparison.OrdinalIgnoreCase))
-                {
-                    columnMetadata.IsPrimaryKey = true;
-                    return;
-                }
             }
         }
         #endregion

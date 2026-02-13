@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 
 using PocoDataSet.IData;
@@ -23,19 +24,12 @@ namespace PocoDataSet.Extensions
                 return;
             }
 
-            if (dataTable.Columns == null)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                dataTable.Columns = listOfColumnMetadata;
-            }
-            else
-            {
-                for (int i = 0; i < listOfColumnMetadata.Count; i++)
+                IColumnMetadata c = listOfColumnMetadata[i];
+                if (!dataTable.ContainsColumn(c.ColumnName))
                 {
-                    IColumnMetadata c = listOfColumnMetadata[i];
-                    if (!dataTable.ContainsColumn(c.ColumnName))
-                    {
-                        dataTable.AddColumn(c.ColumnName, c.DataType, c.IsNullable, c.IsPrimaryKey, c.IsForeignKey);
-                    }
+                    dataTable.AddColumn(c.ColumnName, c.DataType, c.IsNullable, c.IsPrimaryKey, c.IsForeignKey);
                 }
             }
 
@@ -80,3 +74,4 @@ namespace PocoDataSet.Extensions
         #endregion
     }
 }
+*/

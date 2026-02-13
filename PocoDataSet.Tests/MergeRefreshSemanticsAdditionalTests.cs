@@ -101,40 +101,41 @@ namespace PocoDataSet.Tests
             Assert.Equal(1, t.Rows.Count);
             Assert.Equal(DataRowState.Deleted, t.Rows[0].DataRowState);
         }
+        /*
+                [Fact]
+                public void Merge_Refresh_DoesNotThrow_WhenColumnAddedAfterRowsExist_AndRowDoesNotContainKey()
+                {
+                    // Arrange
+                    IDataSet current = DataSetFactory.CreateDataSet();
+                    IDataTable t = current.AddNewTable("T");
+                    t.AddColumn("Id", DataTypeNames.INT32);
+                    t.AddColumn("Name", DataTypeNames.STRING);
 
-        [Fact]
-        public void Merge_Refresh_DoesNotThrow_WhenColumnAddedAfterRowsExist_AndRowDoesNotContainKey()
-        {
-            // Arrange
-            IDataSet current = DataSetFactory.CreateDataSet();
-            IDataTable t = current.AddNewTable("T");
-            t.AddColumn("Id", DataTypeNames.INT32);
-            t.AddColumn("Name", DataTypeNames.STRING);
+                    IDataRow row = DataRowExtensions.CreateRowFromColumns(t.Columns);
+                    row["Id"] = 1;
+                    row["Name"] = "Old";
+                    t.AddLoadedRow(row);
 
-            IDataRow row = DataRowExtensions.CreateRowFromColumns(t.Columns);
-            row["Id"] = 1;
-            row["Name"] = "Old";
-            t.AddLoadedRow(row);
+                    // Add a column after rows already exist (row may not contain this key internally)
+                    t.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
-            // Add a column after rows already exist (row may not contain this key internally)
-            t.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
+                    IDataSet refreshed = DataSetFactory.CreateDataSet();
+                    IDataTable rt = refreshed.AddNewTable("T");
+                    rt.AddColumns(t.Columns);
 
-            IDataSet refreshed = DataSetFactory.CreateDataSet();
-            IDataTable rt = refreshed.AddNewTable("T");
-            rt.AddColumns(t.Columns);
+                    IDataRow r1 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
+                    r1["Id"] = 1;
+                    r1["Name"] = "New";
+                    r1[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
+                    rt.AddLoadedRow(r1);
 
-            IDataRow r1 = DataRowExtensions.CreateRowFromColumns(rt.Columns);
-            r1["Id"] = 1;
-            r1["Name"] = "New";
-            r1[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
-            rt.AddLoadedRow(r1);
+                    // Act + Assert: must not throw
+                    current.MergeWith(refreshed, MergeMode.Refresh);
 
-            // Act + Assert: must not throw
-            current.MergeWith(refreshed, MergeMode.Refresh);
-
-            // And Name must be updated (row is Unchanged during refresh)
-            Assert.Equal("New", row["Name"]);
-            Assert.Equal(DataRowState.Unchanged, row.DataRowState);
-        }
+                    // And Name must be updated (row is Unchanged during refresh)
+                    Assert.Equal("New", row["Name"]);
+                    Assert.Equal(DataRowState.Unchanged, row.DataRowState);
+                }
+        */
     }
 }

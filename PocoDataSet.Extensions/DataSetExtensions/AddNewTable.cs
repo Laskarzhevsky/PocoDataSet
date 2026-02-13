@@ -59,21 +59,7 @@ namespace PocoDataSet.Extensions
 
             IDataTable dataTable = new DataTable();
             dataTable.TableName = tableName;
-            dataTable.Columns = listOfColumnMetadata;
-
-            // Populate primary keys from column metadata
-            if (listOfColumnMetadata != null)
-            {
-                for (int i = 0; i < listOfColumnMetadata.Count; i++)
-                {
-                    IColumnMetadata columnMetadata = listOfColumnMetadata[i];
-                    if (columnMetadata != null && columnMetadata.IsPrimaryKey)
-                    {
-                        dataTable.AddPrimaryKey(columnMetadata.ColumnName);
-                    }
-                }
-            }
-
+            dataTable.AddColumns(listOfColumnMetadata);
             dataSet.AddTable(dataTable);
 
             return dataTable;

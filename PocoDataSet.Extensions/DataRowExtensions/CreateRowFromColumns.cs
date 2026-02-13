@@ -16,7 +16,7 @@ namespace PocoDataSet.Extensions
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>Created data row</returns>
-        public static IDataRow CreateRowFromColumns(List<IColumnMetadata> listOfColumnMetadata)
+        public static IDataRow CreateRowFromColumns(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             IDataRow dataRow = DataRowFactory.CreateEmpty(listOfColumnMetadata.Count);
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)

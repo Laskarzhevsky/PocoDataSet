@@ -18,7 +18,7 @@ namespace PocoDataSet.ObservableExtensions
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
         /// <returns>Created row</returns>
-        public static IObservableDataRow CreateRowFromColumns(IList<IColumnMetadata> listOfColumnMetadata)
+        public static IObservableDataRow CreateRowFromColumns(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             IDataRow dataRow = DataRowFactory.CreateEmpty(listOfColumnMetadata.Count);
             foreach (IColumnMetadata column in listOfColumnMetadata)

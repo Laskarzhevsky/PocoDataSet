@@ -27,22 +27,8 @@ namespace PocoDataSet.Extensions
             for (int i = 0; i < sourceDataTable.Columns.Count; i++)
             {
                 IColumnMetadata columnMetadata = sourceDataTable.Columns[i];
-                IColumnMetadata clonedColumnMetadata = new ColumnMetadata();
-                clonedColumnMetadata.ColumnName = columnMetadata.ColumnName;
-                clonedColumnMetadata.DataType = columnMetadata.DataType;
-                clonedColumnMetadata.Description = columnMetadata.Description;
-                clonedColumnMetadata.DisplayName = columnMetadata.DisplayName;
-                clonedColumnMetadata.DisplayOrder = columnMetadata.DisplayOrder;
-                clonedColumnMetadata.IsForeignKey = columnMetadata.IsForeignKey;
-                clonedColumnMetadata.IsNullable = columnMetadata.IsNullable;
-                clonedColumnMetadata.IsPrimaryKey = columnMetadata.IsPrimaryKey;
-                clonedColumnMetadata.MaxLength = columnMetadata.MaxLength;
-                clonedColumnMetadata.Precision = columnMetadata.Precision;
-                clonedColumnMetadata.ReferencedColumnName = columnMetadata.ReferencedColumnName;
-                clonedColumnMetadata.ReferencedTableName = columnMetadata.ReferencedTableName;
-                clonedColumnMetadata.Scale = columnMetadata.Scale;
-
-                dataTable.Columns.Add(clonedColumnMetadata);
+                IColumnMetadata clonedColumnMetadata = sourceDataTable.Columns[i].Clone();
+                dataTable.AddColumn(clonedColumnMetadata);
             }
 
             // Preserve primary keys from source table

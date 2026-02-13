@@ -246,7 +246,11 @@ namespace PocoDataSet.Tests
             IDataTable t = refreshed.AddNewTable(currentTable.TableName);
 
             // Schema
-            t.AddColumns(currentTable.Columns);
+            for (int c = 0; c < currentTable.Columns.Count; c++)
+            {
+                IColumnMetadata col = currentTable.Columns[c];
+                t.AddColumn(col.ColumnName, col.DataType, col.IsNullable, col.IsPrimaryKey, col.IsForeignKey);
+            }
 
             for (int i = 0; i < currentTable.Rows.Count; i++)
             {

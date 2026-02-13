@@ -53,7 +53,12 @@ namespace PocoDataSet.Extensions
 
                 // Create target table with same schema
                 IDataTable targetTable = changeset.AddNewTable(tableName);
-                targetTable.AddColumns(sourceTable.Columns);
+                targetTable.EnsureClientKeyColumnExists();
+                for (int i = 0; i < sourceTable.Columns.Count; i++)
+                {
+                    IColumnMetadata sourceTableColumn = sourceTable.Columns[i];
+                    targetTable.AddColumn(sourceTableColumn.ColumnName, sourceTableColumn.DataType, sourceTableColumn.IsNullable, sourceTableColumn.IsPrimaryKey, sourceTableColumn.IsForeignKey);
+                }
 
                 // Preserve primary keys
                 if (sourceTable.PrimaryKeys != null && sourceTable.PrimaryKeys.Count > 0)
@@ -119,9 +124,16 @@ namespace PocoDataSet.Extensions
                         targetTable.AddLoadedRow(targetRow);
                         targetTable.DeleteRow(targetRow);
                     }
+                    else if (sourceRow.DataRowState == DataRowState.Added)
+                    {
+                        // Added: preserve state explicitly, then add
+                        targetRow[SpecialColumnNames.CLIENT_KEY] = System.Guid.NewGuid();
+                        targetRow.SetDataRowState(sourceRow.DataRowState);
+                        targetTable.AddRow(targetRow);
+                    }
                     else
                     {
-                        // Added or Modified: preserve state explicitly, then add
+                        // Modified: preserve state explicitly, then add
                         targetRow.SetDataRowState(sourceRow.DataRowState);
                         targetTable.AddRow(targetRow);
                     }

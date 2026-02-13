@@ -121,7 +121,7 @@ namespace PocoDataSet.ObservableData
         /// Gets columns
         /// IObservableDataView interface implementation
         /// </summary>
-        public IList<IColumnMetadata> Columns
+        public IReadOnlyList<IColumnMetadata> Columns
         {
             get
             {

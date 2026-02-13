@@ -110,5 +110,13 @@
             get; set;
         }
         #endregion
+
+        #region Methods
+        /// <summary>
+        /// Clones column metadata
+        /// </summary>
+        /// <returns>Cloned column metadata</returns>
+        IColumnMetadata Clone();
+        #endregion
     }
 }

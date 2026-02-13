@@ -20,7 +20,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableDataRow">Observable data row</param>
         /// <param name="dataRow">Data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public static void CopyFrom(this IObservableDataRow? observableDataRow, IDataRow dataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        public static void CopyFrom(this IObservableDataRow? observableDataRow, IDataRow dataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             if (observableDataRow == null)
             {

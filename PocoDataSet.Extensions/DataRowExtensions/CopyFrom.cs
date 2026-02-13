@@ -20,7 +20,7 @@ namespace PocoDataSet.Extensions
         /// <param name="currentDataRow">Current data row</param>
         /// <param name="sourceDataRow">Source data row</param>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public static void CopyFrom(this IDataRow? currentDataRow, IDataRow sourceDataRow, IList<IColumnMetadata> listOfColumnMetadata)
+        public static void CopyFrom(this IDataRow? currentDataRow, IDataRow sourceDataRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             if (currentDataRow == null)
             {
