@@ -64,7 +64,7 @@ namespace PocoDataSet.IData
         /// Adds columns
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        void AddColumns(List<IColumnMetadata> listOfColumnMetadata);
+        void AddColumns(IReadOnlyList<IColumnMetadata> listOfColumnMetadata);
 
         /// <summary>
         /// Adds loaded row from data storage

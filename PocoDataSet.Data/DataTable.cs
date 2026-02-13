@@ -22,6 +22,11 @@ namespace PocoDataSet.Data
         /// "Rows" property data field
         /// </summary>
         readonly List<IDataRow> _rows = new();
+
+        /// <summary>
+        /// TableName property data field
+        /// </summary>
+        string _tableName = string.Empty;
         #endregion
 
         #region Public Properties
@@ -29,6 +34,7 @@ namespace PocoDataSet.Data
         /// Gets columns
         /// IDataTable interface implementation
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<IColumnMetadata> Columns
         {
             get
@@ -38,14 +44,62 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
+        /// Gets columns for JSON serialization / deserialization
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("Columns")]
+        public List<IColumnMetadata> ColumnsJson
+        {
+            get
+            {
+                // Serialize the authoritative schema list
+                return new List<IColumnMetadata>(_dataTableSchema.Items);
+            }
+            private set
+            {
+                _dataTableSchema.ReplaceColumns(value);
+                _dataTableSchema.TableName = TableName;
+
+                // If rows were already deserialized, ensure each row has all columns.
+                EnsureExistingRowsHaveAllColumns();
+            }
+        }
+
+        /// <summary>
         /// Gets primary keys
         /// IDataTable interface implementation
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<string> PrimaryKeys
         {
             get
             {
                 return _dataTableSchema.PrimaryKeys.Items;
+            }
+        }
+
+        /// <summary>
+        /// Gets primary keys for JSON serialization / deserialization
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("PrimaryKeys")]
+        public List<string> PrimaryKeysJson
+        {
+            get
+            {
+                return new List<string>(_dataTableSchema.PrimaryKeys.Items);
+            }
+            private set
+            {
+                // If JSON includes explicit PrimaryKeys, treat them as authoritative.
+                // This also sets/unsets IsPrimaryKey flags on column metadata.
+                if (value == null)
+                {
+                    _dataTableSchema.PrimaryKeys.RebuildFromColumnFlags(_dataTableSchema.Items);
+                    return;
+                }
+
+                _dataTableSchema.PrimaryKeys.SetPrimaryKeys(_dataTableSchema.Items, value, TableName);
             }
         }
 
@@ -86,6 +140,9 @@ namespace PocoDataSet.Data
                 {
                     _rows.Add(value[i]);
                 }
+
+                // If schema was already deserialized, ensure each row has all columns.
+                EnsureExistingRowsHaveAllColumns();
             }
         }
 
@@ -95,8 +152,16 @@ namespace PocoDataSet.Data
         /// </summary>
         public string TableName
         {
-            get; set;
-        } = string.Empty;
+            get
+            {
+                return _tableName;
+            }
+            set
+            {
+                _tableName = value ?? string.Empty;
+                _dataTableSchema.TableName = _tableName;
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -145,7 +210,7 @@ namespace PocoDataSet.Data
         /// IDataTable interface implementation
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        public void AddColumns(List<IColumnMetadata> listOfColumnMetadata)
+        public void AddColumns(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
@@ -347,11 +412,31 @@ namespace PocoDataSet.Data
         /// Ensures that existing rows have column
         /// </summary>
         /// <param name="columnName">column name</param>
+        
+        /// <summary>
+        /// Ensures that all existing rows have all current schema columns.
+        /// This is important during deserialization where Rows and Columns can be set in either order.
+        /// </summary>
+        void EnsureExistingRowsHaveAllColumns()
+        {
+            for (int c = 0; c < _dataTableSchema.Items.Count; c++)
+            {
+                string columnName = _dataTableSchema.Items[c].ColumnName;
+                EnsureExistingRowsHaveColumn(columnName);
+            }
+        }
+
         void EnsureExistingRowsHaveColumn(string columnName)
         {
             for (int i = 0; i < Rows.Count; i++)
             {
                 IDataRow row = Rows[i];
+
+                // Floating (sparse) rows must preserve missing keys.
+                if (row is PocoDataSet.IData.IFloatingDataRow)
+                {
+                    continue;
+                }
 
                 // Only safe for our concrete DataRow: we can write into ValuesJson without changing row state.
                 PocoDataSet.Data.DataRow? concreteRow = row as PocoDataSet.Data.DataRow;

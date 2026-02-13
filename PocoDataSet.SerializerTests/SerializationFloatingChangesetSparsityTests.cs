@@ -22,6 +22,7 @@ namespace PocoDataSet.SerializerTests
             table.AddColumn("Id", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             // Create a FLOATING (sparse) row explicitly:
             // We intentionally do NOT set Description at all.

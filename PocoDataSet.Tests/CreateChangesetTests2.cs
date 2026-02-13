@@ -131,6 +131,7 @@ namespace PocoDataSet.Tests
             table.AddColumn("Id", DataTypeNames.INT32, false, true);
             table.AddColumn("Name", DataTypeNames.STRING);
             table.AddColumn("Description", DataTypeNames.STRING);
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
 
             IDataRow loaded = DataRowExtensions.CreateRowFromColumns(table.Columns);
             loaded["Id"] = 10;

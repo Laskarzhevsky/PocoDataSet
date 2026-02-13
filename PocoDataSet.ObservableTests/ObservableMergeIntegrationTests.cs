@@ -56,6 +56,7 @@ namespace PocoDataSet.ObservableTests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
             IDataTable table = dataSet.AddNewTable("Department");
             // Observable merge relies on the client-only key column.
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
 

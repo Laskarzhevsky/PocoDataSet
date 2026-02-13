@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Data.Internal
 {
-    class DataTableSchema
+    /// <summary>
+    /// Owns schema for a table: columns, lookup, and primary key tracking.
+    /// </summary>
+    internal sealed class DataTableSchema
     {
         #region Data Fields
         /// <summary>
@@ -22,21 +22,30 @@ namespace PocoDataSet.Data.Internal
         List<IColumnMetadata> _columns = new List<IColumnMetadata>();
 
         /// <summary>
+        /// 
+        /// </summary>
+        private readonly Dictionary<string, IColumnMetadata> _columnsByName = new(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
         /// PrimaryKeys property data field
         /// </summary>
         readonly PrimaryKeys _primaryKeys = new();
         #endregion
 
-        #region Constructors
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public DataTableSchema()
-        {
-        }
-        #endregion
-
         #region Public Methods
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Clear()
+        {
+            _columnsByName.Clear();
+            _columns.Clear();
+            _clientKeyColumn = null;
+
+            // Clear PK list; flags are on columns that are being cleared anyway.
+            _primaryKeys.RebuildFromColumnFlags(_columns);
+        }
+
         /// <summary>
         /// Creates column
         /// </summary>
@@ -127,12 +136,21 @@ namespace PocoDataSet.Data.Internal
         public void AddColumn(IColumnMetadata columnMetadata)
         {
             // Keep table.PrimaryKeys as a single source of truth
-            if (columnMetadata.IsPrimaryKey)
+            if (_columnsByName.ContainsKey(columnMetadata.ColumnName))
             {
-                _primaryKeys.AddPrimaryKey(columnMetadata.ColumnName);
+                throw new InvalidOperationException($"Column '{columnMetadata.ColumnName}' already exists in table '{TableName}'.");
             }
 
+            _columnsByName.Add(columnMetadata.ColumnName, columnMetadata);
             _columns.Add(columnMetadata);
+
+            if (string.Equals(columnMetadata.ColumnName, SpecialColumnNames.CLIENT_KEY, StringComparison.OrdinalIgnoreCase))
+            {
+                _clientKeyColumn = columnMetadata;
+            }
+
+            // Keep PK list in sync with flags.
+            _primaryKeys.RebuildFromColumnFlags(_columns);
         }
 
         /// <summary>
@@ -142,17 +160,44 @@ namespace PocoDataSet.Data.Internal
         /// <returns>Flag indicating whether data table contains column with specified name</returns>
         public bool ContainsColumn(string columnName)
         {
-            string columnNameToLowerInvariant = columnName.ToLowerInvariant();
-            for (int i = 0; i < _columns.Count; i++)
+            return _columnsByName.ContainsKey(columnName);
+        }
+
+        /// <summary>
+        /// Replaces columns
+        /// </summary>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public void ReplaceColumns(IList<IColumnMetadata>? listOfColumnMetadata)
+        {
+            _columnsByName.Clear();
+            _columns.Clear();
+            _clientKeyColumn = null;
+
+            if (listOfColumnMetadata != null)
             {
-                IColumnMetadata columnMetadata = _columns[i];
-                if (columnMetadata.ColumnName.ToLowerInvariant() == columnNameToLowerInvariant)
+                for (int i = 0; i < listOfColumnMetadata.Count; i++)
                 {
-                    return true;
+                    IColumnMetadata column = listOfColumnMetadata[i];
+                    if (column == null)
+                    {
+                        continue;
+                    }
+
+                    // Use internal add without rebuilding PK list on each add (perf & determinism).
+                    if (!_columnsByName.ContainsKey(column.ColumnName))
+                    {
+                        _columnsByName.Add(column.ColumnName, column);
+                        _columns.Add(column);
+
+                        if (string.Equals(column.ColumnName, SpecialColumnNames.CLIENT_KEY, StringComparison.OrdinalIgnoreCase))
+                        {
+                            _clientKeyColumn = column;
+                        }
+                    }
                 }
             }
 
-            return false;
+            _primaryKeys.RebuildFromColumnFlags(_columns);
         }
 
         /// <summary>
@@ -160,14 +205,31 @@ namespace PocoDataSet.Data.Internal
         /// </summary>
         public void EnsureClientKeyColumnExists()
         {
-            _clientKeyColumn = new ColumnMetadata();
-            _clientKeyColumn.ColumnName = SpecialColumnNames.CLIENT_KEY;
-            _clientKeyColumn.DataType = DataTypeNames.GUID;
-            _clientKeyColumn.IsNullable = false;
-            _clientKeyColumn.IsPrimaryKey = false;
-            _clientKeyColumn.DisplayName = null;
-            _clientKeyColumn.Description = "Client-only key for changeset correlation.";
-            _columns.Add(_clientKeyColumn);
+            if (_clientKeyColumn != null)
+            {
+                return;
+            }
+
+            if (_columnsByName.TryGetValue(SpecialColumnNames.CLIENT_KEY, out IColumnMetadata existing))
+            {
+                _clientKeyColumn = existing;
+                return;
+            }
+
+            IColumnMetadata clientKeyColumn = new ColumnMetadata();
+            clientKeyColumn.ColumnName = SpecialColumnNames.CLIENT_KEY;
+            clientKeyColumn.DataType = DataTypeNames.GUID;
+            clientKeyColumn.IsNullable = false;
+            clientKeyColumn.IsPrimaryKey = false;
+            clientKeyColumn.DisplayName = null;
+            clientKeyColumn.Description = "Client-only key for changeset correlation.";
+
+            _columnsByName.Add(clientKeyColumn.ColumnName, clientKeyColumn);
+            _columns.Add(clientKeyColumn);
+            _clientKeyColumn = clientKeyColumn;
+
+            // PK list unchanged, but keep it consistent with flags.
+            _primaryKeys.RebuildFromColumnFlags(_columns);
         }
         #endregion
 
@@ -204,6 +266,14 @@ namespace PocoDataSet.Data.Internal
                 return _primaryKeys;
             }
         }
+
+        /// <summary>
+        /// The owning table name (for error messages).
+        /// </summary>
+        public string TableName
+        {
+            get; set;
+        } = string.Empty;
         #endregion
     }
 }

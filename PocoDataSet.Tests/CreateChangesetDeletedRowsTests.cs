@@ -67,6 +67,7 @@ namespace PocoDataSet.Tests
             IDataTable table = dataSet.AddNewTable("Department");
             table.AddColumn("Id", DataTypeNames.INT32);
             table.AddColumn("Name", DataTypeNames.STRING);
+            table.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
             table.AddColumn("RowVersion", DataTypeNames.BINARY);
 
             // Added row (insert scenario)

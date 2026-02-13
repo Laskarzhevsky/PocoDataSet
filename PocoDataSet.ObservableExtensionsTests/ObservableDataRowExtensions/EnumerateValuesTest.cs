@@ -33,7 +33,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             Dictionary<string, object?> dictionary = departmentObservableDataRow.EnumerateValues().ToDictionary(p => p.Key, p => p.Value);
 
             // Assert
-            Assert.Equal(2, dictionary.Count);
+            Assert.Equal(3, dictionary.Count);
             Assert.Equal(1, dictionary["Id"]);
             Assert.Equal("Sales", dictionary["Name"]);
         }

@@ -22,8 +22,16 @@ namespace PocoDataSet.Extensions
                 throw new System.ArgumentNullException(nameof(dataTable));
             }
 
+            
+            // Ensure __ClientKey column exists in the table schema.
+            // AddNewRow() always assigns a client correlation key, and schema must reflect it.
+            if (!dataTable.ContainsColumn(SpecialColumnNames.CLIENT_KEY))
+            {
+                dataTable.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
+            }
+
             IDataRow dataRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
-//            dataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
+            dataRow[SpecialColumnNames.CLIENT_KEY] = Guid.NewGuid();
             dataRow.SetDataRowState(DataRowState.Added);
             dataTable.AddRow(dataRow);
 

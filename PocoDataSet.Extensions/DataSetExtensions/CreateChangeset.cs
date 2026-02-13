@@ -57,6 +57,11 @@ namespace PocoDataSet.Extensions
                 for (int i = 0; i < sourceTable.Columns.Count; i++)
                 {
                     IColumnMetadata sourceTableColumn = sourceTable.Columns[i];
+                    if (targetTable.ContainsColumn(sourceTableColumn.ColumnName))
+                    {
+                        continue;
+                    }
+
                     targetTable.AddColumn(sourceTableColumn.ColumnName, sourceTableColumn.DataType, sourceTableColumn.IsNullable, sourceTableColumn.IsPrimaryKey, sourceTableColumn.IsForeignKey);
                 }
 
@@ -165,12 +170,16 @@ namespace PocoDataSet.Extensions
                     }
                 }
 
-                // __ClientKey (optional)
-                if (sourceTable.ContainsColumn(SpecialColumnNames.CLIENT_KEY) && !columnsToCopy.Contains(SpecialColumnNames.CLIENT_KEY))
+                // __ClientKey
+                // Include only for Deleted rows (correlation for deletes if needed).
+                // Modified rows are correlated by primary key and should remain "floating" with only PK + changed columns.
+                if (sourceRow.DataRowState == DataRowState.Deleted &&
+                    sourceTable.ContainsColumn(SpecialColumnNames.CLIENT_KEY) &&
+                    !columnsToCopy.Contains(SpecialColumnNames.CLIENT_KEY))
                 {
                     columnsToCopy.Add(SpecialColumnNames.CLIENT_KEY);
                 }
-            }
+}
 
             if (sourceRow.DataRowState == DataRowState.Added)
             {
