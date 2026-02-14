@@ -1,11 +1,12 @@
+using PocoDataSet.Extensions;
+using PocoDataSet.IObservableData;
+using PocoDataSet.ObservableData;
+using PocoDataSet.ObservableExtensions;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
-
-using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableData;
-using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
@@ -16,10 +17,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
         [Fact]
         public void CompilePrimaryKeyValue_ReturnsEmptyString_WhenRowIsNull()
         {
-            IObservableDataRow? row = null;
+            bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                row: null,
+                primaryKeyColumnNames: new List<string> { "Id" },
+                primaryKeyValue: out string value);
 
-            string value = row.CompilePrimaryKeyValue(new List<string> { "Id" });
-
+            Assert.False(ok);
             Assert.Equal(string.Empty, value);
         }
 
@@ -34,8 +37,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             r["Id"] = 5;
             r.AcceptChanges();
 
-            string value = r.CompilePrimaryKeyValue(new List<string>());
+            bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                row: r.InnerDataRow,
+                primaryKeyColumnNames: new List<string>(),
+                primaryKeyValue: out string value);
 
+            Assert.False(ok);
             Assert.Equal(string.Empty, value);
         }
 
@@ -44,8 +51,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
         {
             IObservableDataRow r = CreateRowWithValues(("Id", 5));
 
-            string value = r.CompilePrimaryKeyValue(new List<string> { "Id" });
+            bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                row: r.InnerDataRow,
+                primaryKeyColumnNames: new List<string> { "Id" },
+                primaryKeyValue: out string value);
 
+            Assert.True(ok);
             Assert.Equal("1#5", value);
         }
 
@@ -54,8 +65,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
         {
             IObservableDataRow r = CreateRowWithValues(("TenantId", 7), ("Code", "AB"));
 
-            string value = r.CompilePrimaryKeyValue(new List<string> { "TenantId", "Code" });
+            bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                row: r.InnerDataRow,
+                primaryKeyColumnNames: new List<string> { "TenantId", "Code" },
+                primaryKeyValue: out string value);
 
+            Assert.True(ok);
             Assert.Equal("1#7|2#AB", value);
         }
 
@@ -72,8 +87,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
             r["B"] = DBNull.Value;
             r.AcceptChanges();
 
-            string value = r.CompilePrimaryKeyValue(new List<string> { "A", "B" });
+            bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                row: r.InnerDataRow,
+                primaryKeyColumnNames: new List<string> { "A", "B" },
+                primaryKeyValue: out string value);
 
+            Assert.True(ok);
             Assert.Equal("0#|0#", value);
         }
 
@@ -90,8 +109,12 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
                 IObservableDataRow r = CreateRowWithValues(("Amount", 12.5m));
 
-                string value = r.CompilePrimaryKeyValue(new List<string> { "Amount" });
+                bool ok = RowIdentityResolver.TryGetPrimaryKeyValue(
+                    row: r.InnerDataRow,
+                    primaryKeyColumnNames: new List<string> { "Amount" },
+                    primaryKeyValue: out string value);
 
+                Assert.True(ok);
                 Assert.Equal("4#12.5", value);
             }
             finally

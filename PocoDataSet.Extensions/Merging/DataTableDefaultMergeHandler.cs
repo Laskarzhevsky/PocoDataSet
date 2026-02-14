@@ -35,7 +35,7 @@ namespace PocoDataSet.Extensions
             else
             {
                 // Current table has primary key
-                Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = RowIndexBuilder.BuildRowIndex(refreshedDataTable, currentDataTablePrimaryKeyColumnNames);
+                Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildPrimaryKeyIndex(currentDataTablePrimaryKeyColumnNames);
                 HashSet<string> primaryKeysOfMergedDataRows = new HashSet<string>();
 
                 MergeCurrentDataTableRows(currentDataTable, refreshedDataTable, mergeOptions, currentDataTablePrimaryKeyColumnNames, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);
@@ -56,11 +56,12 @@ namespace PocoDataSet.Extensions
                 {
                     IDataRow currentRow = currentDataTable.Rows[i];
                     string pkValue;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue))
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
                 {
                     pkValue = string.Empty;
                 }
-if (string.IsNullOrEmpty(pkValue))
+                    if (string.IsNullOrEmpty(pkValue))
                     {
                         continue;
                     }
@@ -163,11 +164,12 @@ if (string.IsNullOrEmpty(pkValue))
             if (primaryKeyColumnNames.Count > 0)
             {
                 string pkValue;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue))
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
                 {
                     pkValue = string.Empty;
                 }
-if (!string.IsNullOrEmpty(pkValue))
+                if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
                 }
@@ -217,11 +219,12 @@ if (!string.IsNullOrEmpty(pkValue))
             if (primaryKeyColumnNames.Count > 0)
             {
                 string pkValue;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue))
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
                 {
                     pkValue = string.Empty;
                 }
-if (!string.IsNullOrEmpty(pkValue))
+                if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
                 }
@@ -290,11 +293,13 @@ if (!string.IsNullOrEmpty(pkValue))
             {
                 IDataRow currentDataRow = currentDataTable.Rows[i];
                 string primaryKeyValue;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(currentDataRow, currentDataTablePrimaryKeyColumnNames, out primaryKeyValue))
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(currentDataRow, currentDataTablePrimaryKeyColumnNames, out primaryKeyValue);
+                if (!hasPrimaryKeyValue)
                 {
                     primaryKeyValue = string.Empty;
                 }
-IDataRow? refreshedDataRow;
+
+                IDataRow? refreshedDataRow;
                 refreshedDataTableDataRowIndex.TryGetValue(primaryKeyValue, out refreshedDataRow);
                 if (refreshedDataRow == null)
                 {

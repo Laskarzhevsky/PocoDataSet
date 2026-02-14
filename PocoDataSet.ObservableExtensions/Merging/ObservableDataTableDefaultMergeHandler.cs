@@ -64,7 +64,7 @@ namespace PocoDataSet.ObservableExtensions
                 ValidateNoDuplicatePrimaryKeys(refreshedDataTable, primaryKeyColumnNames, "refreshed");
             }
 
-            Dictionary<string, IDataRow> refreshedIndex = RowIndexBuilder.BuildRowIndex(refreshedDataTable, primaryKeyColumnNames);
+            Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildPrimaryKeyIndex(primaryKeyColumnNames);
 
             Dictionary<Guid, IDataRow>? refreshedRowsByClientKey = null;
             Dictionary<Guid, IObservableDataRow>? currentRowsByClientKey = null;
@@ -109,10 +109,17 @@ namespace PocoDataSet.ObservableExtensions
             {
                 IDataRow row = dataTable.Rows[i];
                 string key;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out key))
+
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out key);
+
+                if (!hasPrimaryKeyValue)
+
                 {
+
                     key = string.Empty;
+
                 }
+
                 if (seen.Contains(key))
                 {
                     throw new InvalidOperationException(
@@ -218,7 +225,7 @@ namespace PocoDataSet.ObservableExtensions
                 {
                     throw new InvalidOperationException(
                         "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
-                }
+                    }
 
                 index[g] = row;
             }
@@ -269,10 +276,17 @@ namespace PocoDataSet.ObservableExtensions
             {
                 IObservableDataRow observableDataRow = currentObservableDataTable.Rows[i];
                 string currentPkValue;
-                if (!RowIdentityResolver.TryGetPrimaryKeyValue(observableDataRow.InnerDataRow, primaryKeyColumnNames, out currentPkValue))
+
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(observableDataRow.InnerDataRow, primaryKeyColumnNames, out currentPkValue);
+
+                if (!hasPrimaryKeyValue)
+
                 {
+
                     currentPkValue = string.Empty;
+
                 }
+
                 // PostSave semantics: finalize deletes.
                 // Deleted rows are removed from the current table regardless of whether the server returned
                 // a corresponding row. Additionally, if a matching server row exists, it is considered
@@ -338,10 +352,12 @@ namespace PocoDataSet.ObservableExtensions
                     }
 
                     string refreshedPkValue;
-                    if (!RowIdentityResolver.TryGetPrimaryKeyValue(refreshedDataRow, primaryKeyColumnNames, out refreshedPkValue))
+                    bool hasPrimaryKeyValueForRefreshedRow = RowIdentityResolver.TryGetPrimaryKeyValue(refreshedDataRow, primaryKeyColumnNames, out refreshedPkValue);
+                    if (!hasPrimaryKeyValueForRefreshedRow)
                     {
                         refreshedPkValue = string.Empty;
                     }
+
                     processedRefreshedPrimaryKeys.Add(refreshedPkValue);
                 }
             }
