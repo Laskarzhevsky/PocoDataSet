@@ -52,23 +52,12 @@ namespace PocoDataSet.Extensions
             Dictionary<string, IDataRow> currentRowsByPrimaryKey = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
             if (primaryKeyColumnNames.Count > 0)
             {
-                for (int i = 0; i < currentDataTable.Rows.Count; i++)
+                currentRowsByPrimaryKey = RowIndexBuilder.BuildRowIndex(currentDataTable, primaryKeyColumnNames);
+
+                // PostSave historically skipped empty PK values entirely (unlike Refresh indexing).
+                if (currentRowsByPrimaryKey.ContainsKey(string.Empty))
                 {
-                    IDataRow currentRow = currentDataTable.Rows[i];
-                    string pkValue;
-                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue);
-                if (!hasPrimaryKeyValue)
-                {
-                    pkValue = string.Empty;
-                }
-                    if (string.IsNullOrEmpty(pkValue))
-                    {
-                        continue;
-                    }
-                    if (!currentRowsByPrimaryKey.ContainsKey(pkValue))
-                    {
-                        currentRowsByPrimaryKey.Add(pkValue, currentRow);
-                    }
+                    currentRowsByPrimaryKey.Remove(string.Empty);
                 }
             }
 
@@ -100,44 +89,12 @@ namespace PocoDataSet.Extensions
 
         static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IDataTable dataTable)
         {
-            Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
-            for (int i = 0; i < dataTable.Rows.Count; i++)
-            {
-                IDataRow row = dataTable.Rows[i];
-                Guid clientKey;
-                if (TryGetClientKey(row, out clientKey))
-                {
-                    if (!index.ContainsKey(clientKey))
-                    {
-                        index.Add(clientKey, row);
-                    }
-                }
-            }
-            return index;
+            return RowIdentityResolver.BuildClientKeyIndex(dataTable.Rows);
         }
 
         static bool TryGetClientKey(IDataRow row, out Guid clientKey)
         {
-            clientKey = Guid.Empty;
-
-            if (!row.ContainsKey(SpecialColumnNames.CLIENT_KEY))
-            {
-                return false;
-            }
-
-            object? value = row[SpecialColumnNames.CLIENT_KEY];
-            if (value == null)
-            {
-                return false;
-            }
-
-            if (value is Guid)
-            {
-                clientKey = (Guid)value;
-                return clientKey != Guid.Empty;
-            }
-
-            return false;
+            return RowIdentityResolver.TryGetClientKey(row, out clientKey);
         }
 
         static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
@@ -149,6 +106,7 @@ namespace PocoDataSet.Extensions
                 {
                     continue;
                 }
+
                 targetRow[columnName] = sourceRow[columnName];
             }
         }
@@ -169,6 +127,7 @@ namespace PocoDataSet.Extensions
                 {
                     pkValue = string.Empty;
                 }
+
                 if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
@@ -224,6 +183,7 @@ namespace PocoDataSet.Extensions
                 {
                     pkValue = string.Empty;
                 }
+
                 if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
@@ -255,6 +215,7 @@ namespace PocoDataSet.Extensions
             }
         }
         #endregion
+
 
         #region Private Methods
         /// <summary>

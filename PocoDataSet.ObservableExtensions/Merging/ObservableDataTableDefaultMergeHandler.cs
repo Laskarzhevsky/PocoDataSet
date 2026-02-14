@@ -143,7 +143,40 @@ namespace PocoDataSet.ObservableExtensions
             return false;
         }
 
-        static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refreshedDataTable, bool requireClientKey)
+        static bool TryGetClientKeyGuid(IDataRow row, bool requireClientKey, string tableName, string tableRoleDescription, out Guid clientKey)
+        {
+            clientKey = Guid.Empty;
+
+            object? value;
+            row.TryGetValue(ClientKeyColumnName, out value);
+
+            if (value == null)
+            {
+                if (requireClientKey)
+                {
+                    throw new InvalidOperationException(
+                        "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in " + tableRoleDescription + " table '" + tableName + "'.");
+                }
+
+                return false;
+            }
+
+            if (!(value is Guid g) || g == Guid.Empty)
+            {
+                if (requireClientKey)
+                {
+                    throw new InvalidOperationException(
+                        "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in " + tableRoleDescription + " table '" + tableName + "'.");
+                }
+
+                return false;
+            }
+
+            clientKey = g;
+            return true;
+        }
+
+static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refreshedDataTable, bool requireClientKey)
         {
             Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
 
@@ -151,38 +184,19 @@ namespace PocoDataSet.ObservableExtensions
             {
                 IDataRow row = refreshedDataTable.Rows[i];
 
-                object? value;
-                row.TryGetValue(ClientKeyColumnName, out value);
-
-                if (value == null)
+                Guid clientKey;
+                if (!TryGetClientKeyGuid(row, requireClientKey, refreshedDataTable.TableName, "refreshed", out clientKey))
                 {
-                    if (requireClientKey)
-                    {
-                        throw new InvalidOperationException(
-                            "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in refreshed table '" + refreshedDataTable.TableName + "'.");
-                    }
-
                     continue;
                 }
 
-                if (!(value is Guid g) || g == Guid.Empty)
-                {
-                    if (requireClientKey)
-                    {
-                        throw new InvalidOperationException(
-                            "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in refreshed table '" + refreshedDataTable.TableName + "'.");
-                    }
-
-                    continue;
-                }
-
-                if (index.ContainsKey(g))
+                if (index.ContainsKey(clientKey))
                 {
                     throw new InvalidOperationException(
-                        "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in refreshed table '" + refreshedDataTable.TableName + "'.");
+                        "Duplicate " + ClientKeyColumnName + " '" + clientKey.ToString() + "' detected in refreshed table '" + refreshedDataTable.TableName + "'.");
                 }
 
-                index[g] = row;
+                index.Add(clientKey, row);
             }
 
             return index;
@@ -194,40 +208,21 @@ namespace PocoDataSet.ObservableExtensions
 
             for (int i = 0; i < currentObservableDataTable.Rows.Count; i++)
             {
-                IObservableDataRow row = currentObservableDataTable.Rows[i];
+                IObservableDataRow observableRow = currentObservableDataTable.Rows[i];
 
-                object? value;
-                row.InnerDataRow.TryGetValue(ClientKeyColumnName, out value);
-
-                if (value == null)
+                Guid clientKey;
+                if (!TryGetClientKeyGuid(observableRow.InnerDataRow, requireClientKey, currentObservableDataTable.TableName, "current", out clientKey))
                 {
-                    if (requireClientKey)
-                    {
-                        throw new InvalidOperationException(
-                            "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in current table '" + currentObservableDataTable.TableName + "'.");
-                    }
-
                     continue;
                 }
 
-                if (!(value is Guid g) || g == Guid.Empty)
-                {
-                    if (requireClientKey)
-                    {
-                        throw new InvalidOperationException(
-                            "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in current table '" + currentObservableDataTable.TableName + "'.");
-                    }
-
-                    continue;
-                }
-
-                if (index.ContainsKey(g))
+                if (index.ContainsKey(clientKey))
                 {
                     throw new InvalidOperationException(
-                        "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
-                    }
+                        "Duplicate " + ClientKeyColumnName + " '" + clientKey.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
+                }
 
-                index[g] = row;
+                index.Add(clientKey, observableRow);
             }
 
             return index;
