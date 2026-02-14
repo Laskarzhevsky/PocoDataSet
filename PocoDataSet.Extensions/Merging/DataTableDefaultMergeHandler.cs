@@ -67,7 +67,7 @@ namespace PocoDataSet.Extensions
                 }
             }
 
-            Dictionary<Guid, IDataRow> currentRowsByClientKey = BuildClientKeyIndex(currentDataTable);
+            Dictionary<Guid, IDataRow> currentRowsByClientKey = RowIdentityResolver.BuildClientKeyIndex(currentDataTable);
 
             for (int i = 0; i < changesetDataTable.Rows.Count; i++)
             {
@@ -91,48 +91,6 @@ namespace PocoDataSet.Extensions
                     continue;
                 }
             }
-        }
-
-        static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IDataTable dataTable)
-        {
-            Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
-            for (int i = 0; i < dataTable.Rows.Count; i++)
-            {
-                IDataRow row = dataTable.Rows[i];
-                Guid clientKey;
-                if (TryGetClientKey(row, out clientKey))
-                {
-                    if (!index.ContainsKey(clientKey))
-                    {
-                        index.Add(clientKey, row);
-                    }
-                }
-            }
-            return index;
-        }
-
-        static bool TryGetClientKey(IDataRow row, out Guid clientKey)
-        {
-            clientKey = Guid.Empty;
-
-            if (!row.ContainsKey(SpecialColumnNames.CLIENT_KEY))
-            {
-                return false;
-            }
-
-            object? value = row[SpecialColumnNames.CLIENT_KEY];
-            if (value == null)
-            {
-                return false;
-            }
-
-            if (value is Guid)
-            {
-                clientKey = (Guid)value;
-                return clientKey != Guid.Empty;
-            }
-
-            return false;
         }
 
         static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
@@ -169,7 +127,7 @@ namespace PocoDataSet.Extensions
             if (targetRow == null)
             {
                 Guid clientKey;
-                if (TryGetClientKey(changesetRow, out clientKey))
+                if (RowIdentityResolver.TryGetClientKey(changesetRow, out clientKey))
                 {
                     currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
                 }
@@ -218,7 +176,7 @@ namespace PocoDataSet.Extensions
             if (targetRow == null)
             {
                 Guid clientKey;
-                if (TryGetClientKey(changesetRow, out clientKey))
+                if (RowIdentityResolver.TryGetClientKey(changesetRow, out clientKey))
                 {
                     currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
                 }
