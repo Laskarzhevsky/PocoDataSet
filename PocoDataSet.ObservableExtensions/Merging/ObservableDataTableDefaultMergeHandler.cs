@@ -28,10 +28,15 @@ namespace PocoDataSet.ObservableExtensions
         {
             IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
 
-            ObservableMergeContext context = new ObservableMergeContext(currentObservableDataTable, refreshedDataTable, observableMergeOptions, policy);
+            // Observable merge mode selection is already expressed by the policy.
+            // Avoid the extra strategy/factory/context indirection and route here.
+            if (policy.IsFullReload)
+            {
+                MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                return;
+            }
 
-            IObservableTableMergeStrategy strategy = ObservableTableMergeStrategyFactory.Create(context);
-            strategy.Execute(this, context);
+            MergeKeyed(currentObservableDataTable, refreshedDataTable, observableMergeOptions, policy);
         }
 #region Keyed Merge
         internal void MergeKeyed(
