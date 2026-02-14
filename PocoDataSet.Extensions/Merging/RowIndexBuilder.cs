@@ -22,7 +22,7 @@ namespace PocoDataSet.Extensions
         /// - Keeps the first row for a given key (duplicates are ignored)
         /// - Does not special-case empty keys (empty key is a valid dictionary key)
         /// </summary>
-        public static Dictionary<string, IDataRow> BuildRowIndex(IDataTable dataTable, IReadOnlyList<string> primaryKeyColumnNames)
+        public static Dictionary<string, IDataRow> BuildRowIndex(IDataTable? dataTable, IReadOnlyList<string> primaryKeyColumnNames)
         {
             Dictionary<string, IDataRow> index = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
 
