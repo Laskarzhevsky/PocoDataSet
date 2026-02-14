@@ -79,6 +79,119 @@ namespace PocoDataSet.Extensions
         #endregion
 
         #region Refresh Merge
+
+        sealed class KeyedMergeContext
+        {
+            public KeyedMergeContext(
+                IDataTable currentDataTable,
+                IDataTable refreshedDataTable,
+                IMergeOptions mergeOptions,
+                List<string> primaryKeyColumnNames,
+                Dictionary<string, IDataRow> refreshedIndex,
+                HashSet<string> processedKeys)
+            {
+                CurrentDataTable = currentDataTable;
+                RefreshedDataTable = refreshedDataTable;
+                MergeOptions = mergeOptions;
+                PrimaryKeyColumnNames = primaryKeyColumnNames;
+                RefreshedIndex = refreshedIndex;
+                ProcessedKeys = processedKeys;
+            }
+
+            public IDataTable CurrentDataTable { get; private set; }
+            public IDataTable RefreshedDataTable { get; private set; }
+            public IMergeOptions MergeOptions { get; private set; }
+            public List<string> PrimaryKeyColumnNames { get; private set; }
+            public Dictionary<string, IDataRow> RefreshedIndex { get; private set; }
+            public HashSet<string> ProcessedKeys { get; private set; }
+        }
+
+        interface IKeyedMergeTemplate
+        {
+            void MergeExisting(DataTableDefaultMergeHandler handler, KeyedMergeContext context);
+            void MergeNew(DataTableDefaultMergeHandler handler, KeyedMergeContext context);
+        }
+
+        sealed class RefreshKeyedMergeTemplate : IKeyedMergeTemplate
+        {
+            public void MergeExisting(DataTableDefaultMergeHandler handler, KeyedMergeContext context)
+            {
+                handler.MergeCurrentDataTableRows(
+                    context.CurrentDataTable,
+                    context.RefreshedDataTable,
+                    context.MergeOptions,
+                    context.PrimaryKeyColumnNames,
+                    context.RefreshedIndex,
+                    context.ProcessedKeys);
+            }
+
+            public void MergeNew(DataTableDefaultMergeHandler handler, KeyedMergeContext context)
+            {
+                handler.MergeNonProcessedDataRowsFromRefreshedDataTable(
+                    context.CurrentDataTable,
+                    context.RefreshedDataTable,
+                    context.MergeOptions,
+                    context.RefreshedIndex,
+                    context.ProcessedKeys);
+            }
+        }
+
+        Dictionary<string, IDataRow> BuildRowsByPrimaryKey(IDataTable dataTable, List<string> primaryKeyColumnNames, bool skipEmptyKey)
+        {
+            Dictionary<string, IDataRow> rowsByPrimaryKey = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
+
+            if (primaryKeyColumnNames == null || primaryKeyColumnNames.Count == 0)
+            {
+                return rowsByPrimaryKey;
+            }
+
+            for (int i = 0; i < dataTable.Rows.Count; i++)
+            {
+                IDataRow row = dataTable.Rows[i];
+
+                string pkValue;
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
+                {
+                    pkValue = string.Empty;
+                }
+
+                if (skipEmptyKey && string.IsNullOrEmpty(pkValue))
+                {
+                    continue;
+                }
+
+                if (!rowsByPrimaryKey.ContainsKey(pkValue))
+                {
+                    rowsByPrimaryKey.Add(pkValue, row);
+                }
+            }
+
+            return rowsByPrimaryKey;
+        }
+
+        void MergeKeyedRefresh(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions, List<string> primaryKeyColumnNames)
+        {
+            Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildPrimaryKeyIndex(primaryKeyColumnNames);
+            HashSet<string> processedKeys = new HashSet<string>();
+
+            KeyedMergeContext context = new KeyedMergeContext(
+                currentDataTable,
+                refreshedDataTable,
+                mergeOptions,
+                primaryKeyColumnNames,
+                refreshedIndex,
+                processedKeys);
+
+            ExecuteKeyedMergeTemplate(new RefreshKeyedMergeTemplate(), context);
+        }
+
+        void ExecuteKeyedMergeTemplate(IKeyedMergeTemplate template, KeyedMergeContext context)
+        {
+            template.MergeExisting(this, context);
+            template.MergeNew(this, context);
+        }
+
         void MergeRefresh(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
             List<string> currentDataTablePrimaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
@@ -90,11 +203,7 @@ namespace PocoDataSet.Extensions
             else
             {
                 // Current table has primary key
-                Dictionary<string, IDataRow> refreshedDataTableDataRowIndex = refreshedDataTable.BuildPrimaryKeyIndex(currentDataTablePrimaryKeyColumnNames);
-                HashSet<string> primaryKeysOfMergedDataRows = new HashSet<string>();
-
-                MergeCurrentDataTableRows(currentDataTable, refreshedDataTable, mergeOptions, currentDataTablePrimaryKeyColumnNames, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);
-                MergeNonProcessedDataRowsFromRefreshedDataTable(currentDataTable, refreshedDataTable, mergeOptions, refreshedDataTableDataRowIndex, primaryKeysOfMergedDataRows);
+                MergeKeyedRefresh(currentDataTable, refreshedDataTable, mergeOptions, currentDataTablePrimaryKeyColumnNames);
             }
         }
         #endregion
@@ -106,28 +215,9 @@ namespace PocoDataSet.Extensions
         {
             List<string> primaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
 
-            Dictionary<string, IDataRow> currentRowsByPrimaryKey = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
-            if (primaryKeyColumnNames.Count > 0)
-            {
-                for (int i = 0; i < currentDataTable.Rows.Count; i++)
-                {
-                    IDataRow currentRow = currentDataTable.Rows[i];
-                    string pkValue;
-                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue);
-                if (!hasPrimaryKeyValue)
-                {
-                    pkValue = string.Empty;
-                }
-                    if (string.IsNullOrEmpty(pkValue))
-                    {
-                        continue;
-                    }
-                    if (!currentRowsByPrimaryKey.ContainsKey(pkValue))
-                    {
-                        currentRowsByPrimaryKey.Add(pkValue, currentRow);
-                    }
-                }
-            }
+            Dictionary<string, IDataRow> currentRowsByPrimaryKey = BuildRowsByPrimaryKey(currentDataTable, primaryKeyColumnNames, true);
+
+
 
             Dictionary<Guid, IDataRow> currentRowsByClientKey = BuildClientKeyIndex(currentDataTable);
 

@@ -101,6 +101,82 @@ namespace PocoDataSet.ObservableExtensions
         #endregion
 
         #region Keyed Merge
+
+        sealed class KeyedMergeContext
+        {
+            public KeyedMergeContext(
+                IObservableDataTable currentObservableDataTable,
+                IDataTable refreshedDataTable,
+                IObservableMergeOptions observableMergeOptions,
+                IObservableMergePolicy policy,
+                List<string> primaryKeyColumnNames,
+                Dictionary<string, IDataRow> refreshedIndex,
+                HashSet<string> processedRefreshedPrimaryKeys,
+                Dictionary<Guid, IDataRow>? refreshedRowsByClientKey,
+                Dictionary<Guid, IObservableDataRow>? currentRowsByClientKey)
+            {
+                CurrentObservableDataTable = currentObservableDataTable;
+                RefreshedDataTable = refreshedDataTable;
+                ObservableMergeOptions = observableMergeOptions;
+                Policy = policy;
+                PrimaryKeyColumnNames = primaryKeyColumnNames;
+                RefreshedIndex = refreshedIndex;
+                ProcessedRefreshedPrimaryKeys = processedRefreshedPrimaryKeys;
+                RefreshedRowsByClientKey = refreshedRowsByClientKey;
+                CurrentRowsByClientKey = currentRowsByClientKey;
+            }
+
+            public IObservableDataTable CurrentObservableDataTable { get; private set; }
+            public IDataTable RefreshedDataTable { get; private set; }
+            public IObservableMergeOptions ObservableMergeOptions { get; private set; }
+            public IObservableMergePolicy Policy { get; private set; }
+            public List<string> PrimaryKeyColumnNames { get; private set; }
+            public Dictionary<string, IDataRow> RefreshedIndex { get; private set; }
+            public HashSet<string> ProcessedRefreshedPrimaryKeys { get; private set; }
+            public Dictionary<Guid, IDataRow>? RefreshedRowsByClientKey { get; private set; }
+            public Dictionary<Guid, IObservableDataRow>? CurrentRowsByClientKey { get; private set; }
+        }
+
+        interface IKeyedMergeTemplate
+        {
+            void MergeExisting(ObservableDataTableDefaultMergeHandler handler, KeyedMergeContext context);
+            void MergeNew(ObservableDataTableDefaultMergeHandler handler, KeyedMergeContext context);
+        }
+
+        sealed class DefaultKeyedMergeTemplate : IKeyedMergeTemplate
+        {
+            public void MergeExisting(ObservableDataTableDefaultMergeHandler handler, KeyedMergeContext context)
+            {
+                handler.MergeCurrentObservableDataTableRows(
+                    context.CurrentObservableDataTable,
+                    context.RefreshedDataTable,
+                    context.ObservableMergeOptions,
+                    context.Policy,
+                    context.PrimaryKeyColumnNames,
+                    context.RefreshedIndex,
+                    context.ProcessedRefreshedPrimaryKeys,
+                    context.RefreshedRowsByClientKey);
+            }
+
+            public void MergeNew(ObservableDataTableDefaultMergeHandler handler, KeyedMergeContext context)
+            {
+                handler.MergeNonProcessedDataRowsFromRefreshedDataTable(
+                    context.CurrentObservableDataTable,
+                    context.RefreshedDataTable,
+                    context.ObservableMergeOptions,
+                    context.Policy,
+                    context.RefreshedIndex,
+                    context.ProcessedRefreshedPrimaryKeys,
+                    context.CurrentRowsByClientKey);
+            }
+        }
+
+        void ExecuteKeyedMergeTemplate(IKeyedMergeTemplate template, KeyedMergeContext context)
+        {
+            template.MergeExisting(this, context);
+            template.MergeNew(this, context);
+        }
+
         void MergeKeyed(
             IObservableDataTable currentObservableDataTable,
             IDataTable refreshedDataTable,
@@ -152,7 +228,7 @@ namespace PocoDataSet.ObservableExtensions
 
             HashSet<string> processedRefreshedPrimaryKeys = new HashSet<string>();
 
-            MergeCurrentObservableDataTableRows(
+            KeyedMergeContext context = new KeyedMergeContext(
                 currentObservableDataTable,
                 refreshedDataTable,
                 observableMergeOptions,
@@ -160,16 +236,10 @@ namespace PocoDataSet.ObservableExtensions
                 primaryKeyColumnNames,
                 refreshedIndex,
                 processedRefreshedPrimaryKeys,
-                refreshedRowsByClientKey);
-
-            MergeNonProcessedDataRowsFromRefreshedDataTable(
-                currentObservableDataTable,
-                refreshedDataTable,
-                observableMergeOptions,
-                policy,
-                refreshedIndex,
-                processedRefreshedPrimaryKeys,
+                refreshedRowsByClientKey,
                 currentRowsByClientKey);
+
+            ExecuteKeyedMergeTemplate(new DefaultKeyedMergeTemplate(), context);
         }
         #endregion
 
