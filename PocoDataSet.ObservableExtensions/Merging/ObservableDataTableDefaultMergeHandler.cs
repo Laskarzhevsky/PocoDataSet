@@ -28,12 +28,85 @@ namespace PocoDataSet.ObservableExtensions
         {
             IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
 
-            if (policy.IsFullReload)
+            MergeContext context = new MergeContext(currentObservableDataTable, refreshedDataTable, observableMergeOptions, policy);
+
+            IObservableTableMergeStrategy strategy = ObservableTableMergeStrategyFactory.Create(context);
+            strategy.Execute(this, context);
+        }
+        
+        #region Merge Strategies
+        sealed class MergeContext
+        {
+            public MergeContext(
+                IObservableDataTable currentObservableDataTable,
+                IDataTable refreshedDataTable,
+                IObservableMergeOptions observableMergeOptions,
+                IObservableMergePolicy policy)
             {
-                MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
-                return;
+                CurrentObservableDataTable = currentObservableDataTable;
+                RefreshedDataTable = refreshedDataTable;
+                ObservableMergeOptions = observableMergeOptions;
+                Policy = policy;
             }
 
+            public IObservableDataTable CurrentObservableDataTable { get; private set; }
+
+            public IDataTable RefreshedDataTable { get; private set; }
+
+            public IObservableMergeOptions ObservableMergeOptions { get; private set; }
+
+            public IObservableMergePolicy Policy { get; private set; }
+        }
+
+        interface IObservableTableMergeStrategy
+        {
+            void Execute(ObservableDataTableDefaultMergeHandler handler, MergeContext context);
+        }
+
+        static class ObservableTableMergeStrategyFactory
+        {
+            public static IObservableTableMergeStrategy Create(MergeContext context)
+            {
+                if (context.Policy.IsFullReload)
+                {
+                    return new FullReloadMergeStrategy();
+                }
+
+                return new KeyedMergeStrategy();
+            }
+        }
+
+        sealed class FullReloadMergeStrategy : IObservableTableMergeStrategy
+        {
+            public void Execute(ObservableDataTableDefaultMergeHandler handler, MergeContext context)
+            {
+                handler.MergeObservableDataRowsWithoutPrimaryKeys(
+                    context.CurrentObservableDataTable,
+                    context.RefreshedDataTable,
+                    context.ObservableMergeOptions);
+            }
+        }
+
+        sealed class KeyedMergeStrategy : IObservableTableMergeStrategy
+        {
+            public void Execute(ObservableDataTableDefaultMergeHandler handler, MergeContext context)
+            {
+                handler.MergeKeyed(
+                    context.CurrentObservableDataTable,
+                    context.RefreshedDataTable,
+                    context.ObservableMergeOptions,
+                    context.Policy);
+            }
+        }
+        #endregion
+
+        #region Keyed Merge
+        void MergeKeyed(
+            IObservableDataTable currentObservableDataTable,
+            IDataTable refreshedDataTable,
+            IObservableMergeOptions observableMergeOptions,
+            IObservableMergePolicy policy)
+        {
             List<string> primaryKeyColumnNames = currentObservableDataTable.GetPrimaryKeyColumnNames(observableMergeOptions);
 
             policy.ValidateAfterPrimaryKeyDiscovery(currentObservableDataTable, refreshedDataTable, observableMergeOptions, primaryKeyColumnNames.Count);
@@ -100,6 +173,8 @@ namespace PocoDataSet.ObservableExtensions
         }
         #endregion
 
+#endregion
+
         #region Private Methods
         static void ValidateNoDuplicatePrimaryKeys(IDataTable dataTable, List<string> primaryKeyColumnNames, string tableRoleDescription)
         {
@@ -129,51 +204,6 @@ namespace PocoDataSet.ObservableExtensions
                 seen.Add(key);
             }
         }
-
-        static IDataRow? TryFindMatchingRefreshedRow(
-            IObservableDataRow currentObservableRow,
-            string currentPrimaryKeyValue,
-            Dictionary<string, IDataRow> refreshedIndex,
-            IObservableMergePolicy policy,
-            Dictionary<Guid, IDataRow>? refreshedRowsByClientKey)
-        {
-            IDataRow? refreshedDataRow;
-
-            refreshedIndex.TryGetValue(currentPrimaryKeyValue, out refreshedDataRow);
-
-            if (refreshedDataRow != null)
-            {
-                return refreshedDataRow;
-            }
-
-            if (!policy.RequiresClientKeyCorrelation)
-            {
-                return null;
-            }
-
-            if (refreshedRowsByClientKey == null)
-            {
-                return null;
-            }
-
-            Guid clientKey;
-            bool hasClientKey = RowIdentityResolver.TryGetClientKey(currentObservableRow.InnerDataRow, out clientKey);
-
-            if (!hasClientKey)
-            {
-                return null;
-            }
-
-            if (clientKey == Guid.Empty)
-            {
-                return null;
-            }
-
-            refreshedRowsByClientKey.TryGetValue(clientKey, out refreshedDataRow);
-            return refreshedDataRow;
-        }
-
-
 
         static bool TableHasColumn(IDataTable dataTable, string columnName)
         {
@@ -349,13 +379,23 @@ namespace PocoDataSet.ObservableExtensions
                     continue;
                 }
 
-                IDataRow? refreshedDataRow = TryFindMatchingRefreshedRow(
-                    observableDataRow,
-                    currentPkValue,
-                    refreshedIndex,
-                    policy,
-                    refreshedRowsByClientKey);
-if (refreshedDataRow == null)
+                IDataRow? refreshedDataRow = null;
+                refreshedIndex.TryGetValue(currentPkValue, out refreshedDataRow);
+
+                if (refreshedDataRow == null
+                    && policy.RequiresClientKeyCorrelation
+                    && refreshedRowsByClientKey != null)
+                {
+                    object? clientKeyValue;
+                    observableDataRow.InnerDataRow.TryGetValue(ClientKeyColumnName, out clientKeyValue);
+
+                    if (clientKeyValue is Guid clientKey && clientKey != Guid.Empty)
+                    {
+                        refreshedRowsByClientKey.TryGetValue(clientKey, out refreshedDataRow);
+                    }
+                }
+
+                if (refreshedDataRow == null)
                 {
                     bool preserve = policy.PreserveRowWhenMissingFromRefreshed(observableDataRow.InnerDataRow.DataRowState);
 

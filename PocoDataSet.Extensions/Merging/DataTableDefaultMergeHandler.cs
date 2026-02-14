@@ -20,12 +20,67 @@ namespace PocoDataSet.Extensions
         /// <param name="mergeOptions">Merge options</param>
         public void Merge(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
-            if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.PostSave)
+            MergeContext context = new MergeContext(currentDataTable, refreshedDataTable, mergeOptions);
+
+            ITableMergeStrategy strategy = TableMergeStrategyFactory.Create(context);
+            strategy.Execute(this, context);
+        }
+        
+        #region Merge Strategies
+        sealed class MergeContext
+        {
+            public MergeContext(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
             {
-                MergePostSave(currentDataTable, refreshedDataTable, mergeOptions);
-                return;
+                CurrentDataTable = currentDataTable;
+                RefreshedDataTable = refreshedDataTable;
+                MergeOptions = mergeOptions;
             }
 
+            public IDataTable CurrentDataTable { get; private set; }
+
+            public IDataTable RefreshedDataTable { get; private set; }
+
+            public IMergeOptions MergeOptions { get; private set; }
+        }
+
+        interface ITableMergeStrategy
+        {
+            void Execute(DataTableDefaultMergeHandler handler, MergeContext context);
+        }
+
+        static class TableMergeStrategyFactory
+        {
+            public static ITableMergeStrategy Create(MergeContext context)
+            {
+                if (context.MergeOptions != null && context.MergeOptions.MergeMode == MergeMode.PostSave)
+                {
+                    return new PostSaveMergeStrategy();
+                }
+
+                return new RefreshMergeStrategy();
+            }
+        }
+
+        sealed class RefreshMergeStrategy : ITableMergeStrategy
+        {
+            public void Execute(DataTableDefaultMergeHandler handler, MergeContext context)
+            {
+                handler.MergeRefresh(context.CurrentDataTable, context.RefreshedDataTable, context.MergeOptions);
+            }
+        }
+
+        sealed class PostSaveMergeStrategy : ITableMergeStrategy
+        {
+            public void Execute(DataTableDefaultMergeHandler handler, MergeContext context)
+            {
+                handler.MergePostSave(context.CurrentDataTable, context.RefreshedDataTable, context.MergeOptions);
+            }
+        }
+        #endregion
+
+        #region Refresh Merge
+        void MergeRefresh(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
+        {
             List<string> currentDataTablePrimaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
             if (currentDataTablePrimaryKeyColumnNames.Count == 0)
             {
@@ -44,6 +99,8 @@ namespace PocoDataSet.Extensions
         }
         #endregion
 
+#endregion
+
         #region PostSave Merge
         void MergePostSave(IDataTable currentDataTable, IDataTable changesetDataTable, IMergeOptions mergeOptions)
         {
@@ -52,12 +109,23 @@ namespace PocoDataSet.Extensions
             Dictionary<string, IDataRow> currentRowsByPrimaryKey = new Dictionary<string, IDataRow>(StringComparer.Ordinal);
             if (primaryKeyColumnNames.Count > 0)
             {
-                currentRowsByPrimaryKey = RowIndexBuilder.BuildRowIndex(currentDataTable, primaryKeyColumnNames);
-
-                // PostSave historically skipped empty PK values entirely (unlike Refresh indexing).
-                if (currentRowsByPrimaryKey.ContainsKey(string.Empty))
+                for (int i = 0; i < currentDataTable.Rows.Count; i++)
                 {
-                    currentRowsByPrimaryKey.Remove(string.Empty);
+                    IDataRow currentRow = currentDataTable.Rows[i];
+                    string pkValue;
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
+                {
+                    pkValue = string.Empty;
+                }
+                    if (string.IsNullOrEmpty(pkValue))
+                    {
+                        continue;
+                    }
+                    if (!currentRowsByPrimaryKey.ContainsKey(pkValue))
+                    {
+                        currentRowsByPrimaryKey.Add(pkValue, currentRow);
+                    }
                 }
             }
 
@@ -89,22 +157,65 @@ namespace PocoDataSet.Extensions
 
         static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IDataTable dataTable)
         {
-            return RowIdentityResolver.BuildClientKeyIndex(dataTable.Rows);
+            Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
+            for (int i = 0; i < dataTable.Rows.Count; i++)
+            {
+                IDataRow row = dataTable.Rows[i];
+                Guid clientKey;
+                if (TryGetClientKey(row, out clientKey))
+                {
+                    if (!index.ContainsKey(clientKey))
+                    {
+                        index.Add(clientKey, row);
+                    }
+                }
+            }
+            return index;
         }
 
         static bool TryGetClientKey(IDataRow row, out Guid clientKey)
         {
-            return RowIdentityResolver.TryGetClientKey(row, out clientKey);
+            clientKey = Guid.Empty;
+
+            if (!row.ContainsKey(SpecialColumnNames.CLIENT_KEY))
+            {
+                return false;
+            }
+
+            object? value = row[SpecialColumnNames.CLIENT_KEY];
+            if (value == null)
+            {
+                return false;
+            }
+
+            if (value is Guid)
+            {
+                clientKey = (Guid)value;
+                return clientKey != Guid.Empty;
+            }
+
+            return false;
         }
 
-        static bool TryFindPostSaveTargetRow(
-            IDataRow changesetRow,
-            List<string> primaryKeyColumnNames,
+        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
+        {
+            for (int c = 0; c < targetColumns.Count; c++)
+            {
+                string columnName = targetColumns[c].ColumnName;
+                if (!sourceRow.ContainsKey(columnName))
+                {
+                    continue;
+                }
+                targetRow[columnName] = sourceRow[columnName];
+            }
+        }
+
+        void ApplyPostSaveRow(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
             Dictionary<string, IDataRow> currentRowsByPrimaryKey,
             Dictionary<Guid, IDataRow> currentRowsByClientKey,
-            out IDataRow? targetRow)
+            IMergeOptions mergeOptions)
         {
-            targetRow = null;
+            IDataRow? targetRow = null;
 
             // 1) Try match by primary key (works for updates, and for inserts if PK is already present in UI).
             if (primaryKeyColumnNames.Count > 0)
@@ -115,7 +226,6 @@ namespace PocoDataSet.Extensions
                 {
                     pkValue = string.Empty;
                 }
-
                 if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
@@ -131,31 +241,6 @@ namespace PocoDataSet.Extensions
                     currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
                 }
             }
-
-            return targetRow != null;
-        }
-
-        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
-        {
-            for (int c = 0; c < targetColumns.Count; c++)
-            {
-                string columnName = targetColumns[c].ColumnName;
-                if (!sourceRow.ContainsKey(columnName))
-                {
-                    continue;
-                }
-
-                targetRow[columnName] = sourceRow[columnName];
-            }
-        }
-
-        void ApplyPostSaveRow(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
-            Dictionary<string, IDataRow> currentRowsByPrimaryKey,
-            Dictionary<Guid, IDataRow> currentRowsByClientKey,
-            IMergeOptions mergeOptions)
-        {
-            IDataRow? targetRow;
-            TryFindPostSaveTargetRow(changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, out targetRow);
 
             bool isNewRowAddedToCurrent = false;
             if (targetRow == null)
@@ -186,8 +271,30 @@ namespace PocoDataSet.Extensions
             Dictionary<Guid, IDataRow> currentRowsByClientKey,
             IMergeOptions mergeOptions)
         {
-            IDataRow? targetRow;
-            TryFindPostSaveTargetRow(changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, out targetRow);
+            IDataRow? targetRow = null;
+
+            if (primaryKeyColumnNames.Count > 0)
+            {
+                string pkValue;
+                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue);
+                if (!hasPrimaryKeyValue)
+                {
+                    pkValue = string.Empty;
+                }
+                if (!string.IsNullOrEmpty(pkValue))
+                {
+                    currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
+                }
+            }
+
+            if (targetRow == null)
+            {
+                Guid clientKey;
+                if (TryGetClientKey(changesetRow, out clientKey))
+                {
+                    currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
+                }
+            }
 
             if (targetRow == null)
             {
@@ -205,7 +312,6 @@ namespace PocoDataSet.Extensions
             }
         }
         #endregion
-
 
         #region Private Methods
         /// <summary>
