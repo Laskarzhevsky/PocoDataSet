@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Data
+namespace PocoDataSet.Data.Internal
 {
     /// <summary>
     /// Owns and enforces primary key invariants for a table.

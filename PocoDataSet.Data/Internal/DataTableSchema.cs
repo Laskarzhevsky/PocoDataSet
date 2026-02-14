@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Data
+namespace PocoDataSet.Data.Internal
 {
     /// <summary>
     /// Owns schema for a table: columns, lookup, and primary key tracking.

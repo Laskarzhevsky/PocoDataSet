@@ -5,25 +5,24 @@ using System.Text.Json.Serialization;
 
 using PocoDataSet.IData;
 
-namespace PocoDataSet.Data
+namespace PocoDataSet.Data.Internal
 {
     /// <summary>
-    /// System.Text.Json cannot deserialize interface-typed collections.
-    /// This converter round-trips IDataRow items and preserves FloatingDataRow semantics
-    /// via the $rowKind discriminator.
+    /// Serializes and deserializes a list of IDataRow preserving runtime types (DataRow vs FloatingDataRow)
+    /// using the "$rowKind" discriminator that already exists in the row JSON.
     /// </summary>
     internal sealed class DataRowListJsonConverter : JsonConverter<List<IDataRow>>
     {
-        public override List<IDataRow> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override List<IDataRow>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             if (reader.TokenType == JsonTokenType.Null)
             {
-                return new List<IDataRow>();
+                return null;
             }
 
             if (reader.TokenType != JsonTokenType.StartArray)
             {
-                throw new JsonException("Expected JSON array for Rows.");
+                throw new JsonException("Expected StartArray for Rows.");
             }
 
             List<IDataRow> rows = new List<IDataRow>();
@@ -35,7 +34,7 @@ namespace PocoDataSet.Data
                     return rows;
                 }
 
-                // Parse the row object so we can inspect $rowKind.
+                // Deserialize each row object into a JsonDocument to inspect $rowKind.
                 using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
                 {
                     JsonElement root = doc.RootElement;
@@ -49,21 +48,19 @@ namespace PocoDataSet.Data
                         }
                     }
 
-                    IDataRow row;
-                    string raw = root.GetRawText();
-
-                    if (string.Equals(rowKind, "floating", StringComparison.OrdinalIgnoreCase))
+                    // Decide concrete type. Default to DataRow.
+                    Type rowType = typeof(DataRow);
+                    if (!string.IsNullOrWhiteSpace(rowKind) &&
+                        string.Equals(rowKind, "Floating", StringComparison.OrdinalIgnoreCase))
                     {
-                        row = JsonSerializer.Deserialize<FloatingDataRow>(raw, options)
-                              ?? throw new JsonException("Failed to deserialize FloatingDataRow.");
-                    }
-                    else
-                    {
-                        row = JsonSerializer.Deserialize<DataRow>(raw, options)
-                              ?? throw new JsonException("Failed to deserialize DataRow.");
+                        rowType = typeof(FloatingDataRow);
                     }
 
-                    rows.Add(row);
+                    IDataRow? row = (IDataRow?)JsonSerializer.Deserialize(root.GetRawText(), rowType, options);
+                    if (row != null)
+                    {
+                        rows.Add(row);
+                    }
                 }
             }
 
@@ -83,8 +80,14 @@ namespace PocoDataSet.Data
             for (int i = 0; i < value.Count; i++)
             {
                 IDataRow row = value[i];
-                Type runtimeType = row.GetType();
-                JsonSerializer.Serialize(writer, row, runtimeType, options);
+                if (row == null)
+                {
+                    writer.WriteNullValue();
+                    continue;
+                }
+
+                // Serialize using runtime type to preserve $rowKind and subtype-specific JSON.
+                JsonSerializer.Serialize(writer, row, row.GetType(), options);
             }
 
             writer.WriteEndArray();

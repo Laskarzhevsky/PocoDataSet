@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+using PocoDataSet.Data.Internal;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Data
@@ -201,12 +202,12 @@ namespace PocoDataSet.Data
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("Rows")]
-        [JsonConverter(typeof(PocoDataSet.Data.DataRowListJsonConverter))]
+        [JsonConverter(typeof(DataRowListJsonConverter))]
         public List<IDataRow> RowsJson
         {
             get
             {
-                return _rows;
+                return new List<IDataRow>(_rows);
             }
             private set
             {
