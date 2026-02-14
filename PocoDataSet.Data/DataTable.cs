@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-using PocoDataSet.Data.Internal;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Data
@@ -22,6 +21,17 @@ namespace PocoDataSet.Data
         /// "Rows" property data field
         /// </summary>
         readonly List<IDataRow> _rows = new();
+
+        /// <summary>
+        /// Holds PrimaryKeys JSON value when it arrives before Columns during deserialization.
+        /// </summary>
+        List<string>? _pendingPrimaryKeysJson;
+
+        /// <summary>
+        /// Holds a flag indicating that PrimaryKeys should be rebuilt from column flags
+        /// when Columns arrive (PrimaryKeys JSON value was null).
+        /// </summary>
+        bool _pendingPrimaryKeysRebuildFromColumnFlags;
 
         /// <summary>
         /// TableName property data field
@@ -48,17 +58,71 @@ namespace PocoDataSet.Data
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("Columns")]
-        public List<IColumnMetadata> ColumnsJson
+        public List<ColumnMetadata> ColumnsJson
         {
             get
             {
-                // Serialize the authoritative schema list
-                return new List<IColumnMetadata>(_dataTableSchema.Items);
+                // System.Text.Json cannot deserialize interfaces. Use the concrete ColumnMetadata.
+                // If schema contains other IColumnMetadata implementations, clone/copy into ColumnMetadata.
+                List<ColumnMetadata> result = new List<ColumnMetadata>(_dataTableSchema.Items.Count);
+
+                for (int i = 0; i < _dataTableSchema.Items.Count; i++)
+                {
+                    IColumnMetadata item = _dataTableSchema.Items[i];
+
+                    ColumnMetadata? concrete = item as ColumnMetadata;
+                    if (concrete != null)
+                    {
+                        result.Add(concrete);
+                        continue;
+                    }
+
+                    IColumnMetadata cloned = item.Clone();
+                    ColumnMetadata? clonedConcrete = cloned as ColumnMetadata;
+                    if (clonedConcrete != null)
+                    {
+                        result.Add(clonedConcrete);
+                        continue;
+                    }
+
+                    // Last resort: copy known fields.
+                    ColumnMetadata copy = new ColumnMetadata();
+                    copy.ColumnName = item.ColumnName;
+                    copy.DataType = item.DataType;
+                    copy.Description = item.Description;
+                    copy.DisplayName = item.DisplayName;
+                    copy.DisplayOrder = item.DisplayOrder;
+                    copy.IsForeignKey = item.IsForeignKey;
+                    copy.IsNullable = item.IsNullable;
+                    copy.IsPrimaryKey = item.IsPrimaryKey;
+                    copy.MaxLength = item.MaxLength;
+                    copy.Precision = item.Precision;
+                    copy.ReferencedColumnName = item.ReferencedColumnName;
+                    copy.ReferencedTableName = item.ReferencedTableName;
+                    copy.Scale = item.Scale;
+                    result.Add(copy);
+                }
+
+                return result;
             }
             private set
             {
-                _dataTableSchema.ReplaceColumns(value);
+                // ReplaceColumns expects IColumnMetadata; convert without LINQ.
+                List<IColumnMetadata> list = new List<IColumnMetadata>();
+
+                if (value != null)
+                {
+                    for (int i = 0; i < value.Count; i++)
+                    {
+                        list.Add(value[i]);
+                    }
+                }
+
+                _dataTableSchema.ReplaceColumns(list);
                 _dataTableSchema.TableName = TableName;
+
+                // Apply pending PrimaryKeys (if PrimaryKeys JSON was read before Columns).
+                ApplyPendingPrimaryKeysIfAny();
 
                 // If rows were already deserialized, ensure each row has all columns.
                 EnsureExistingRowsHaveAllColumns();
@@ -95,7 +159,23 @@ namespace PocoDataSet.Data
                 // This also sets/unsets IsPrimaryKey flags on column metadata.
                 if (value == null)
                 {
+                    // Columns may not be deserialized yet.
+                    if (_dataTableSchema.Items.Count == 0)
+                    {
+                        _pendingPrimaryKeysRebuildFromColumnFlags = true;
+                        _pendingPrimaryKeysJson = null;
+                        return;
+                    }
+
                     _dataTableSchema.PrimaryKeys.RebuildFromColumnFlags(_dataTableSchema.Items);
+                    return;
+                }
+
+                // Columns may not be deserialized yet.
+                if (_dataTableSchema.Items.Count == 0)
+                {
+                    _pendingPrimaryKeysJson = value;
+                    _pendingPrimaryKeysRebuildFromColumnFlags = false;
                     return;
                 }
 
@@ -121,6 +201,7 @@ namespace PocoDataSet.Data
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("Rows")]
+        [JsonConverter(typeof(PocoDataSet.Data.DataRowListJsonConverter))]
         public List<IDataRow> RowsJson
         {
             get
@@ -413,6 +494,28 @@ namespace PocoDataSet.Data
         /// </summary>
         /// <param name="columnName">column name</param>
         
+        void ApplyPendingPrimaryKeysIfAny()
+        {
+            if (_dataTableSchema.Items.Count == 0)
+            {
+                return;
+            }
+
+            if (_pendingPrimaryKeysRebuildFromColumnFlags)
+            {
+                _dataTableSchema.PrimaryKeys.RebuildFromColumnFlags(_dataTableSchema.Items);
+                _pendingPrimaryKeysRebuildFromColumnFlags = false;
+                _pendingPrimaryKeysJson = null;
+                return;
+            }
+
+            if (_pendingPrimaryKeysJson != null)
+            {
+                _dataTableSchema.PrimaryKeys.SetPrimaryKeys(_dataTableSchema.Items, _pendingPrimaryKeysJson, TableName);
+                _pendingPrimaryKeysJson = null;
+            }
+        }
+
         /// <summary>
         /// Ensures that all existing rows have all current schema columns.
         /// This is important during deserialization where Rows and Columns can be set in either order.

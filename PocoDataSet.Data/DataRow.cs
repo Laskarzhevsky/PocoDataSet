@@ -372,9 +372,72 @@ namespace PocoDataSet.Data
         /// <param name="columnName">Column name</param>
         /// <param name="value">Value if found</param>
         /// <returns>True if value returned, otherwise false</returns>
+        
+        private static object? NormalizeJsonElement(object? value)
+        {
+            if (value is System.Text.Json.JsonElement json)
+            {
+                switch (json.ValueKind)
+                {
+                    case System.Text.Json.JsonValueKind.Null:
+                    case System.Text.Json.JsonValueKind.Undefined:
+                        return null;
+
+                    case System.Text.Json.JsonValueKind.String:
+                        return json.GetString();
+
+                    case System.Text.Json.JsonValueKind.True:
+                    case System.Text.Json.JsonValueKind.False:
+                        return json.GetBoolean();
+
+                    case System.Text.Json.JsonValueKind.Number:
+                        // Prefer Int32 when possible (most common for PKs), then Int64, then Decimal/Double.
+                        int i32;
+                        if (json.TryGetInt32(out i32))
+                        {
+                            return i32;
+                        }
+
+                        long i64;
+                        if (json.TryGetInt64(out i64))
+                        {
+                            return i64;
+                        }
+
+                        decimal dec;
+                        if (json.TryGetDecimal(out dec))
+                        {
+                            return dec;
+                        }
+
+                        return json.GetDouble();
+
+                    default:
+                        // Object/Array: keep raw text for safety.
+                        return json.GetRawText();
+                }
+            }
+
+            return value;
+        }
+
         public bool TryGetValue(string columnName, out object? value)
         {
-            return _values.TryGetValue(columnName, out value);
+            object? raw;
+            if (!_values.TryGetValue(columnName, out raw))
+            {
+                value = null;
+                return false;
+            }
+
+            object? normalized = NormalizeJsonElement(raw);
+            if (!object.ReferenceEquals(raw, normalized))
+            {
+                _values[columnName] = normalized;
+            }
+
+            value = normalized;
+            return true;
         }
         #endregion
 
@@ -394,12 +457,19 @@ namespace PocoDataSet.Data
 
                 object? value;
                 bool hasValue = _values.TryGetValue(columnName, out value);
+
                 if (!hasValue)
                 {
                     return null;
                 }
 
-                return value;
+                object? normalized = NormalizeJsonElement(value);
+                if (!object.ReferenceEquals(value, normalized))
+                {
+                    _values[columnName] = normalized;
+                }
+
+                return normalized;
             }
             set
             {
