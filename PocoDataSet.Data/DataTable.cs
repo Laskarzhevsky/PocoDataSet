@@ -29,12 +29,6 @@ namespace PocoDataSet.Data
         List<string>? _pendingPrimaryKeysJson;
 
         /// <summary>
-        /// Holds a flag indicating that PrimaryKeys should be rebuilt from column flags
-        /// when Columns arrive (PrimaryKeys JSON value was null).
-        /// </summary>
-        bool _pendingPrimaryKeysRebuildFromColumnFlags;
-
-        /// <summary>
         /// TableName property data field
         /// </summary>
         string _tableName = string.Empty;
@@ -139,48 +133,35 @@ namespace PocoDataSet.Data
         {
             get
             {
-                return _dataTableSchema.PrimaryKeys.Items;
+                return _dataTableSchema.PrimaryKeyColumnNames;
             }
         }
 
         /// <summary>
-        /// Gets primary keys for JSON serialization / deserialization
+        /// Legacy JSON hook: accepts "PrimaryKeys" from older payloads.
+        /// PK membership is stored only in <see cref="IColumnMetadata.IsPrimaryKey"/> flags.
+        /// This property is deserialization-only (no getter => it is not emitted).
         /// </summary>
         [JsonInclude]
         [JsonPropertyName("PrimaryKeys")]
-        public List<string> PrimaryKeysJson
+        private List<string>? PrimaryKeysJson
         {
-            get
+            set
             {
-                return new List<string>(_dataTableSchema.PrimaryKeys.Items);
-            }
-            private set
-            {
-                // If JSON includes explicit PrimaryKeys, treat them as authoritative.
-                // This also sets/unsets IsPrimaryKey flags on column metadata.
-                if (value == null)
-                {
-                    // Columns may not be deserialized yet.
-                    if (_dataTableSchema.Items.Count == 0)
-                    {
-                        _pendingPrimaryKeysRebuildFromColumnFlags = true;
-                        _pendingPrimaryKeysJson = null;
-                        return;
-                    }
-
-                    _dataTableSchema.PrimaryKeys.RebuildFromColumnFlags(_dataTableSchema.Items);
-                    return;
-                }
-
-                // Columns may not be deserialized yet.
+                // If columns are not available yet, defer.
                 if (_dataTableSchema.Items.Count == 0)
                 {
                     _pendingPrimaryKeysJson = value;
-                    _pendingPrimaryKeysRebuildFromColumnFlags = false;
                     return;
                 }
 
-                _dataTableSchema.PrimaryKeys.SetPrimaryKeys(_dataTableSchema.Items, value, TableName);
+                if (value == null)
+                {
+                    // No explicit PK list provided; keep whatever flags came from columns.
+                    return;
+                }
+
+                _dataTableSchema.SetPrimaryKeysByName(value);
             }
         }
 
@@ -338,7 +319,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = true;
-                r.SetPrimaryKeyColumns(_dataTableSchema.PrimaryKeys.Items);
+                r.SetPrimaryKeyColumns(_dataTableSchema.PrimaryKeyColumnNames);
             }
 
             // Physically attach row WITHOUT calling AddRow (AddRow is for client-added rows)
@@ -391,7 +372,7 @@ namespace PocoDataSet.Data
             if (r != null)
             {
                 r.IsLoadedRow = false;
-                r.SetPrimaryKeyColumns(_dataTableSchema.PrimaryKeys.Items);
+                r.SetPrimaryKeyColumns(_dataTableSchema.PrimaryKeyColumnNames);
             }
 
             _rows.Add(dataRow);
@@ -403,7 +384,7 @@ namespace PocoDataSet.Data
         /// </summary>
         public void ClearPrimaryKeys()
         {
-            _dataTableSchema.PrimaryKeys.ClearPrimaryKeys(_dataTableSchema.Items);
+            _dataTableSchema.ClearPrimaryKeyFlags();
         }
 
         /// <summary>
@@ -485,7 +466,7 @@ namespace PocoDataSet.Data
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
         public void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
         {
-            _dataTableSchema.PrimaryKeys.SetPrimaryKeys(Columns, primaryKeyColumnNames, TableName);
+            _dataTableSchema.SetPrimaryKeysByName(primaryKeyColumnNames);
         }
         #endregion
 
@@ -502,19 +483,13 @@ namespace PocoDataSet.Data
                 return;
             }
 
-            if (_pendingPrimaryKeysRebuildFromColumnFlags)
+            if (_pendingPrimaryKeysJson == null)
             {
-                _dataTableSchema.PrimaryKeys.RebuildFromColumnFlags(_dataTableSchema.Items);
-                _pendingPrimaryKeysRebuildFromColumnFlags = false;
-                _pendingPrimaryKeysJson = null;
                 return;
             }
 
-            if (_pendingPrimaryKeysJson != null)
-            {
-                _dataTableSchema.PrimaryKeys.SetPrimaryKeys(_dataTableSchema.Items, _pendingPrimaryKeysJson, TableName);
-                _pendingPrimaryKeysJson = null;
-            }
+            _dataTableSchema.SetPrimaryKeysByName(_pendingPrimaryKeysJson);
+            _pendingPrimaryKeysJson = null;
         }
 
         /// <summary>

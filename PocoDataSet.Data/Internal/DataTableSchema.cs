@@ -27,9 +27,10 @@ namespace PocoDataSet.Data.Internal
         private readonly Dictionary<string, IColumnMetadata> _columnsByName = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// PrimaryKeys property data field
+        /// Cached PK column names derived from <see cref="IColumnMetadata.IsPrimaryKey"/> flags.
+        /// Source of truth is always the column flags.
         /// </summary>
-        readonly PrimaryKeys _primaryKeys = new();
+        readonly List<string> _primaryKeyColumnNames = new();
         #endregion
 
         #region Public Methods
@@ -42,8 +43,7 @@ namespace PocoDataSet.Data.Internal
             _columns.Clear();
             _clientKeyColumn = null;
 
-            // Clear PK list; flags are on columns that are being cleared anyway.
-            _primaryKeys.RebuildFromColumnFlags(_columns);
+            _primaryKeyColumnNames.Clear();
         }
 
         /// <summary>
@@ -149,8 +149,7 @@ namespace PocoDataSet.Data.Internal
                 _clientKeyColumn = columnMetadata;
             }
 
-            // Keep PK list in sync with flags.
-            _primaryKeys.RebuildFromColumnFlags(_columns);
+            RebuildPrimaryKeysFromColumnFlags();
         }
 
         /// <summary>
@@ -197,7 +196,7 @@ namespace PocoDataSet.Data.Internal
                 }
             }
 
-            _primaryKeys.RebuildFromColumnFlags(_columns);
+            RebuildPrimaryKeysFromColumnFlags();
         }
 
         /// <summary>
@@ -229,7 +228,77 @@ namespace PocoDataSet.Data.Internal
             _clientKeyColumn = clientKeyColumn;
 
             // PK list unchanged, but keep it consistent with flags.
-            _primaryKeys.RebuildFromColumnFlags(_columns);
+            RebuildPrimaryKeysFromColumnFlags();
+        }
+
+        /// <summary>
+        /// Gets a flag indicating whether this schema currently has any primary key columns.
+        /// </summary>
+        public bool HasPrimaryKey
+        {
+            get
+            {
+                return _primaryKeyColumnNames.Count > 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets primary key column names derived from <see cref="IColumnMetadata.IsPrimaryKey"/> flags.
+        /// </summary>
+        public IReadOnlyList<string> PrimaryKeyColumnNames
+        {
+            get
+            {
+                return _primaryKeyColumnNames;
+            }
+        }
+
+        /// <summary>
+        /// Clears primary key flags on all columns.
+        /// </summary>
+        public void ClearPrimaryKeyFlags()
+        {
+            for (int i = 0; i < _columns.Count; i++)
+            {
+                IColumnMetadata column = _columns[i];
+                if (column != null)
+                {
+                    column.IsPrimaryKey = false;
+                }
+            }
+
+            RebuildPrimaryKeysFromColumnFlags();
+        }
+
+        /// <summary>
+        /// Sets primary keys by column name. This is authoritative: it clears existing PK flags first.
+        /// </summary>
+        public void SetPrimaryKeysByName(IList<string> primaryKeyColumnNames)
+        {
+            ClearPrimaryKeyFlags();
+
+            if (primaryKeyColumnNames == null || primaryKeyColumnNames.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < primaryKeyColumnNames.Count; i++)
+            {
+                string name = primaryKeyColumnNames[i];
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    continue;
+                }
+
+                if (!_columnsByName.TryGetValue(name, out IColumnMetadata column))
+                {
+                    throw new InvalidOperationException($"Column '{name}' does not exist in table '{TableName}'.");
+                }
+
+                column.IsPrimaryKey = true;
+            }
+
+            RebuildPrimaryKeysFromColumnFlags();
         }
         #endregion
 
@@ -257,23 +326,50 @@ namespace PocoDataSet.Data.Internal
         }
 
         /// <summary>
-        /// Gets primary keys
-        /// </summary>
-        public PrimaryKeys PrimaryKeys
-        {
-            get
-            {
-                return _primaryKeys;
-            }
-        }
-
-        /// <summary>
         /// The owning table name (for error messages).
         /// </summary>
         public string TableName
         {
             get; set;
         } = string.Empty;
+
+        #endregion
+
+        #region Private Methods
+        void RebuildPrimaryKeysFromColumnFlags()
+        {
+            _primaryKeyColumnNames.Clear();
+
+            for (int i = 0; i < _columns.Count; i++)
+            {
+                IColumnMetadata column = _columns[i];
+                if (column == null)
+                {
+                    continue;
+                }
+
+                if (!column.IsPrimaryKey)
+                {
+                    continue;
+                }
+
+                // Keep order stable (schema order). Avoid duplicates.
+                bool alreadyAdded = false;
+                for (int j = 0; j < _primaryKeyColumnNames.Count; j++)
+                {
+                    if (string.Equals(_primaryKeyColumnNames[j], column.ColumnName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        alreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyAdded)
+                {
+                    _primaryKeyColumnNames.Add(column.ColumnName);
+                }
+            }
+        }
         #endregion
     }
 }
