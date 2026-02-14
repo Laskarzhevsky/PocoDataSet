@@ -108,8 +108,11 @@ namespace PocoDataSet.ObservableExtensions
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
                 IDataRow row = dataTable.Rows[i];
-                string key = row.CompilePrimaryKeyValue(primaryKeyColumnNames);
-
+                string key;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out key))
+                {
+                    key = string.Empty;
+                }
                 if (seen.Contains(key))
                 {
                     throw new InvalidOperationException(
@@ -215,7 +218,7 @@ namespace PocoDataSet.ObservableExtensions
                 {
                     throw new InvalidOperationException(
                         "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
-                    }
+                }
 
                 index[g] = row;
             }
@@ -265,8 +268,11 @@ namespace PocoDataSet.ObservableExtensions
             for (int i = currentObservableDataTable.Rows.Count - 1; i >= 0; i--)
             {
                 IObservableDataRow observableDataRow = currentObservableDataTable.Rows[i];
-                string currentPkValue = observableDataRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
-
+                string currentPkValue;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(observableDataRow.InnerDataRow, primaryKeyColumnNames, out currentPkValue))
+                {
+                    currentPkValue = string.Empty;
+                }
                 // PostSave semantics: finalize deletes.
                 // Deleted rows are removed from the current table regardless of whether the server returned
                 // a corresponding row. Additionally, if a matching server row exists, it is considered
@@ -331,7 +337,11 @@ namespace PocoDataSet.ObservableExtensions
                             new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
                     }
 
-                    string refreshedPkValue = refreshedDataRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
+                    string refreshedPkValue;
+                    if (!RowIdentityResolver.TryGetPrimaryKeyValue(refreshedDataRow, primaryKeyColumnNames, out refreshedPkValue))
+                    {
+                        refreshedPkValue = string.Empty;
+                    }
                     processedRefreshedPrimaryKeys.Add(refreshedPkValue);
                 }
             }

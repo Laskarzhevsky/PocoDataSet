@@ -1,21 +1,47 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
     /// <summary>
-    /// Centralizes row identity resolution for merge operations.
-    /// Primary rule: if schema defines primary keys, use them.
-    /// Fallback: use <see cref="SpecialColumnNames.CLIENT_KEY"/> when present (changeset correlation).
+    /// Centralized row identity resolution (PK-first, then __ClientKey).
     /// </summary>
     public static class RowIdentityResolver
     {
-        /// <summary>
-        /// Tries to compute the compiled primary key value for the given row.
-        /// </summary>
-        public static bool TryGetPrimaryKeyValue(IDataRow row, IReadOnlyList<string> primaryKeyColumnNames, out string primaryKeyValue)
+        #region Public Methods
+        public static bool TryGetRowKey(IDataRow? row, IReadOnlyList<string> primaryKeyColumnNames, out string rowKey)
+        {
+            rowKey = string.Empty;
+
+            if (row == null)
+            {
+                return false;
+            }
+
+            bool hasPrimaryKey = primaryKeyColumnNames != null && primaryKeyColumnNames.Count > 0;
+            if (hasPrimaryKey)
+            {
+                string pkValue = CompilePrimaryKeyValue(row, primaryKeyColumnNames);
+                rowKey = pkValue;
+                return true;
+            }
+
+            Guid clientKey;
+            bool hasClientKey = TryGetClientKey(row, out clientKey);
+            if (hasClientKey)
+            {
+                rowKey = clientKey.ToString("D", CultureInfo.InvariantCulture);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool TryGetPrimaryKeyValue(IDataRow? row, IReadOnlyList<string> primaryKeyColumnNames, out string primaryKeyValue)
         {
             primaryKeyValue = string.Empty;
 
@@ -29,20 +55,11 @@ namespace PocoDataSet.Extensions
                 return false;
             }
 
-            string compiled = row.CompilePrimaryKeyValue(primaryKeyColumnNames);
-            if (string.IsNullOrEmpty(compiled))
-            {
-                return false;
-            }
-
-            primaryKeyValue = compiled;
+            primaryKeyValue = CompilePrimaryKeyValue(row, primaryKeyColumnNames);
             return true;
         }
 
-        /// <summary>
-        /// Tries to read the client key from the given row.
-        /// </summary>
-        public static bool TryGetClientKey(IDataRow row, out Guid clientKey)
+        public static bool TryGetClientKey(IDataRow? row, out Guid clientKey)
         {
             clientKey = Guid.Empty;
 
@@ -51,77 +68,115 @@ namespace PocoDataSet.Extensions
                 return false;
             }
 
-            if (!row.ContainsKey(SpecialColumnNames.CLIENT_KEY))
+            object? raw;
+            bool found = row.TryGetValue(SpecialColumnNames.CLIENT_KEY, out raw);
+            if (!found)
             {
                 return false;
             }
 
-            object? value = row[SpecialColumnNames.CLIENT_KEY];
-            if (value == null)
+            if (raw == null)
             {
                 return false;
             }
 
-            if (value is Guid)
+            if (raw is Guid guid)
             {
-                clientKey = (Guid)value;
-                return clientKey != Guid.Empty;
+                clientKey = guid;
+                return true;
+            }
+
+            string? s = raw as string;
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                Guid parsed;
+                bool ok = Guid.TryParse(s, out parsed);
+                if (ok)
+                {
+                    clientKey = parsed;
+                    return true;
+                }
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Builds an index of rows by client key. Rows without a client key are skipped.
-        /// </summary>
-        public static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IDataTable dataTable)
+        public static Dictionary<Guid, IDataRow> BuildClientKeyIndex(IEnumerable<IDataRow> rows)
         {
             Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
 
-            if (dataTable == null)
+            foreach (IDataRow row in rows)
             {
-                return index;
-            }
-
-            for (int i = 0; i < dataTable.Rows.Count; i++)
-            {
-                IDataRow row = dataTable.Rows[i];
-
                 Guid clientKey;
-                if (TryGetClientKey(row, out clientKey))
+                bool hasClientKey = TryGetClientKey(row, out clientKey);
+                if (!hasClientKey)
                 {
-                    if (!index.ContainsKey(clientKey))
-                    {
-                        index.Add(clientKey, row);
-                    }
+                    continue;
+                }
+
+                // First wins (matches prior behavior in BuildPrimaryKeyIndex)
+                if (!index.ContainsKey(clientKey))
+                {
+                    index.Add(clientKey, row);
                 }
             }
 
             return index;
         }
+        #endregion
 
-        /// <summary>
-        /// Tries to build a deterministic row key string (PK first, then client key).
-        /// </summary>
-        public static bool TryGetRowKey(IDataRow row, IReadOnlyList<string> primaryKeyColumnNames, out string rowKey)
+        #region Methods
+        static string CompilePrimaryKeyValue(IDataRow dataRow, IReadOnlyList<string> primaryKeyColumnNames)
         {
-            rowKey = string.Empty;
+            StringBuilder stringBuilder = new StringBuilder();
 
-            string pk;
-            if (TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out pk))
+            for (int i = 0; i < primaryKeyColumnNames.Count; i++)
             {
-                rowKey = "PK:" + pk;
-                return true;
+                string columnName = primaryKeyColumnNames[i];
+
+                object? raw;
+                bool found = dataRow.TryGetValue(columnName, out raw);
+                if (!found)
+                {
+                    // Keep old behavior: schema says PK column exists; missing is a bug.
+                    throw new KeyNotFoundException(columnName);
+                }
+
+                string stringRepresentationOfValue = GetStringRepresentationOf(raw);
+
+                if (i > 0)
+                {
+                    stringBuilder.Append('|');
+                }
+
+                stringBuilder.Append(stringRepresentationOfValue.Length.ToString(CultureInfo.InvariantCulture));
+                stringBuilder.Append('#');
+                stringBuilder.Append(stringRepresentationOfValue);
             }
 
-            Guid clientKey;
-            if (TryGetClientKey(row, out clientKey))
-            {
-                rowKey = "CK:" + clientKey.ToString("D");
-                return true;
-            }
-
-            return false;
+            return stringBuilder.ToString();
         }
+
+        static string GetStringRepresentationOf(object? value)
+        {
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
+            if (Convert.IsDBNull(value))
+            {
+                return string.Empty;
+            }
+
+            IFormattable? formattable = value as IFormattable;
+            if (formattable != null)
+            {
+                return formattable.ToString(null, CultureInfo.InvariantCulture) ?? string.Empty;
+            }
+
+            return value.ToString() ?? string.Empty;
+        }
+        #endregion
     }
 }

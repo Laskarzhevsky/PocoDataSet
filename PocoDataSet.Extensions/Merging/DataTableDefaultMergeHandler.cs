@@ -55,8 +55,12 @@ namespace PocoDataSet.Extensions
                 for (int i = 0; i < currentDataTable.Rows.Count; i++)
                 {
                     IDataRow currentRow = currentDataTable.Rows[i];
-                    string pkValue = currentRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
-                    if (string.IsNullOrEmpty(pkValue))
+                    string pkValue;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(currentRow, primaryKeyColumnNames, out pkValue))
+                {
+                    pkValue = string.Empty;
+                }
+if (string.IsNullOrEmpty(pkValue))
                     {
                         continue;
                     }
@@ -158,8 +162,12 @@ namespace PocoDataSet.Extensions
             // 1) Try match by primary key (works for updates, and for inserts if PK is already present in UI).
             if (primaryKeyColumnNames.Count > 0)
             {
-                string pkValue = changesetRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
-                if (!string.IsNullOrEmpty(pkValue))
+                string pkValue;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue))
+                {
+                    pkValue = string.Empty;
+                }
+if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
                 }
@@ -208,8 +216,12 @@ namespace PocoDataSet.Extensions
 
             if (primaryKeyColumnNames.Count > 0)
             {
-                string pkValue = changesetRow.CompilePrimaryKeyValue(primaryKeyColumnNames);
-                if (!string.IsNullOrEmpty(pkValue))
+                string pkValue;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue))
+                {
+                    pkValue = string.Empty;
+                }
+if (!string.IsNullOrEmpty(pkValue))
                 {
                     currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
                 }
@@ -277,9 +289,12 @@ namespace PocoDataSet.Extensions
             for (int i = currentDataTable.Rows.Count - 1; i >= 0; i--)
             {
                 IDataRow currentDataRow = currentDataTable.Rows[i];
-                string primaryKeyValue = currentDataRow.CompilePrimaryKeyValue(currentDataTablePrimaryKeyColumnNames);
-
-                IDataRow? refreshedDataRow;
+                string primaryKeyValue;
+                if (!RowIdentityResolver.TryGetPrimaryKeyValue(currentDataRow, currentDataTablePrimaryKeyColumnNames, out primaryKeyValue))
+                {
+                    primaryKeyValue = string.Empty;
+                }
+IDataRow? refreshedDataRow;
                 refreshedDataTableDataRowIndex.TryGetValue(primaryKeyValue, out refreshedDataRow);
                 if (refreshedDataRow == null)
                 {
