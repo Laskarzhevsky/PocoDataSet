@@ -130,6 +130,51 @@ namespace PocoDataSet.ObservableExtensions
             }
         }
 
+        static IDataRow? TryFindMatchingRefreshedRow(
+            IObservableDataRow currentObservableRow,
+            string currentPrimaryKeyValue,
+            Dictionary<string, IDataRow> refreshedIndex,
+            IObservableMergePolicy policy,
+            Dictionary<Guid, IDataRow>? refreshedRowsByClientKey)
+        {
+            IDataRow? refreshedDataRow;
+
+            refreshedIndex.TryGetValue(currentPrimaryKeyValue, out refreshedDataRow);
+
+            if (refreshedDataRow != null)
+            {
+                return refreshedDataRow;
+            }
+
+            if (!policy.RequiresClientKeyCorrelation)
+            {
+                return null;
+            }
+
+            if (refreshedRowsByClientKey == null)
+            {
+                return null;
+            }
+
+            Guid clientKey;
+            bool hasClientKey = RowIdentityResolver.TryGetClientKey(currentObservableRow.InnerDataRow, out clientKey);
+
+            if (!hasClientKey)
+            {
+                return null;
+            }
+
+            if (clientKey == Guid.Empty)
+            {
+                return null;
+            }
+
+            refreshedRowsByClientKey.TryGetValue(clientKey, out refreshedDataRow);
+            return refreshedDataRow;
+        }
+
+
+
         static bool TableHasColumn(IDataTable dataTable, string columnName)
         {
             for (int i = 0; i < dataTable.Columns.Count; i++)
@@ -143,40 +188,7 @@ namespace PocoDataSet.ObservableExtensions
             return false;
         }
 
-        static bool TryGetClientKeyGuid(IDataRow row, bool requireClientKey, string tableName, string tableRoleDescription, out Guid clientKey)
-        {
-            clientKey = Guid.Empty;
-
-            object? value;
-            row.TryGetValue(ClientKeyColumnName, out value);
-
-            if (value == null)
-            {
-                if (requireClientKey)
-                {
-                    throw new InvalidOperationException(
-                        "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in " + tableRoleDescription + " table '" + tableName + "'.");
-                }
-
-                return false;
-            }
-
-            if (!(value is Guid g) || g == Guid.Empty)
-            {
-                if (requireClientKey)
-                {
-                    throw new InvalidOperationException(
-                        "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in " + tableRoleDescription + " table '" + tableName + "'.");
-                }
-
-                return false;
-            }
-
-            clientKey = g;
-            return true;
-        }
-
-static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refreshedDataTable, bool requireClientKey)
+        static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refreshedDataTable, bool requireClientKey)
         {
             Dictionary<Guid, IDataRow> index = new Dictionary<Guid, IDataRow>();
 
@@ -184,19 +196,38 @@ static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refre
             {
                 IDataRow row = refreshedDataTable.Rows[i];
 
-                Guid clientKey;
-                if (!TryGetClientKeyGuid(row, requireClientKey, refreshedDataTable.TableName, "refreshed", out clientKey))
+                object? value;
+                row.TryGetValue(ClientKeyColumnName, out value);
+
+                if (value == null)
                 {
+                    if (requireClientKey)
+                    {
+                        throw new InvalidOperationException(
+                            "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in refreshed table '" + refreshedDataTable.TableName + "'.");
+                    }
+
                     continue;
                 }
 
-                if (index.ContainsKey(clientKey))
+                if (!(value is Guid g) || g == Guid.Empty)
                 {
-                    throw new InvalidOperationException(
-                        "Duplicate " + ClientKeyColumnName + " '" + clientKey.ToString() + "' detected in refreshed table '" + refreshedDataTable.TableName + "'.");
+                    if (requireClientKey)
+                    {
+                        throw new InvalidOperationException(
+                            "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in refreshed table '" + refreshedDataTable.TableName + "'.");
+                    }
+
+                    continue;
                 }
 
-                index.Add(clientKey, row);
+                if (index.ContainsKey(g))
+                {
+                    throw new InvalidOperationException(
+                        "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in refreshed table '" + refreshedDataTable.TableName + "'.");
+                }
+
+                index[g] = row;
             }
 
             return index;
@@ -208,21 +239,40 @@ static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refre
 
             for (int i = 0; i < currentObservableDataTable.Rows.Count; i++)
             {
-                IObservableDataRow observableRow = currentObservableDataTable.Rows[i];
+                IObservableDataRow row = currentObservableDataTable.Rows[i];
 
-                Guid clientKey;
-                if (!TryGetClientKeyGuid(observableRow.InnerDataRow, requireClientKey, currentObservableDataTable.TableName, "current", out clientKey))
+                object? value;
+                row.InnerDataRow.TryGetValue(ClientKeyColumnName, out value);
+
+                if (value == null)
                 {
+                    if (requireClientKey)
+                    {
+                        throw new InvalidOperationException(
+                            "MergeMode.PostSave requires non-null '" + ClientKeyColumnName + "' values in current table '" + currentObservableDataTable.TableName + "'.");
+                    }
+
                     continue;
                 }
 
-                if (index.ContainsKey(clientKey))
+                if (!(value is Guid g) || g == Guid.Empty)
                 {
-                    throw new InvalidOperationException(
-                        "Duplicate " + ClientKeyColumnName + " '" + clientKey.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
+                    if (requireClientKey)
+                    {
+                        throw new InvalidOperationException(
+                            "MergeMode.PostSave requires non-empty '" + ClientKeyColumnName + "' values in current table '" + currentObservableDataTable.TableName + "'.");
+                    }
+
+                    continue;
                 }
 
-                index.Add(clientKey, observableRow);
+                if (index.ContainsKey(g))
+                {
+                    throw new InvalidOperationException(
+                        "Duplicate " + ClientKeyColumnName + " '" + g.ToString() + "' detected in current table '" + currentObservableDataTable.TableName + "'.");
+                    }
+
+                index[g] = row;
             }
 
             return index;
@@ -299,23 +349,13 @@ static Dictionary<Guid, IDataRow> BuildRefreshedRowsByClientKey(IDataTable refre
                     continue;
                 }
 
-                IDataRow? refreshedDataRow = null;
-                refreshedIndex.TryGetValue(currentPkValue, out refreshedDataRow);
-
-                if (refreshedDataRow == null
-                    && policy.RequiresClientKeyCorrelation
-                    && refreshedRowsByClientKey != null)
-                {
-                    object? clientKeyValue;
-                    observableDataRow.InnerDataRow.TryGetValue(ClientKeyColumnName, out clientKeyValue);
-
-                    if (clientKeyValue is Guid clientKey && clientKey != Guid.Empty)
-                    {
-                        refreshedRowsByClientKey.TryGetValue(clientKey, out refreshedDataRow);
-                    }
-                }
-
-                if (refreshedDataRow == null)
+                IDataRow? refreshedDataRow = TryFindMatchingRefreshedRow(
+                    observableDataRow,
+                    currentPkValue,
+                    refreshedIndex,
+                    policy,
+                    refreshedRowsByClientKey);
+if (refreshedDataRow == null)
                 {
                     bool preserve = policy.PreserveRowWhenMissingFromRefreshed(observableDataRow.InnerDataRow.DataRowState);
 

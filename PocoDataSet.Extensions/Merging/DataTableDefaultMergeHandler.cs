@@ -97,26 +97,14 @@ namespace PocoDataSet.Extensions
             return RowIdentityResolver.TryGetClientKey(row, out clientKey);
         }
 
-        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
-        {
-            for (int c = 0; c < targetColumns.Count; c++)
-            {
-                string columnName = targetColumns[c].ColumnName;
-                if (!sourceRow.ContainsKey(columnName))
-                {
-                    continue;
-                }
-
-                targetRow[columnName] = sourceRow[columnName];
-            }
-        }
-
-        void ApplyPostSaveRow(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
+        static bool TryFindPostSaveTargetRow(
+            IDataRow changesetRow,
+            List<string> primaryKeyColumnNames,
             Dictionary<string, IDataRow> currentRowsByPrimaryKey,
             Dictionary<Guid, IDataRow> currentRowsByClientKey,
-            IMergeOptions mergeOptions)
+            out IDataRow? targetRow)
         {
-            IDataRow? targetRow = null;
+            targetRow = null;
 
             // 1) Try match by primary key (works for updates, and for inserts if PK is already present in UI).
             if (primaryKeyColumnNames.Count > 0)
@@ -143,6 +131,31 @@ namespace PocoDataSet.Extensions
                     currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
                 }
             }
+
+            return targetRow != null;
+        }
+
+        static void CopyAllValues(IDataRow targetRow, IDataRow sourceRow, IReadOnlyList<IColumnMetadata> targetColumns)
+        {
+            for (int c = 0; c < targetColumns.Count; c++)
+            {
+                string columnName = targetColumns[c].ColumnName;
+                if (!sourceRow.ContainsKey(columnName))
+                {
+                    continue;
+                }
+
+                targetRow[columnName] = sourceRow[columnName];
+            }
+        }
+
+        void ApplyPostSaveRow(IDataTable currentDataTable, IDataRow changesetRow, List<string> primaryKeyColumnNames,
+            Dictionary<string, IDataRow> currentRowsByPrimaryKey,
+            Dictionary<Guid, IDataRow> currentRowsByClientKey,
+            IMergeOptions mergeOptions)
+        {
+            IDataRow? targetRow;
+            TryFindPostSaveTargetRow(changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, out targetRow);
 
             bool isNewRowAddedToCurrent = false;
             if (targetRow == null)
@@ -173,31 +186,8 @@ namespace PocoDataSet.Extensions
             Dictionary<Guid, IDataRow> currentRowsByClientKey,
             IMergeOptions mergeOptions)
         {
-            IDataRow? targetRow = null;
-
-            if (primaryKeyColumnNames.Count > 0)
-            {
-                string pkValue;
-                bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(changesetRow, primaryKeyColumnNames, out pkValue);
-                if (!hasPrimaryKeyValue)
-                {
-                    pkValue = string.Empty;
-                }
-
-                if (!string.IsNullOrEmpty(pkValue))
-                {
-                    currentRowsByPrimaryKey.TryGetValue(pkValue, out targetRow);
-                }
-            }
-
-            if (targetRow == null)
-            {
-                Guid clientKey;
-                if (TryGetClientKey(changesetRow, out clientKey))
-                {
-                    currentRowsByClientKey.TryGetValue(clientKey, out targetRow);
-                }
-            }
+            IDataRow? targetRow;
+            TryFindPostSaveTargetRow(changesetRow, primaryKeyColumnNames, currentRowsByPrimaryKey, currentRowsByClientKey, out targetRow);
 
             if (targetRow == null)
             {
