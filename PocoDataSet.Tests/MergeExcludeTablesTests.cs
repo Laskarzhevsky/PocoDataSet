@@ -35,7 +35,7 @@ namespace PocoDataSet.Tests
             rt1.AddLoadedRow(rr);
 
             IMergeOptions options = new MergeOptions();
-            options.MergeMode = MergeMode.Refresh;
+            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
             options.ExcludeTablesFromMerge.Add("T1");
 
             // Act

@@ -92,7 +92,7 @@ namespace PocoDataSet.ObservableExtensions
         public MergeMode MergeMode
         {
             get; set;
-        } = MergeMode.Refresh;
+        } = MergeMode.RefreshPreservingLocalChanges;
 
         /// <summary>
         /// Gets observable data set merge handlers

@@ -41,7 +41,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             // Act
             // 3. Merge refreshed values into the current observable data set (Refresh mode)
             IObservableMergeOptions observableMergeOptions = new ObservableMergeOptions();
-            observableMergeOptions.MergeMode = MergeMode.Refresh;
+            observableMergeOptions.MergeMode = MergeMode.RefreshPreservingLocalChanges;
 
             IObservableDataSetMergeResult mergeResult = currentObservableDataSet.MergeWith(refreshedDataSet, observableMergeOptions);
 

@@ -105,7 +105,7 @@ namespace PocoDataSet.Tests
                     IDataSet refreshed = BuildRefreshedSnapshotFromCurrent(table, random);
 
                     // Must not throw
-                    dataSet.MergeWith(refreshed, MergeMode.Refresh);
+                    dataSet.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
                     // Invariants after merge:
                     // - no duplicate PK among non-deleted rows

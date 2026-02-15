@@ -42,7 +42,7 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
 
             IObservableMergeOptions options = new ObservableMergeOptions();
             // IMPORTANT: use your project's default/merge mode enum value here if it differs.
-            options.MergeMode = MergeMode.Default;
+            options.MergeMode = MergeMode.RefreshIfNoChangesExist;
 
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() => current.MergeWith(refreshed, options));
@@ -79,7 +79,7 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
             s2["Name"] = "Engineering";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.Default;
+            options.MergeMode = MergeMode.RefreshIfNoChangesExist;
 
             // Act
             current.MergeWith(refreshed, options);

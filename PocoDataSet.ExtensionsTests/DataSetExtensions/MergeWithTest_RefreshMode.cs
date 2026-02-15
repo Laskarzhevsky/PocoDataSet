@@ -34,7 +34,7 @@ namespace PocoDataSet.ExtensionsTests
 
             // Act
             // 3. Merge refreshed values into current data set using Refresh mode
-            IDataSetMergeResult mergeResult = currentDataSet.MergeWith(refreshedDataSet, MergeMode.Refresh);
+            IDataSetMergeResult mergeResult = currentDataSet.MergeWith(refreshedDataSet, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert
             // 4. Current row now has refreshed values "Sales and Marketing"

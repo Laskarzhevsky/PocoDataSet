@@ -27,7 +27,7 @@ public partial class DataTableDefaultMergeHandler
                     {
                         bool shouldPreserveRow = false;
 
-                        if (mergeOptions.MergeMode == MergeMode.Refresh)
+                        if (mergeOptions.MergeMode == MergeMode.RefreshPreservingLocalChanges)
                         {
                             // In refresh mode, preserve local client-side changes that have not been saved yet.
                             // Typical cases: Added row (new record), Modified row (edited record), Deleted row (pending delete).

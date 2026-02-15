@@ -39,7 +39,7 @@ public partial class DataTableDefaultMergeHandler : ITableMergeHandler
         IMergeOptions mergeOptions)
     {
                     // Refresh must never overwrite local edits.
-                    if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.Refresh)
+                    if (mergeOptions != null && mergeOptions.MergeMode == MergeMode.RefreshPreservingLocalChanges)
                     {
                         if (currentDataRow.DataRowState != DataRowState.Unchanged)
                         {

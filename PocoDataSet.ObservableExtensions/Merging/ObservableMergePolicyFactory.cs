@@ -20,7 +20,7 @@ namespace PocoDataSet.ObservableExtensions
         {
             switch (mergeMode)
             {
-                case MergeMode.Default:
+                case MergeMode.RefreshIfNoChangesExist:
                     return new DefaultMergePolicy();
 
                 case MergeMode.PostSave:
@@ -29,7 +29,7 @@ namespace PocoDataSet.ObservableExtensions
                 case MergeMode.Replace:
                     return new ReplaceMergePolicy();
 
-                case MergeMode.Refresh:
+                case MergeMode.RefreshPreservingLocalChanges:
                     return new RefreshMergePolicy();
 
                 default:

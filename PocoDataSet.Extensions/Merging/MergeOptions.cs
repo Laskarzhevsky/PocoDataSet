@@ -23,7 +23,7 @@ namespace PocoDataSet.Extensions
             DefaultRowMergeHandler = new DataRowDefaultMergeHandler();
             DefaultTableMergeHandler = new DataTableDefaultMergeHandler();
             DataTypeDefaultValueProvider = new MetadataDefaultsProvider();
-            MergeMode = MergeMode.Refresh;
+            MergeMode = MergeMode.RefreshPreservingLocalChanges;
             RowMergeHandlers = new Dictionary<string, IRowMergeHandler>();
             TableMergeHandlers = new Dictionary<string, ITableMergeHandler>();
         }

@@ -66,7 +66,7 @@ namespace PocoDataSet.ObservableExtensions
 
             if (currentObservableDataRow is ObservableDataRow observableDataRow)
             {
-                if (observableMergeOptions.MergeMode == MergeMode.Refresh)
+                if (observableMergeOptions.MergeMode == MergeMode.RefreshPreservingLocalChanges)
                 {
                     suppressRowStateChanged = true;
                 }

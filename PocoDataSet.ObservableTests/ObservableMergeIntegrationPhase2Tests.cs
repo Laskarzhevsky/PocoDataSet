@@ -368,7 +368,7 @@ namespace PocoDataSet.ObservableTests
             refreshedRow["Name"] = "Engineering";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.Refresh;
+            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
 
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
@@ -405,7 +405,7 @@ namespace PocoDataSet.ObservableTests
             r2["Name"] = "Engineering Duplicate";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.Refresh;
+            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
 
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>

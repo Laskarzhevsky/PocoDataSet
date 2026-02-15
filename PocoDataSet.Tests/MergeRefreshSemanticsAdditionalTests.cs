@@ -36,7 +36,7 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r1);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.Refresh);
+            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert
             Assert.Equal("New", row["Name"]);
@@ -64,7 +64,7 @@ namespace PocoDataSet.Tests
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.Refresh);
+            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert: Added row preserved
             Assert.Equal(1, t.Rows.Count);
@@ -95,7 +95,7 @@ namespace PocoDataSet.Tests
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.Refresh);
+            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert: Deleted row preserved in Refresh mode
             Assert.Equal(1, t.Rows.Count);
@@ -130,7 +130,7 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r1);
 
             // Act + Assert: must not throw
-            current.MergeWith(refreshed, MergeMode.Refresh);
+            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // And Name must be updated (row is Unchanged during refresh)
             Assert.Equal("New", row["Name"]);

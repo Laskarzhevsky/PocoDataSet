@@ -35,7 +35,7 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(refreshedRow);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.Refresh);
+            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert
             Assert.Single(currentTable.Rows);
@@ -82,7 +82,7 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.Refresh);
+            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert
             // Refresh merge treats refreshed data as authoritative snapshot,
@@ -130,7 +130,7 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.Refresh);
+            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert
             // Baseline row remains, local Added row remains too
@@ -200,7 +200,7 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr3);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.Refresh);
+            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
 
             // Assert: row 2 must be removed (or counted as deleted in merge result)
             Assert.Equal(2, currentTable.Rows.Count);

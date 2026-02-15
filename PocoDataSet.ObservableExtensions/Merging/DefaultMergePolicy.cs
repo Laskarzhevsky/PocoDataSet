@@ -24,7 +24,7 @@ namespace PocoDataSet.ObservableExtensions
         public MergeMode Mode
         {
             get; private set;
-        } = MergeMode.Default;
+        } = MergeMode.RefreshIfNoChangesExist;
 
         /// <summary>
         /// Whether duplicate primary keys in refreshed data should be rejected (determinism).
