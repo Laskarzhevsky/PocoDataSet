@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
@@ -10,21 +8,24 @@ namespace PocoDataSet.ExtensionsTests
     public partial class DataTableExtensionsTests
     {
         [Fact]
-        public void MergeWithTest_RefreshMode()
+        public void DoRefreshMergePreservingLocalChanges_DoesNotOverwriteModifiedRow()
         {
             // Arrange
-            // 1. Create current table (for example, UI-bound)
             IDataSet currentDataSet = DataSetFactory.CreateDataSet();
             IDataTable currentDepartment = currentDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32);
             currentDepartment.AddColumn("Name", DataTypeNames.STRING);
 
+            // Current row (locally edited)
             IDataRow currentRow = currentDepartment.AddNewRow();
             currentRow["Id"] = 1;
-            currentRow["Name"] = "Sales";
+            currentRow["Name"] = "Engineering";
             currentRow.AcceptChanges();
 
-            // 2. Create refreshed table snapshot
+            // Local change
+            currentRow["Name"] = "Engineering (local edit)";
+
+            // Refreshed data row (server)
             IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
             IDataTable refreshedDepartment = refreshedDataSet.AddNewTable("Department");
             refreshedDepartment.AddColumn("Id", DataTypeNames.INT32);
@@ -32,19 +33,89 @@ namespace PocoDataSet.ExtensionsTests
 
             IDataRow refreshedRow = refreshedDepartment.AddNewRow();
             refreshedRow["Id"] = 1;
-            refreshedRow["Name"] = "Sales and Marketing";
+            refreshedRow["Name"] = "Engineering (server)";
+
+            IMergeOptions options = new MergeOptions();
 
             // Act
-            // 3. Merge refreshed values into current table using Refresh mode
-            IMergeOptions options = new MergeOptions();
-            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
             currentDepartment.DoRefreshMergePreservingLocalChanges(refreshedDepartment, options);
 
             // Assert
-            // 4. Current row now has refreshed values
-            string? name = currentDepartment.GetFieldValue<string>(0, "Name");
+            string name = currentDepartment.Rows[0].GetDataFieldValue<string>("Name");
+            Assert.Equal("Engineering (local edit)", name);
+            Assert.Equal(DataRowState.Modified, currentDepartment.Rows[0].DataRowState);
+        }
 
-            Assert.Equal("Sales and Marketing", name);
+        [Fact]
+        public void DoRefreshMergeIfNoChangesExist_Throws_WhenTableIsDirty()
+        {
+            // Arrange
+            IDataSet currentDataSet = DataSetFactory.CreateDataSet();
+            IDataTable currentDepartment = currentDataSet.AddNewTable("Department");
+            currentDepartment.AddColumn("Id", DataTypeNames.INT32);
+            currentDepartment.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow currentRow = currentDepartment.AddNewRow();
+            currentRow["Id"] = 1;
+            currentRow["Name"] = "Engineering";
+            currentRow.AcceptChanges();
+
+            // Make table dirty
+            currentRow["Name"] = "Engineering (local edit)";
+
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedDepartment = refreshedDataSet.AddNewTable("Department");
+            refreshedDepartment.AddColumn("Id", DataTypeNames.INT32);
+            refreshedDepartment.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow refreshedRow = refreshedDepartment.AddNewRow();
+            refreshedRow["Id"] = 1;
+            refreshedRow["Name"] = "Engineering (server)";
+
+            IMergeOptions options = new MergeOptions();
+
+            // Act + Assert
+            Assert.Throws<System.InvalidOperationException>(
+                delegate
+                {
+                    currentDepartment.DoRefreshMergeIfNoChangesExist(refreshedDepartment, options);
+                });
+        }
+
+        [Fact]
+        public void DoReplaceMerge_ClearsAndReloadsRows()
+        {
+            // Arrange
+            IDataSet currentDataSet = DataSetFactory.CreateDataSet();
+            IDataTable currentDepartment = currentDataSet.AddNewTable("Department");
+            currentDepartment.AddColumn("Id", DataTypeNames.INT32);
+            currentDepartment.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow currentRow = currentDepartment.AddNewRow();
+            currentRow["Id"] = 1;
+            currentRow["Name"] = "Old";
+            currentRow.AcceptChanges();
+
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedDepartment = refreshedDataSet.AddNewTable("Department");
+            refreshedDepartment.AddColumn("Id", DataTypeNames.INT32);
+            refreshedDepartment.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow refreshedRow = refreshedDepartment.AddNewRow();
+            refreshedRow["Id"] = 2;
+            refreshedRow["Name"] = "New";
+            refreshedRow.AcceptChanges();
+
+            IMergeOptions options = new MergeOptions();
+
+            // Act
+            currentDepartment.DoReplaceMerge(refreshedDepartment, options);
+
+            // Assert
+            Assert.Single(currentDepartment.Rows);
+            Assert.Equal(2, currentDepartment.Rows[0].GetDataFieldValue<int>("Id"));
+            Assert.Equal("New", currentDepartment.Rows[0].GetDataFieldValue<string>("Name"));
+            Assert.Equal(DataRowState.Unchanged, currentDepartment.Rows[0].DataRowState);
         }
     }
 }

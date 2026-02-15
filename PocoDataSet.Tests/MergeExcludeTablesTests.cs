@@ -35,13 +35,11 @@ namespace PocoDataSet.Tests
             rt1.AddLoadedRow(rr);
 
             IMergeOptions options = new MergeOptions();
-            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
             options.ExcludeTablesFromMerge.Add("T1");
 
             // Act
-            current.MergeWith(refreshed, options);
-
-            // Assert: unchanged because merge skipped
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// Assert: unchanged because merge skipped
             Assert.Equal("Old", current.Tables["T1"].Rows[0]["Name"]);
         }
     }

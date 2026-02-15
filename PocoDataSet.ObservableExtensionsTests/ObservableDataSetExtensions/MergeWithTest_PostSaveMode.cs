@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -50,11 +50,9 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             // Act
             // 3. Merge server-returned values into the observable data set using PostSave mode
             IObservableMergeOptions observableMergeOptions = new ObservableMergeOptions();
-            observableMergeOptions.MergeMode = MergeMode.PostSave;
-
-            IObservableDataSetMergeResult mergeResult = observableDataSet.MergeWith(postSaveDataSet, observableMergeOptions);
-
-            // Assert
+            observableDataSet.DoPostSaveMerge(postSaveDataSet, observableMergeOptions);
+            IObservableDataSetMergeResult mergeResult = observableMergeOptions.ObservableDataSetMergeResult;
+// Assert
             // 4. Current row now has server-generated values (identity/rowversion) and is typically accepted as Unchanged by the merge handlers
             int id = departmentObservableDataTable.Rows[0].GetDataFieldValue<int>("Id"); // 10
             Assert.Equal(10, id);

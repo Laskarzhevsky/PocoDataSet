@@ -35,9 +35,10 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(refreshedRow);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+            IDataSetMergeResult result = options.DataSetMergeResult;
+// Assert
             Assert.Single(currentTable.Rows);
             Assert.Equal(2, currentTable.Rows[0]["Id"]);
             Assert.Equal("Reception", currentTable.Rows[0]["Name"]);
@@ -82,9 +83,10 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+            IDataSetMergeResult result = options.DataSetMergeResult;
+// Assert
             // Refresh merge treats refreshed data as authoritative snapshot,
             // so missing rows are removed from the current table.
             Assert.Single(currentTable.Rows);
@@ -130,9 +132,10 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+            IDataSetMergeResult result = options.DataSetMergeResult;
+// Assert
             // Baseline row remains, local Added row remains too
             Assert.Equal(2, currentTable.Rows.Count);
 
@@ -200,9 +203,10 @@ namespace PocoDataSet.Tests
             refreshedTable.AddLoadedRow(rr3);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert: row 2 must be removed (or counted as deleted in merge result)
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+            IDataSetMergeResult result = options.DataSetMergeResult;
+// Assert: row 2 must be removed (or counted as deleted in merge result)
             Assert.Equal(2, currentTable.Rows.Count);
 
             bool has1 = false;

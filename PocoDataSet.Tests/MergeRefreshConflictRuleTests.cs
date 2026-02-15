@@ -39,9 +39,9 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r1);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert: local edit is preserved
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// Assert: local edit is preserved
             Assert.Equal("LocalEdit", row["Name"]);
             Assert.Equal(DataRowState.Modified, row.DataRowState);
         }

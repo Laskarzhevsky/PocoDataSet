@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using PocoDataSet.Extensions;
@@ -46,7 +46,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is not done because the observable row in Modified state
-            departmentObservableDataRow.MergeWith(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(departmentObservableDataRow.DataRowState.ToString(), DataRowState.Modified.ToString());
@@ -87,7 +87,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is not done because the observable row in Deleted state
-            departmentObservableDataRow.MergeWith(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(DataRowState.Deleted.ToString(), departmentObservableDataRow.DataRowState.ToString());
@@ -127,7 +127,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is completed because the observable row was in Unchanged state
-            departmentObservableDataRow.MergeWith(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(DataRowState.Unchanged.ToString(), departmentObservableDataRow.DataRowState.ToString());

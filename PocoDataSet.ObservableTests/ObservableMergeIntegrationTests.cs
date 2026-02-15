@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using PocoDataSet.Data;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -35,7 +35,8 @@ namespace PocoDataSet.ObservableTests
             IDataSet refreshed = CreateRefreshedDepartmentDataSet();
 
             // Act
-            currentObservableDataSet.MergeWith(refreshed);
+            IObservableMergeOptions options = new ObservableMergeOptions();
+            currentObservableDataSet.DoRefreshMergePreservingLocalChanges(refreshed, options);
 
             // Assert: view sees 2 rows (Ids 1 and 3)
             Assert.Equal(2, view.Rows.Count);

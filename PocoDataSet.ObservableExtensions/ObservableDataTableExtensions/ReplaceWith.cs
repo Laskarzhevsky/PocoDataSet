@@ -1,7 +1,5 @@
 ﻿using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
-using PocoDataSet.ObservableExtensions.Merging.Modes;
-
 namespace PocoDataSet.ObservableExtensions
 {
     /// <summary>
@@ -18,8 +16,7 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableMergeOptions">Observable merge options</param>
         public static void ReplaceWith(this IObservableDataTable observableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
-            ObservableReplaceDataTableMerger observableReplaceDataTableMerger = new ObservableReplaceDataTableMerger();
-            observableReplaceDataTableMerger.Replace(observableDataTable, refreshedDataTable, observableMergeOptions);
+            observableDataTable.DoReplaceMerge(refreshedDataTable, observableMergeOptions);
         }
         #endregion
     }

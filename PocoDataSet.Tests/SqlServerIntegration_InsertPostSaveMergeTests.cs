@@ -65,9 +65,9 @@ namespace PocoDataSet.Tests
                 Assert.Equal(1, affected);
 
                 // Act: merge server-confirmed changes (identity + rowversion) back into local dataset
-                current.MergeWith(changeset, MergeMode.PostSave);
-
-                // Assert: local row has identity + rowversion and is normalized to Unchanged
+                MergeOptions options = new MergeOptions();
+            current.DoPostSaveMerge(changeset, options);
+// Assert: local row has identity + rowversion and is normalized to Unchanged
                 Assert.Equal(DataRowState.Unchanged, local.DataRowState);
 
                 int newId = (int)local["Id"]!;

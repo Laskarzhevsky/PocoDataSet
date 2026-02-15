@@ -42,10 +42,8 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
 
             IObservableMergeOptions options = new ObservableMergeOptions();
             // IMPORTANT: use your project's default/merge mode enum value here if it differs.
-            options.MergeMode = MergeMode.RefreshIfNoChangesExist;
-
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => currentDept.MergeRefreshIfNoChangesExistWith(refreshedDept, options));
+            Assert.Throws<InvalidOperationException>(() => currentDept.DoRefreshMergeIfNoChangesExist(refreshedDept, options));
         }
 
         [Fact]
@@ -79,10 +77,8 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
             s2["Name"] = "Engineering";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.RefreshIfNoChangesExist;
-
             // Act
-            currentDept.MergeRefreshIfNoChangesExistWith(refreshedDept, options);
+            currentDept.DoRefreshMergeIfNoChangesExist(refreshedDept, options);
 
             // Assert
             Assert.Equal(2, currentDept.Rows.Count);

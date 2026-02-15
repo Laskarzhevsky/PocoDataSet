@@ -46,10 +46,8 @@ namespace PocoDataSet.ObservableTests
             s2["Name"] = "Engineering";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.Replace;
-
             // Act
-            current.MergeWith(refreshed, options);
+            current.DoReplaceMerge(refreshed, options);
 
             // Assert
             Assert.Equal(2, current.Tables["Department"].Rows.Count);

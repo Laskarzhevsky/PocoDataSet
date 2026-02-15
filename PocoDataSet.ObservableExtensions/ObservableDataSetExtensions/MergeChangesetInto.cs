@@ -34,7 +34,12 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            targetDataSet.MergeWith(outboundChangeset, mergeOptions);
+            if (mergeOptions == null)
+            {
+                mergeOptions = new MergeOptions();
+            }
+
+            targetDataSet.DoReplaceMerge(outboundChangeset, mergeOptions);
         }
     }
 }

@@ -56,10 +56,8 @@ namespace PocoDataSet.ObservableTests
             saved2["RowVersion"] = new byte[] { 2, 0, 0, 0, 0, 0, 0, 0 };
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act
-            currentObservableDataSet.MergeWith(postSaveDataSet, options);
+            currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options);
 
             // Assert
             Assert.Equal(2, currentObservableDataSet.Tables["Department"].Rows.Count);
@@ -131,10 +129,8 @@ namespace PocoDataSet.ObservableTests
             savedAdded["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act
-            currentObservableDataSet.MergeWith(postSaveDataSet, options);
+            currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options);
 
             // Assert
             Assert.Equal(2, currentObservableDataSet.Tables["Department"].Rows.Count);
@@ -191,10 +187,8 @@ namespace PocoDataSet.ObservableTests
             saved["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act
-            currentObservableDataSet.MergeWith(postSaveDataSet, options);
+            currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options);
 
             // Assert
             // Documented defensive behavior (given current implementation): row is added as a new row.
@@ -247,11 +241,9 @@ namespace PocoDataSet.ObservableTests
             saved["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
-                currentObservableDataSet.MergeWith(postSaveDataSet, options));
+                currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options));
         }
 
         [Fact]
@@ -290,11 +282,9 @@ namespace PocoDataSet.ObservableTests
             postSaveDepartment.AddRow(refreshedRow);
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
-                currentObservableDataSet.MergeWith(postSaveDataSet, options));
+                currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options));
         }
 
         [Fact]
@@ -335,11 +325,9 @@ namespace PocoDataSet.ObservableTests
             postSaveDepartment.AddRow(refreshedRow);
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
-                currentObservableDataSet.MergeWith(postSaveDataSet, options));
+                currentObservableDataSet.DoPostSaveMerge(postSaveDataSet, options));
         }
 
         [Fact]
@@ -368,11 +356,9 @@ namespace PocoDataSet.ObservableTests
             refreshedRow["Name"] = "Engineering";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
-
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
-                currentObservableDataSet.MergeWith(refreshedDataSet, options));
+                currentObservableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, options));
         }
 
         [Fact]
@@ -405,11 +391,9 @@ namespace PocoDataSet.ObservableTests
             r2["Name"] = "Engineering Duplicate";
 
             IObservableMergeOptions options = new ObservableMergeOptions();
-            options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
-
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() =>
-                currentObservableDataSet.MergeWith(refreshedDataSet, options));
+                currentObservableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, options));
         }
 
 

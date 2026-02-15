@@ -58,9 +58,10 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r21);
 
             // Act
-            IDataSetMergeResult result = current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert: row (1,2) removed, others remain
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+            IDataSetMergeResult result = options.DataSetMergeResult;
+// Assert: row (1,2) removed, others remain
             Assert.Equal(2, t.Rows.Count);
 
             bool has11 = false;

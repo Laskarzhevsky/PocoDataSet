@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
@@ -11,10 +10,9 @@ namespace PocoDataSet.ExtensionsTests
     public partial class DataTableExtensionsTests
     {
         [Fact]
-        public void MergeWithTest_PostSaveMode()
+        public void DoPostSaveMerge_MergesIdentityAndRowVersion_AndAcceptsChanges()
         {
             // Arrange
-            // 1. Create a current table with a newly added row (client-side)
             IDataSet currentDataSet = DataSetFactory.CreateDataSet();
             IDataTable currentDepartment = currentDataSet.AddNewTable("Department");
             currentDepartment.AddColumn("Id", DataTypeNames.INT32);
@@ -24,10 +22,8 @@ namespace PocoDataSet.ExtensionsTests
             IDataRow newRow = currentDepartment.AddNewRow();
             newRow["Name"] = "Engineering";
 
-            // Correlation key (client-side) is typically used to match added rows with server-returned rows
             Guid clientKey = newRow.GetDataFieldValue<Guid>(SpecialColumnNames.CLIENT_KEY);
 
-            // 2. Create a refreshed table containing server-generated values
             IDataSet postSaveDataSet = DataSetFactory.CreateDataSet();
             IDataTable postSaveDepartment = postSaveDataSet.AddNewTable("Department");
             postSaveDepartment.AddColumn("Id", DataTypeNames.INT32);
@@ -38,22 +34,22 @@ namespace PocoDataSet.ExtensionsTests
             savedRow["Id"] = 10;
             savedRow["Name"] = "Engineering";
             savedRow["RowVersion"] = new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 };
-            savedRow[SpecialColumnNames.CLIENT_KEY] = clientKey; // correlate rows
+            savedRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
+
+            IMergeOptions options = new MergeOptions();
 
             // Act
-            IMergeOptions options = new MergeOptions();
-            options.MergeMode = MergeMode.PostSave;
-
-            // ✅ Explicit entry point
             currentDepartment.DoPostSaveMerge(postSaveDepartment, options);
 
             // Assert
-            int id = currentDepartment.Rows[0].GetDataFieldValue<int>("Id"); // 10
+            int id = currentDepartment.Rows[0].GetDataFieldValue<int>("Id");
             Assert.Equal(10, id);
 
             byte[]? rowVersion = currentDepartment.Rows[0].GetDataFieldValue<byte[]>("RowVersion");
             Assert.NotNull(rowVersion);
             Assert.Equal(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0 }, rowVersion);
+
+            Assert.Equal(DataRowState.Unchanged, currentDepartment.Rows[0].DataRowState);
         }
     }
 }

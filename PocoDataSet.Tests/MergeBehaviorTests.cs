@@ -38,9 +38,8 @@ namespace PocoDataSet.Tests
             // Ensure merge result starts empty
             options.DataSetMergeResult.Clear();
 
-            current.MergeWith(refreshed, options);
-
-            Assert.Equal(1, currentTable.Rows.Count);
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+Assert.Equal(1, currentTable.Rows.Count);
             Assert.Equal("C", currentTable.Rows[0]["Code"]);
             Assert.Equal("Three", currentTable.Rows[0]["Value"]);
 

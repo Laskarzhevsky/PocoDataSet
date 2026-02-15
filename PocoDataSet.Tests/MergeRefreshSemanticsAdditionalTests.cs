@@ -36,9 +36,9 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r1);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// Assert
             Assert.Equal("New", row["Name"]);
             Assert.Equal(DataRowState.Unchanged, row.DataRowState);
         }
@@ -64,9 +64,9 @@ namespace PocoDataSet.Tests
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert: Added row preserved
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// Assert: Added row preserved
             Assert.Equal(1, t.Rows.Count);
             Assert.Equal("ClientOnly", t.Rows[0]["Name"]);
             Assert.Equal(DataRowState.Added, t.Rows[0].DataRowState);
@@ -95,9 +95,9 @@ namespace PocoDataSet.Tests
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
-            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // Assert: Deleted row preserved in Refresh mode
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// Assert: Deleted row preserved in Refresh mode
             Assert.Equal(1, t.Rows.Count);
             Assert.Equal(DataRowState.Deleted, t.Rows[0].DataRowState);
         }
@@ -130,9 +130,9 @@ namespace PocoDataSet.Tests
             rt.AddLoadedRow(r1);
 
             // Act + Assert: must not throw
-            current.MergeWith(refreshed, MergeMode.RefreshPreservingLocalChanges);
-
-            // And Name must be updated (row is Unchanged during refresh)
+            MergeOptions options = new MergeOptions();
+            current.DoRefreshMergePreservingLocalChanges(refreshed, options);
+// And Name must be updated (row is Unchanged during refresh)
             Assert.Equal("New", row["Name"]);
             Assert.Equal(DataRowState.Unchanged, row.DataRowState);
         }

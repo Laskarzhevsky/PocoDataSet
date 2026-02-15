@@ -44,8 +44,7 @@ namespace PocoDataSet.ObservableTests
 
             // Act
             IObservableMergeOptions observableMergeOptions = new ObservableMergeOptions();
-            observableMergeOptions.MergeMode = MergeMode.RefreshPreservingLocalChanges;
-            ds.MergeWith(refreshed, observableMergeOptions);
+            ds.DoRefreshMergePreservingLocalChanges(refreshed, observableMergeOptions);
 
             // Assert
             Assert.Equal(1, t.Rows.Count);

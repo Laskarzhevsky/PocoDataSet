@@ -177,7 +177,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         public async Task<int> SaveChangesAsync(IDataSet changeset, string? connectionString = null)
         {
-                        if (changeset == null)
+            if (changeset == null)
             {
                 throw new ArgumentNullException(nameof(changeset));
             }
@@ -188,7 +188,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return 0;
             }
 
-SqlDataAdapterTransaction? transaction = null;
+            SqlDataAdapterTransaction? transaction = null;
 
             try
             {
@@ -223,7 +223,9 @@ SqlDataAdapterTransaction? transaction = null;
         public async Task<int> SaveChangesAndMergePostSaveAsync(IDataSet changeset, string? connectionString = null)
         {
             int affectedRows = await SaveChangesAsync(changeset, connectionString);
-            changeset.MergeWith(changeset, MergeMode.PostSave);
+
+            IMergeOptions options = new MergeOptions();
+            changeset.DoPostSaveMerge(changeset, options);
 
             return affectedRows;
         }

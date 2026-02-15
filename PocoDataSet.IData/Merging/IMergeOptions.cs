@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 
 namespace PocoDataSet.IData
@@ -10,39 +9,15 @@ namespace PocoDataSet.IData
     {
         #region Properties
         /// <summary>
-        /// Gets data set merge handlers
-        /// </summary>
-        IDictionary<string, IDataSetMergeHandler> DataSetMergeHandlers
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets data set merge result
         /// </summary>
         IDataSetMergeResult DataSetMergeResult
         {
-            get;
+            get; 
         }
 
         /// <summary>
-        /// Gets or sets default data set merge handler
-        /// </summary>
-        IDataSetMergeHandler DefaultDataSetMergeHandler
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets or sets default row merge handler
-        /// </summary>
-        IRowMergeHandler DefaultRowMergeHandler
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Gets data type default value provider 
+        /// Gets data type default value provider
         /// </summary>
         public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
         {
@@ -55,7 +30,7 @@ namespace PocoDataSet.IData
         /// </summary>
         List<string> ExcludeTablesFromMerge
         {
-            get;
+            get; 
         }
 
         /// <summary>
@@ -63,15 +38,7 @@ namespace PocoDataSet.IData
         /// </summary>
         List<string> ExcludeTablesFromRowDeletion
         {
-            get;
-        }
-
-        /// <summary>
-        /// Gets or sets merge mode
-        /// </summary>
-        MergeMode MergeMode
-        {
-            get; set;
+            get; 
         }
 
         /// <summary>
@@ -81,37 +48,15 @@ namespace PocoDataSet.IData
         {
             get;
         }
-
-        /// <summary>
-        /// Gets row merge handlers
-        /// </summary>
-        IDictionary<string, IRowMergeHandler> RowMergeHandlers
-        {
-            get;
-        }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Gets data set merge handler
-        /// </summary>
-        /// <param name="dataSetMergeHandlerKey">Data set merge handler key</param>
-        /// <returns>Data set merge handler</returns>
-        IDataSetMergeHandler GetDataSetMergeHandler(string? dataSetMergeHandlerKey);
-
         /// <summary>
         /// Gets primary key column names for a given table, applying overrides when configured.
         /// </summary>
         /// <param name="dataTable">Data table</param>
         /// <returns>Primary key column names</returns>
         List<string> GetPrimaryKeyColumnNames(IDataTable dataTable);
-
-        /// <summary>
-        /// Gets row merge handler
-        /// </summary>
-        /// <param name="tableName">Table name</param>
-        /// <returns>Row merge handler</returns>
-        IRowMergeHandler GetRowMergeHandler(string tableName);
         #endregion
     }
 }

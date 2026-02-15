@@ -23,7 +23,7 @@ namespace PocoDataSet.ExtensionsTests
 
             // Act
             // 3. Call GetPrimaryKeyColumnNames method, expected one entry with “Id” key
-            List<string> dataTablePrimaryKeyColumnNames = departmentDataTable.GetPrimaryKeyColumnNames();
+            IReadOnlyList<string> dataTablePrimaryKeyColumnNames = departmentDataTable.PrimaryKeys;
 
             // Assert
             Assert.Single(dataTablePrimaryKeyColumnNames);

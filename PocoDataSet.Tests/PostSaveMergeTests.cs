@@ -45,9 +45,9 @@ namespace PocoDataSet.Tests
             changesetTable.AddRow(serverRow); // Added in changeset
 
             // Act
-            current.MergeWith(changeset, MergeMode.PostSave);
-
-            // Assert: identity propagated, row accepted
+            MergeOptions options = new MergeOptions();
+            current.DoPostSaveMerge(changeset, options);
+// Assert: identity propagated, row accepted
             Assert.Single(currentTable.Rows);
 
             IDataRow merged = currentTable.Rows[0];
@@ -110,9 +110,9 @@ namespace PocoDataSet.Tests
             // ------------------------------------------------------------
             // Act
             // ------------------------------------------------------------
-            currentDataSet.MergeWith(changeset, MergeMode.PostSave);
-
-            // ------------------------------------------------------------
+            MergeOptions options = new MergeOptions();
+            currentDataSet.DoPostSaveMerge(changeset, options);
+// ------------------------------------------------------------
             // Assert
             // ------------------------------------------------------------
 
@@ -167,9 +167,9 @@ namespace PocoDataSet.Tests
             changesetTable.AddRow(serverRow);
 
             // Act
-            current.MergeWith(changeset, MergeMode.PostSave);
-
-            // Assert
+            MergeOptions options = new MergeOptions();
+            current.DoPostSaveMerge(changeset, options);
+// Assert
             Assert.Equal("Edited", currentRow["Name"]);
             Assert.Equal(DataRowState.Unchanged, currentRow.DataRowState);
 
@@ -216,9 +216,9 @@ namespace PocoDataSet.Tests
             serverTable.AddRow(saved); // Keep as Added in changeset
 
             // Act
-            current.MergeWith(serverChangeset, MergeMode.PostSave);
-
-            // Assert: local row gets identity, becomes Unchanged
+            MergeOptions options = new MergeOptions();
+            current.DoPostSaveMerge(serverChangeset, options);
+// Assert: local row gets identity, becomes Unchanged
             Assert.Equal(123, (int)local["Id"]!);
             Assert.Equal("NewDept", local["Name"]);
             Assert.Equal(DataRowState.Unchanged, local.DataRowState);
