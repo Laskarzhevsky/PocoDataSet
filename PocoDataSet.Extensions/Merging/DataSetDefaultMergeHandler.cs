@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using PocoDataSet.Data;
 using PocoDataSet.IData;
+using PocoDataSet.Extensions.Merging.Modes;
 
 namespace PocoDataSet.Extensions
 {
@@ -10,6 +12,11 @@ namespace PocoDataSet.Extensions
     /// </summary>
     public class DataSetDefaultMergeHandler : IDataSetMergeHandler
     {
+        private static readonly PostSaveDataTableMerger _postSaveMerger = new PostSaveDataTableMerger();
+        private static readonly RefreshIfNoChangesExistDataTableMerger _refreshIfCleanMerger = new RefreshIfNoChangesExistDataTableMerger();
+        private static readonly RefreshPreservingLocalChangesDataTableMerger _refreshPreservingMerger = new RefreshPreservingLocalChangesDataTableMerger();
+        private static readonly ReplaceDataTableMerger _replaceMerger = new ReplaceDataTableMerger();
+
         #region Public Methods
         /// <summary>
         /// Merges current data set with refreshed data set
@@ -87,7 +94,28 @@ namespace PocoDataSet.Extensions
                     continue;
                 }
 
-                DataTableExtensions.MergeWith(currentTable, refreshedTable, mergeOptions);
+                MergeMode mode = mergeOptions.MergeMode;
+                switch (mode)
+                {
+                    case MergeMode.PostSave:
+                        _postSaveMerger.MergePostSave(currentTable, refreshedTable, mergeOptions);
+                        break;
+
+                    case MergeMode.RefreshIfNoChangesExist:
+                        _refreshIfCleanMerger.MergeRefreshIfNoChangesExist(currentTable, refreshedTable, mergeOptions);
+                        break;
+
+                    case MergeMode.RefreshPreservingLocalChanges:
+                        _refreshPreservingMerger.MergeRefreshPreservingLocalChanges(currentTable, refreshedTable, mergeOptions);
+                        break;
+
+                    case MergeMode.Replace:
+                        _replaceMerger.Replace(currentTable, refreshedTable, mergeOptions);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(mergeOptions.MergeMode), mergeOptions.MergeMode, "Unknown merge mode.");
+                }
             }
         }
         #endregion

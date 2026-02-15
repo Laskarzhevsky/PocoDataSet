@@ -38,7 +38,7 @@ namespace PocoDataSet.ExtensionsTests
             // 3. Merge refreshed values into current table using Refresh mode
             IMergeOptions options = new MergeOptions();
             options.MergeMode = MergeMode.RefreshPreservingLocalChanges;
-            currentDepartment.MergeWith(refreshedDepartment, options);
+            currentDepartment.DoRefreshMergePreservingLocalChanges(refreshedDepartment, options);
 
             // Assert
             // 4. Current row now has refreshed values

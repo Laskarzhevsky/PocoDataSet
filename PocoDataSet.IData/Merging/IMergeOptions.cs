@@ -42,14 +42,6 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets or sets default table merge handler
-        /// </summary>
-        ITableMergeHandler DefaultTableMergeHandler
-        {
-            get; set;
-        }
-
-        /// <summary>
         /// Gets data type default value provider 
         /// </summary>
         public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
@@ -97,14 +89,6 @@ namespace PocoDataSet.IData
         {
             get;
         }
-
-        /// <summary>
-        /// Gets table merge handlers
-        /// </summary>
-        IDictionary<string, ITableMergeHandler> TableMergeHandlers
-        {
-            get;
-        }
         #endregion
 
         #region Methods
@@ -128,13 +112,6 @@ namespace PocoDataSet.IData
         /// <param name="tableName">Table name</param>
         /// <returns>Row merge handler</returns>
         IRowMergeHandler GetRowMergeHandler(string tableName);
-
-        /// <summary>
-        /// Gets table merge handler
-        /// </summary>
-        /// <param name="tableName">Table name</param>
-        /// <returns>Table merge handler</returns>
-        ITableMergeHandler GetTableMergeHandler(string tableName);
         #endregion
     }
 }

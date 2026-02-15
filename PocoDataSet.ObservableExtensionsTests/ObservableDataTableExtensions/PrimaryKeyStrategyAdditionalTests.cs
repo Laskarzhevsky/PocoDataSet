@@ -43,7 +43,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             options.OverriddenPrimaryKeyNames["T"] = new List<string> { "Name" };
 
             // Act
-            List<string> primaryKeyColumnNames = options.GetPrimaryKeyColumnNames(t);
+            List<string> primaryKeyColumnNames = options.GetPrimaryKeyColumnNames(t.InnerDataTable);
 
             // Assert
             Assert.Single(primaryKeyColumnNames);

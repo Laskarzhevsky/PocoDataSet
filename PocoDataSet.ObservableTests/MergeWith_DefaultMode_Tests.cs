@@ -45,7 +45,7 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
             options.MergeMode = MergeMode.RefreshIfNoChangesExist;
 
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => current.MergeWith(refreshed, options));
+            Assert.Throws<InvalidOperationException>(() => currentDept.MergeRefreshIfNoChangesExistWith(refreshedDept, options));
         }
 
         [Fact]
@@ -82,16 +82,16 @@ namespace PocoDataSet.ObservableTests.ObservableMergeIntegrationPhase4Tests
             options.MergeMode = MergeMode.RefreshIfNoChangesExist;
 
             // Act
-            current.MergeWith(refreshed, options);
+            currentDept.MergeRefreshIfNoChangesExistWith(refreshedDept, options);
 
             // Assert
-            Assert.Equal(2, current.Tables["Department"].Rows.Count);
+            Assert.Equal(2, currentDept.Rows.Count);
 
-            IObservableDataRow found1 = FindById(current.Tables["Department"], 1);
+            IObservableDataRow found1 = FindById(currentDept, 1);
             Assert.Equal("Sales - Server", (string)found1["Name"]!);
             Assert.Equal(DataRowState.Unchanged, found1.InnerDataRow.DataRowState);
 
-            IObservableDataRow found2 = FindById(current.Tables["Department"], 2);
+            IObservableDataRow found2 = FindById(currentDept, 2);
             Assert.Equal("Engineering", (string)found2["Name"]!);
             Assert.Equal(DataRowState.Unchanged, found2.InnerDataRow.DataRowState);
         }

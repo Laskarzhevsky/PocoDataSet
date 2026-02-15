@@ -1,4 +1,5 @@
-﻿using PocoDataSet.IData;
+﻿using PocoDataSet.Extensions.Merging.Modes;
+using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
@@ -14,10 +15,10 @@ namespace PocoDataSet.Extensions
         /// <param name="currentDataTable">Current data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>
         /// <param name="mergeOptions">Merge options</param>
-        public static void MergeWith(this IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
+        public static void DoRefreshMergeIfNoChangesExist(this IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
-            ITableMergeHandler tableHandler = mergeOptions!.GetTableMergeHandler(currentDataTable.TableName);
-            tableHandler.Merge(currentDataTable, refreshedDataTable, mergeOptions);
+            RefreshIfNoChangesExistDataTableMerger refreshIfNoChangesExistDataTableMerger = new RefreshIfNoChangesExistDataTableMerger();
+            refreshIfNoChangesExistDataTableMerger.MergeRefreshIfNoChangesExist(currentDataTable, refreshedDataTable, mergeOptions);
         }
         #endregion
     }

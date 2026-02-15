@@ -10,7 +10,7 @@ namespace PocoDataSet.ObservableExtensions
     /// <summary>
     /// Provides observable data table default merge handler functionality
     /// </summary>
-    public class ObservableDataTableDefaultMergeHandler : IObservableDataTableMergeHandler
+    internal class ObservableDataTableDefaultMergeHandler
     {
         #region Private Constants
         // Correlation column used by PostSave merge to map client-side Added rows to server-returned rows
@@ -24,20 +24,6 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="currentObservableDataTable">Current observable data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
-        public void Merge(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
-        {
-            IObservableMergePolicy policy = ObservableMergePolicyFactory.Create(observableMergeOptions.MergeMode);
-
-            // Observable merge mode selection is already expressed by the policy.
-            // Avoid the extra strategy/factory/context indirection and route here.
-            if (policy.IsFullReload)
-            {
-                MergeObservableDataRowsWithoutPrimaryKeys(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
-                return;
-            }
-
-            MergeKeyed(currentObservableDataTable, refreshedDataTable, observableMergeOptions, policy);
-        }
 #region Keyed Merge
         internal void MergeKeyed(
             IObservableDataTable currentObservableDataTable,

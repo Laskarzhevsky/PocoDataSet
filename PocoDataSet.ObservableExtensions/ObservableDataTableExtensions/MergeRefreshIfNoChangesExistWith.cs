@@ -1,5 +1,6 @@
 ﻿using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
+using PocoDataSet.ObservableExtensions.Merging.Modes;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -15,10 +16,10 @@ namespace PocoDataSet.ObservableExtensions
         /// <param name="observableDataTable">Observable data table</param>
         /// <param name="refreshedDataTable">Refreshed data table</param>
         /// <param name="observableMergeOptions">Observable merge options</param>
-        public static void MergeWith(this IObservableDataTable observableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
+        public static void MergeRefreshIfNoChangesExistWith(this IObservableDataTable observableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
         {
-            IObservableDataTableMergeHandler observableDataTableMergeHandler = observableMergeOptions!.GetObservableTableMergeHandler(observableDataTable.TableName);
-            observableDataTableMergeHandler.Merge(observableDataTable, refreshedDataTable, observableMergeOptions);
+            ObservableRefreshIfNoChangesExistDataTableMerger observableRefreshIfNoChangesExistDataTableMerger = new ObservableRefreshIfNoChangesExistDataTableMerger();
+            observableRefreshIfNoChangesExistDataTableMerger.MergeRefreshIfNoChangesExist(observableDataTable, refreshedDataTable, observableMergeOptions);
         }
         #endregion
     }

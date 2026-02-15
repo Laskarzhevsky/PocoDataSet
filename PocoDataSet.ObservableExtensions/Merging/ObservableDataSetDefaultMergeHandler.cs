@@ -5,6 +5,7 @@ using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 using PocoDataSet.ObservableData;
+using PocoDataSet.ObservableExtensions.Merging.Modes;
 
 namespace PocoDataSet.ObservableExtensions
 {
@@ -86,8 +87,51 @@ namespace PocoDataSet.ObservableExtensions
                 refreshedDataSet.TryGetTable(observableDataTable.TableName, out refreshedDataTable);
                 if (refreshedDataTable != null)
                 {
-                    observableDataTable.MergeWith(refreshedDataTable, observableMergeOptions);
+                    DispatchTableMerge(observableDataTable, refreshedDataTable, observableMergeOptions);
                 }
+            }
+        }
+
+
+        /// <summary>
+        /// Dispatches table merge to an explicit merge-mode entry point.
+        /// </summary>
+        static void DispatchTableMerge(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable, IObservableMergeOptions observableMergeOptions)
+        {
+            MergeMode mergeMode = observableMergeOptions.MergeMode;
+
+            switch (mergeMode)
+            {
+                case MergeMode.PostSave:
+                {
+                    var merger = new ObservablePostSaveDataTableMerger();
+                    merger.MergePostSave(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                    break;
+                }
+
+                case MergeMode.RefreshIfNoChangesExist:
+                {
+                    var merger = new ObservableRefreshIfNoChangesExistDataTableMerger();
+                    merger.MergeRefreshIfNoChangesExist(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                    break;
+                }
+
+                case MergeMode.RefreshPreservingLocalChanges:
+                {
+                    var merger = new ObservableRefreshPreservingLocalChangesDataTableMerger();
+                    merger.MergeRefreshPreservingLocalChanges(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                    break;
+                }
+
+                case MergeMode.Replace:
+                {
+                    var merger = new ObservableReplaceDataTableMerger();
+                    merger.Replace(currentObservableDataTable, refreshedDataTable, observableMergeOptions);
+                    break;
+                }
+
+                default:
+                    throw new System.ArgumentOutOfRangeException(nameof(observableMergeOptions.MergeMode), observableMergeOptions.MergeMode, "Unsupported merge mode.");
             }
         }
         #endregion

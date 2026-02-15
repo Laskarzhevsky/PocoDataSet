@@ -1,27 +1,20 @@
-﻿using System;
-
+using System;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 
 namespace PocoDataSet.ObservableExtensions
 {
     /// <summary>
-    /// 
+    /// Creates observable merge policies for internal validation/behavior switches.
     /// </summary>
     public static class ObservableMergePolicyFactory
     {
-        /// <summary>
-        /// Creates merge policy
-        /// </summary>
-        /// <param name="mergeMode">Merge mode</param>
-        /// <returns>Created merge policy</returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static IObservableMergePolicy Create(MergeMode mergeMode)
         {
             switch (mergeMode)
             {
                 case MergeMode.RefreshIfNoChangesExist:
-                    return new DefaultMergePolicy();
+                    return new RefreshIfNoChangesExistMergePolicy();
 
                 case MergeMode.PostSave:
                     return new PostSaveMergePolicy();
@@ -30,7 +23,7 @@ namespace PocoDataSet.ObservableExtensions
                     return new ReplaceMergePolicy();
 
                 case MergeMode.RefreshPreservingLocalChanges:
-                    return new RefreshMergePolicy();
+                    return new RefreshPreservingLocalChangesMergePolicy();
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mergeMode));

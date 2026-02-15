@@ -36,14 +36,6 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets or sets default observable table merge handler
-        /// </summary>
-        IObservableDataTableMergeHandler DefaultObservableTableMergeHandler
-        {
-            get; set;
-        }
-
-        /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// Data in mentioned tables will not be changed during the merge process
         /// </summary>
@@ -93,14 +85,6 @@ namespace PocoDataSet.IObservableData
         }
 
         /// <summary>
-        /// Gets observable table merge handlers
-        /// </summary>
-        IDictionary<string, IObservableDataTableMergeHandler> ObservableTableMergeHandlers
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
         /// </summary>
         IDictionary<string, List<string>> OverriddenPrimaryKeyNames
@@ -118,25 +102,11 @@ namespace PocoDataSet.IObservableData
         IObservableDataSetMergeHandler GetObservableDataSetMergeHandler(string? dataSetMergeHandlerKey);
 
         /// <summary>
-        /// Gets primary key column names for a given table, applying overrides when configured.
-        /// </summary>
-        /// <param name="dataTable">Data table</param>
-        /// <returns>Primary key column names</returns>
-        List<string> GetPrimaryKeyColumnNames(IObservableDataTable dataTable);
-
-        /// <summary>
         /// Gets observable row merge handler
         /// </summary>
         /// <param name="tableName">Table name</param>
         /// <returns>Row merge handler</returns>
         IObservableDataRowMergeHandler GetObservableRowMergeHandler(string tableName);
-
-        /// <summary>
-        /// Gets observable table merge handler
-        /// </summary>
-        /// <param name="tableName">Table name</param>
-        /// <returns>Table merge handler</returns>
-        IObservableDataTableMergeHandler GetObservableTableMergeHandler(string tableName);
         #endregion
     }
 }

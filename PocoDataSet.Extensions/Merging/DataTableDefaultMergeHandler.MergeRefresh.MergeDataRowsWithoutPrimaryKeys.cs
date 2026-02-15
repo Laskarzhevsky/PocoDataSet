@@ -6,7 +6,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
-public partial class DataTableDefaultMergeHandler
+internal partial class DataTableDefaultMergeHandler
 {
     void MergeDataRowsWithoutPrimaryKeys(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
             {
