@@ -1,0 +1,108 @@
+using System;
+
+using PocoDataSet.Data;
+using PocoDataSet.Extensions;
+using PocoDataSet.IData;
+using PocoDataSet.IObservableData;
+using PocoDataSet.ObservableData;
+using PocoDataSet.ObservableExtensions;
+
+using Xunit;
+
+namespace PocoDataSet.ObservableTests
+{
+    /// <summary>
+    /// Locks insert reconciliation: Observable PostSave must correlate the client-created Added row
+    /// with the server response via __ClientKey and apply server-assigned identity (PK), without
+    /// replacing the observable row instance.
+    /// </summary>
+    public class ObservablePostSaveServerAssignedPrimaryKeyByClientKeyTests
+    {
+        [Fact]
+        public void PostSave_Reconciles_AddedRow_ByClientKey_AndAppliesServerAssignedPrimaryKey_WithoutRowReplacement()
+        {
+            // Arrange
+            IDataSet inner = DataSetFactory.CreateDataSet();
+            IDataTable t = inner.AddNewTable("Department");
+            t.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
+            t.AddColumn("Id", DataTypeNames.INT32, false, true);
+            t.AddColumn("Name", DataTypeNames.STRING);
+
+            Guid clientKey = Guid.NewGuid();
+
+            DataRow currentRow = new DataRow();
+            currentRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
+            currentRow["Id"] = -1;
+            currentRow["Name"] = "Customer Service";
+            t.AddRow(currentRow);
+
+            IObservableDataSet currentObservable = new ObservableDataSet(inner);
+            IObservableDataTable currentTable = currentObservable.Tables["Department"];
+
+            Assert.Equal(1, currentTable.Rows.Count);
+            IObservableDataRow beforeMergeRow = currentTable.Rows[0];
+
+            // Arrange: server post-save response with server-assigned identity.
+            IDataSet postSave = DataSetFactory.CreateDataSet();
+            IDataTable pt = postSave.AddNewTable("Department");
+            pt.AddColumn(SpecialColumnNames.CLIENT_KEY, DataTypeNames.GUID);
+            pt.AddColumn("Id", DataTypeNames.INT32, false, true);
+            pt.AddColumn("Name", DataTypeNames.STRING);
+
+            DataRow serverRow = new DataRow();
+            serverRow[SpecialColumnNames.CLIENT_KEY] = clientKey;
+            serverRow["Id"] = 10;
+            serverRow["Name"] = "Customer Service";
+            pt.AddRow(serverRow);
+
+            // Ensure this is a proper changeset row (Added).
+            serverRow.SetDataRowState(DataRowState.Added);
+
+            ObservableMergeOptions options = new ObservableMergeOptions();
+            IObservableDataSetMergeResult result = options.ObservableDataSetMergeResult;
+
+            // Act
+            currentObservable.DoPostSaveMerge(postSave, options);
+
+            // Assert: row instance preserved
+            Assert.Equal(1, currentTable.Rows.Count);
+            Assert.Same(beforeMergeRow, currentTable.Rows[0]);
+
+            // Assert: PK updated
+            Assert.Equal(10, (int)currentTable.Rows[0]["Id"]!);
+            Assert.Equal(DataRowState.Unchanged, currentTable.Rows[0].DataRowState);
+
+            // Assert: merge result contains the reconciled row entry
+            Assert.True(ContainsRow(result, "Department", beforeMergeRow));
+        }
+
+        private static bool ContainsRow(IObservableDataSetMergeResult result, string tableName, IObservableDataRow row)
+        {
+            foreach (IObservableDataSetMergeResultEntry entry in result.UpdatedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            foreach (IObservableDataSetMergeResultEntry entry in result.AddedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            foreach (IObservableDataSetMergeResultEntry entry in result.DeletedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}
