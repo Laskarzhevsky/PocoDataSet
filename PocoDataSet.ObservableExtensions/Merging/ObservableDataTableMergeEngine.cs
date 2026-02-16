@@ -131,11 +131,11 @@ namespace PocoDataSet.ObservableExtensions
                 bool hasPrimaryKeyValue = RowIdentityResolver.TryGetPrimaryKeyValue(row, primaryKeyColumnNames, out key);
 
                 if (!hasPrimaryKeyValue)
-
                 {
-
-                    key = string.Empty;
-
+                    // A keyed merge requires that every refreshed row has a concrete primary key value.
+                    // Allowing null/empty PKs would make correlation ambiguous and can hide data issues.
+                    throw new InvalidOperationException(
+                        "Missing primary key value detected in " + tableRoleDescription + " table '" + dataTable.TableName + "'.");
                 }
 
                 if (seen.Contains(key))

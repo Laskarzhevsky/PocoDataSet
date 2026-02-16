@@ -73,6 +73,13 @@ namespace PocoDataSet.ObservableExtensions.Merging.RefreshMergePreservingLocalCh
             {
                 string columnName = columnMetadata.ColumnName;
 
+                // Never overwrite the current row's client key during refresh merges.
+                // The client key is a UI/client-side identity and must remain stable for existing rows.
+                if (columnName == SpecialColumnNames.CLIENT_KEY)
+                {
+                    continue;
+                }
+
                 object? oldValue;
                 currentDataRow.TryGetValue(columnName, out oldValue);
 
@@ -98,6 +105,13 @@ namespace PocoDataSet.ObservableExtensions.Merging.RefreshMergePreservingLocalCh
             foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
             {
                 string columnName = columnMetadata.ColumnName;
+
+                // Never overwrite the current row's client key during refresh merges.
+                // The client key is a UI/client-side identity and must remain stable for existing rows.
+                if (columnName == SpecialColumnNames.CLIENT_KEY)
+                {
+                    continue;
+                }
 
                 object? oldValue;
                 currentObservableDataRow.InnerDataRow.TryGetValue(columnName, out oldValue);

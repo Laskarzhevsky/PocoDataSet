@@ -36,11 +36,36 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
                 return;
             }
 
+            EnsureRefreshedRowsHaveNonNullPrimaryKeys(refreshedDataTable, primaryKeyColumnNames);
+
             Dictionary<string, IDataRow> refreshedIndex = refreshedDataTable.BuildPrimaryKeyIndex(primaryKeyColumnNames);
             HashSet<string> mergedPrimaryKeys = new HashSet<string>(StringComparer.Ordinal);
 
             MergeExistingRows(currentDataTable, refreshedDataTable, mergeOptions, primaryKeyColumnNames, refreshedIndex, mergedPrimaryKeys);
             AddNonProcessedRefreshedRows(currentDataTable, mergeOptions, refreshedIndex, mergedPrimaryKeys);
+        }
+
+        private static void EnsureRefreshedRowsHaveNonNullPrimaryKeys(IDataTable refreshedDataTable, List<string> primaryKeyColumnNames)
+        {
+            for (int rowIndex = 0; rowIndex < refreshedDataTable.Rows.Count; rowIndex++)
+            {
+                IDataRow refreshedRow = refreshedDataTable.Rows[rowIndex];
+
+                for (int pkIndex = 0; pkIndex < primaryKeyColumnNames.Count; pkIndex++)
+                {
+                    string pkColumnName = primaryKeyColumnNames[pkIndex];
+                    object? value = refreshedRow[pkColumnName];
+
+                    if (value == null || value == DBNull.Value)
+                    {
+                        throw new InvalidOperationException(
+                            "Refreshed row contains null primary key value. " +
+                            "Table='" + refreshedDataTable.TableName + "', " +
+                            "Column='" + pkColumnName + "', " +
+                            "RowIndex=" + rowIndex.ToString() + ".");
+                    }
+                }
+            }
         }
 
         private static void MergeWithoutPrimaryKeys(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
