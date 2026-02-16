@@ -11,23 +11,16 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
     /// </summary>
     public sealed class DataTableMerger
     {
+        #region Public Methods
+        /// <summary>
+        /// Merges the refreshed data table into the current data table, throwing if pending changes exist in the current data table.
+        /// The merge is performed according to the provided merge options.
+        /// </summary>
+        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="refreshedDataTable">Refreshed data table</param>
+        /// <param name="mergeOptions">Merge options</param>
         public void Merge(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
-            if (currentDataTable == null)
-            {
-                throw new ArgumentNullException(nameof(currentDataTable));
-            }
-
-            if (refreshedDataTable == null)
-            {
-                throw new ArgumentNullException(nameof(refreshedDataTable));
-            }
-
-            if (mergeOptions == null)
-            {
-                throw new ArgumentNullException(nameof(mergeOptions));
-            }
-
             // Fail fast if the table is dirty.
             for (int i = 0; i < currentDataTable.Rows.Count; i++)
             {
@@ -41,7 +34,7 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
             List<string> primaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
             if (primaryKeyColumnNames.Count == 0)
             {
-                MergeWithoutPrimaryKeys(currentDataTable, refreshedDataTable, mergeOptions);
+                MergeTableWithoutPrimaryKeys(currentDataTable, refreshedDataTable, mergeOptions);
                 return;
             }
 
@@ -51,33 +44,51 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
             MergeExistingRows(currentDataTable, mergeOptions, primaryKeyColumnNames, refreshedIndex, mergedPrimaryKeys);
             AddNonProcessedRefreshedRows(currentDataTable, mergeOptions, refreshedIndex, mergedPrimaryKeys);
         }
+        #endregion
 
-        private static void MergeWithoutPrimaryKeys(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
+        #region Private Methods
+        /// <summary>
+        /// Adds non-processed refreshed rows
+        /// </summary>
+        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="mergeOptions">Merge options</param>
+        /// <param name="refreshedIndex">Refreshed index</param>
+        /// <param name="mergedPrimaryKeys">Merged primary keys</param>
+        private static void AddNonProcessedRefreshedRows(IDataTable currentDataTable, IMergeOptions mergeOptions, Dictionary<string, IDataRow> refreshedIndex, HashSet<string> mergedPrimaryKeys)
         {
-            // Track deletions BEFORE clearing the table.
-            for (int i = 0; i < currentDataTable.Rows.Count; i++)
+            foreach (KeyValuePair<string, IDataRow> kvp in refreshedIndex)
             {
-                mergeOptions.DataSetMergeResult.DeletedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, currentDataTable.Rows[i]));
-            }
+                string pkValue = kvp.Key;
+                if (mergedPrimaryKeys.Contains(pkValue))
+                {
+                    continue;
+                }
 
-            currentDataTable.RemoveAllRows();
-
-            for (int i = 0; i < refreshedDataTable.Rows.Count; i++)
-            {
-                IDataRow refreshedRow = refreshedDataTable.Rows[i];
                 IDataRow newRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable);
+                IDataRow refreshedRow = kvp.Value;
 
                 newRow.DoRefreshMergeIfNoChangesExist(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newRow));
             }
         }
 
-        private static void MergeExistingRows(
-            IDataTable currentDataTable,
-            IMergeOptions mergeOptions,
-            List<string> primaryKeyColumnNames,
-            Dictionary<string, IDataRow> refreshedIndex,
-            HashSet<string> mergedPrimaryKeys)
+        private static IDataRow AddNewDataRowWithDefaultValuesToDataTable(IDataTable dataTable)
+        {
+            IDataRow newRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
+            dataTable.AddRow(newRow);
+            newRow.SetDataRowState(DataRowState.Unchanged);
+            return newRow;
+        }
+
+        /// <summary>
+        /// Merges existing rows
+        /// </summary>
+        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="mergeOptions">Merge options</param>
+        /// <param name="primaryKeyColumnNames">Primary key column names</param>
+        /// <param name="refreshedIndex">Refreshed index</param>
+        /// <param name="mergedPrimaryKeys">Merged primary keys</param>
+        private static void MergeExistingRows(IDataTable currentDataTable, IMergeOptions mergeOptions, List<string> primaryKeyColumnNames, Dictionary<string, IDataRow> refreshedIndex, HashSet<string> mergedPrimaryKeys)
         {
             for (int i = currentDataTable.Rows.Count - 1; i >= 0; i--)
             {
@@ -115,34 +126,31 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
             }
         }
 
-        private static void AddNonProcessedRefreshedRows(
-            IDataTable currentDataTable,
-            IMergeOptions mergeOptions,
-            Dictionary<string, IDataRow> refreshedIndex,
-            HashSet<string> mergedPrimaryKeys)
+        /// <summary>
+        /// Merges table without primary keys
+        /// </summary>
+        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="refreshedDataTable">Refreshed data table</param>
+        /// <param name="mergeOptions">Merge options</param>
+        private static void MergeTableWithoutPrimaryKeys(IDataTable currentDataTable, IDataTable refreshedDataTable, IMergeOptions mergeOptions)
         {
-            foreach (KeyValuePair<string, IDataRow> kvp in refreshedIndex)
+            // Track deletions BEFORE clearing the table.
+            for (int i = 0; i < currentDataTable.Rows.Count; i++)
             {
-                string pkValue = kvp.Key;
-                if (mergedPrimaryKeys.Contains(pkValue))
-                {
-                    continue;
-                }
+                mergeOptions.DataSetMergeResult.DeletedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, currentDataTable.Rows[i]));
+            }
 
+            currentDataTable.RemoveAllRows();
+
+            for (int i = 0; i < refreshedDataTable.Rows.Count; i++)
+            {
+                IDataRow refreshedRow = refreshedDataTable.Rows[i];
                 IDataRow newRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable);
-                IDataRow refreshedRow = kvp.Value;
 
                 newRow.DoRefreshMergeIfNoChangesExist(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newRow));
             }
         }
-
-        private static IDataRow AddNewDataRowWithDefaultValuesToDataTable(IDataTable dataTable)
-        {
-            IDataRow newRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(dataTable.Columns);
-            dataTable.AddRow(newRow);
-            newRow.SetDataRowState(DataRowState.Unchanged);
-            return newRow;
-        }
+        #endregion
     }
 }

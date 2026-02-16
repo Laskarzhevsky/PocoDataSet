@@ -47,6 +47,8 @@ namespace PocoDataSet.ObservableExtensions.Merging.DoReplaceMerge
                 throw new ArgumentNullException(nameof(observableMergeOptions));
             }
 
+            ValidateSchemaCompatibilityForReplace(currentObservableDataTable, refreshedDataTable);
+
             MergeObservableDataRowsWithoutPrimaryKeys(
                 currentObservableDataTable,
                 refreshedDataTable,
@@ -280,6 +282,52 @@ namespace PocoDataSet.ObservableExtensions.Merging.DoReplaceMerge
                     new ObservableDataSetMergeResultEntry(currentObservableDataTable.TableName, observableDataRow));
             }
         }
-        #endregion
+        
+        private static void ValidateSchemaCompatibilityForReplace(IObservableDataTable currentObservableDataTable, IDataTable refreshedDataTable)
+        {
+            if (currentObservableDataTable == null)
+            {
+                throw new ArgumentNullException(nameof(currentObservableDataTable));
+            }
+
+            if (refreshedDataTable == null)
+            {
+                throw new ArgumentNullException(nameof(refreshedDataTable));
+            }
+
+            // Policy A: current schema is authoritative. Extra columns in refreshed are ignored.
+            // Missing columns in refreshed are allowed (values become null/default on replaced rows).
+            // BUT if a column exists in both, the data type must match to avoid silent corruption.
+            for (int i = 0; i < currentObservableDataTable.Columns.Count; i++)
+            {
+                IColumnMetadata currentColumn = currentObservableDataTable.Columns[i];
+                IColumnMetadata refreshedColumn = FindColumnByName(refreshedDataTable, currentColumn.ColumnName);
+
+                if (refreshedColumn != null)
+                {
+                    if (!string.Equals(currentColumn.DataType, refreshedColumn.DataType, StringComparison.Ordinal))
+                    {
+                        throw new InvalidOperationException(
+                            "Replace merge requires matching column data types for column '" + currentColumn.ColumnName +
+                            "'. Current type '" + currentColumn.DataType + "', refreshed type '" + refreshedColumn.DataType + "'.");
+                    }
+                }
+            }
+        }
+
+        private static IColumnMetadata FindColumnByName(IDataTable table, string columnName)
+        {
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                if (string.Equals(table.Columns[i].ColumnName, columnName, StringComparison.Ordinal))
+                {
+                    return table.Columns[i];
+                }
+            }
+
+            return null;
+        }
+
+#endregion
     }
 }

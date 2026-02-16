@@ -21,4 +21,10 @@
     <ProjectReference Include="..\PocoDataSet.Serializer\PocoDataSet.Serializer.csproj" />
     <ProjectReference Include="..\PocoDataSet.SqlServerDataAdapter\PocoDataSet.SqlServerDataAdapter.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Merging\RefreshMergePreservingLocalChanges\" />
+    <Folder Include="Merging\RefreshMergeIfNoChangesExist\" />
+    <Folder Include="Merging\ReplaceMerge\" />
+  </ItemGroup>
 </Project>
