@@ -11,24 +11,16 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
     /// </summary>
     public sealed class DataTableMerger
     {
-
+        #region Public Methods
+        /// <summary>
+        /// Merges the changes from the changeset data table into the current data table according to the specified merge options.
+        /// This method is typically called after a successful save operation to apply any server-side changes (including potential corrections) back to the client's current data table.
+        /// </summary>
+        /// <param name="currentDataTable">Current data table</param>
+        /// <param name="refreshedDataTable">Refreshed data table</param>
+        /// <param name="mergeOptions">Merge options</param>
         public void Merge(IDataTable currentDataTable, IDataTable changesetDataTable, IMergeOptions mergeOptions)
         {
-            if (currentDataTable == null)
-            {
-                throw new ArgumentNullException(nameof(currentDataTable));
-            }
-
-            if (changesetDataTable == null)
-            {
-                throw new ArgumentNullException(nameof(changesetDataTable));
-            }
-
-            if (mergeOptions == null)
-            {
-                throw new ArgumentNullException(nameof(mergeOptions));
-            }
-
             List<string> primaryKeyColumnNames = mergeOptions.GetPrimaryKeyColumnNames(currentDataTable);
 
             Dictionary<string, IDataRow> currentRowsByPrimaryKey = BuildPrimaryKeyIndex(currentDataTable, primaryKeyColumnNames);
@@ -51,6 +43,9 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
                 }
             }
         }
+        #endregion
+
+        #region Private Methods
 
         private static Dictionary<string, IDataRow> BuildPrimaryKeyIndex(IDataTable dataTable, List<string> primaryKeyColumnNames)
         {
@@ -103,6 +98,18 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
                 isNewRowAddedToCurrent = true;
             }
 
+            // Idempotence / no-op protection:
+            // If the target row is already Unchanged AND all refreshed values are identical, PostSave must not
+            // capture OriginalValues churn and must not report an UpdatedDataRows entry.
+            if (!isNewRowAddedToCurrent)
+            {
+                bool needsMerge = TargetRowNeedsPostSaveMerge(targetRow, changesetRow, currentDataTable.Columns);
+                if (!needsMerge)
+                {
+                    return;
+                }
+            }
+
             // Delegate row value application to the row merger via extension chain.
             targetRow.DoPostSaveMerge(changesetRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
 
@@ -114,6 +121,38 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
             {
                 mergeOptions.DataSetMergeResult.UpdatedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, targetRow));
             }
+        }
+
+        private static bool TargetRowNeedsPostSaveMerge(IDataRow targetRow, IDataRow changesetRow, IReadOnlyList<IColumnMetadata> columns)
+        {
+            // If there are pending changes, PostSave must run to AcceptChanges even if values are identical.
+            if (targetRow.DataRowState != DataRowState.Unchanged)
+            {
+                return true;
+            }
+
+            for (int c = 0; c < columns.Count; c++)
+            {
+                string columnName = columns[c].ColumnName;
+
+                if (!changesetRow.ContainsKey(columnName))
+                {
+                    continue;
+                }
+
+                object? oldValue;
+                targetRow.TryGetValue(columnName, out oldValue);
+
+                object? newValue;
+                changesetRow.TryGetValue(columnName, out newValue);
+
+                if (!DataFieldValuesComparer.FieldValuesEqual(oldValue, newValue))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void ApplyPostSaveDelete(
@@ -184,5 +223,6 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
             newDataRow.SetDataRowState(DataRowState.Unchanged);
             return newDataRow;
         }
+        #endregion
     }
 }

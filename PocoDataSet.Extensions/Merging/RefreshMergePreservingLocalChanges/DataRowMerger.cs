@@ -10,7 +10,15 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
     /// </summary>
     public sealed class DataRowMerger
     {
-        public bool Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> columns)
+        #region Public Methods
+        /// <summary>
+        /// Merges the refreshed row into the current row, but only if the current row is not in Added/Modified/Deleted state.
+        /// </summary>
+        /// <param name="currentRow">Current row</param>
+        /// <param name="refreshedRow">Refreshed row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>True if changes were merged, otherwise false</returns>
+        public bool Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             // Never overwrite user work.
             if (currentRow.DataRowState == DataRowState.Added ||
@@ -22,9 +30,9 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
 
             bool changed = false;
 
-            for (int i = 0; i < columns.Count; i++)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                string columnName = columns[i].ColumnName;
+                string columnName = listOfColumnMetadata[i].ColumnName;
 
                 // Be tolerant to schema evolution / special columns.
                 object? oldValue;
@@ -49,5 +57,6 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
 
             return changed;
         }
+        #endregion
     }
 }

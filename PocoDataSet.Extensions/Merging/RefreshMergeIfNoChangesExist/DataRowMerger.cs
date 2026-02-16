@@ -9,13 +9,21 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
     /// </summary>
     public sealed class DataRowMerger
     {
-        public bool Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> columns)
+        #region Public Methods
+        /// <summary>
+        /// Merges the refreshed row into the current row if any changes exist.
+        /// </summary>
+        /// <param name="currentRow">Current row</param>
+        /// <param name="refreshedRow">Refreshed row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>True if changes were merged, otherwise false</returns>
+        public bool Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
             bool changed = false;
 
-            for (int i = 0; i < columns.Count; i++)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                string columnName = columns[i].ColumnName;
+                string columnName = listOfColumnMetadata[i].ColumnName;
 
                 object? oldValue;
                 currentRow.TryGetValue(columnName, out oldValue);
@@ -39,5 +47,6 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
 
             return changed;
         }
+        #endregion
     }
 }

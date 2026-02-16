@@ -9,11 +9,18 @@ namespace PocoDataSet.Extensions.Merging.DoReplaceMerge
     /// </summary>
     public sealed class DataRowMerger
     {
-        public void Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> columns)
+        #region Public Methods
+        /// <summary>
+        /// Merges the refreshed row into the current row by overwriting all values and calling AcceptChanges.
+        /// </summary>
+        /// <param name="currentRow">Current row</param>
+        /// <param name="refreshedRow">Refreshed row</param>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        public void Merge(IDataRow currentRow, IDataRow refreshedRow, IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
-            for (int i = 0; i < columns.Count; i++)
+            for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
-                string columnName = columns[i].ColumnName;
+                string columnName = listOfColumnMetadata[i].ColumnName;
 
                 if (!refreshedRow.ContainsKey(columnName))
                 {
@@ -25,5 +32,6 @@ namespace PocoDataSet.Extensions.Merging.DoReplaceMerge
 
             currentRow.AcceptChanges();
         }
+        #endregion
     }
 }
