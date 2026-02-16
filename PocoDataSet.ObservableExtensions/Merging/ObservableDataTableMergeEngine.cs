@@ -361,6 +361,24 @@ namespace PocoDataSet.ObservableExtensions
                 }
                 else
                 {
+                    if (isPostSaveMerge && refreshedDataRow.DataRowState == DataRowState.Unchanged)
+                    {
+                        // PostSave contract: a changeset should contain only changed rows.
+                        // If an Unchanged row sneaks in, do not let it overwrite current data.
+                        // Exception: allow correlation for Added rows (server-assigned identities).
+                        if (observableDataRow.InnerDataRow.DataRowState != DataRowState.Added)
+                        {
+                            string refreshedPkValueForUnchanged;
+                            bool hasPkForUnchanged = RowIdentityResolver.TryGetPrimaryKeyValue(refreshedDataRow, primaryKeyColumnNames, out refreshedPkValueForUnchanged);
+                            if (!hasPkForUnchanged)
+                            {
+                                refreshedPkValueForUnchanged = string.Empty;
+                            }
+                            processedRefreshedPrimaryKeys.Add(refreshedPkValueForUnchanged);
+                            continue;
+                        }
+                    }
+
                     bool changed = rowMerger.MergeObservableRow(
                         currentObservableDataTable.TableName,
                         observableDataRow,
