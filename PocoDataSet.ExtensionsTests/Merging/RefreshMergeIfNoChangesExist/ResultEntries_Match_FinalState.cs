@@ -79,18 +79,5 @@ namespace PocoDataSet.ExtensionsTests.Merging
             Assert.True(RowExistsById(t, 2));
             Assert.True(RowExistsById(t, 3));
         }
-
-        private static bool RowExistsById(IDataTable t, int id)
-        {
-            for (int i = 0; i < t.Rows.Count; i++)
-            {
-                if ((int)t.Rows[i]["Id"]! == id)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
     }
 }

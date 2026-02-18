@@ -1,3 +1,4 @@
+using System;
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
@@ -103,5 +104,46 @@ namespace PocoDataSet.ExtensionsTests.Merging
 
             return ds;
         }
+
+        private static IDataRow GetRowById(IDataTable t, int id)
+        {
+            for (int i = 0; i < t.Rows.Count; i++)
+            {
+                if ((int)t.Rows[i]["Id"]! == id)
+                {
+                    return t.Rows[i];
+                }
+            }
+
+            throw new InvalidOperationException("Row not found for Id=" + id + ".");
+        }
+
+
+        private static bool HasColumn(IDataTable table, string columnName)
+        {
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                if (table.Columns[i].ColumnName == columnName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool RowExistsById(IDataTable t, int id)
+        {
+            for (int i = 0; i < t.Rows.Count; i++)
+            {
+                if ((int)t.Rows[i]["Id"]! == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }

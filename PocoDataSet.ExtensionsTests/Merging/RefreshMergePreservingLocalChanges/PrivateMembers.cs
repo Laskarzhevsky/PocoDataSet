@@ -326,5 +326,18 @@ namespace PocoDataSet.ExtensionsTests.Merging
             }
         }
 
+private static bool HasColumn(IDataTable table, string columnName)
+{
+    for (int i = 0; i < table.Columns.Count; i++)
+    {
+        if (string.Equals(table.Columns[i].ColumnName, columnName, StringComparison.Ordinal))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
     }
 }
