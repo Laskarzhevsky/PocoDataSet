@@ -3,9 +3,18 @@ using PocoDataSet.IData;
 namespace PocoDataSet.ExtensionsTests.Merging
 {
     /// <summary>
-    /// Additional Replace schema contract tests:
-    /// - Replace preserves current column metadata (PK flag, nullability, max length).
-    /// - Refreshed column metadata does not overwrite current schema.
+    /// Additional Replace schema contract tests: - Replace preserves current column metadata (PK
+    /// flag, nullability, max length). - Refreshed column metadata does not overwrite current
+    /// schema.
+    ///
+    /// Scenario:
+    /// - Build a CURRENT DataSet (the client-side truth before the merge).
+    /// - Build a REFRESHED/CHANGESET DataSet (the server-side snapshot or post-save response).
+    /// - Execute Replace merge (replace rows while enforcing current schema contract).
+    /// How the test proves the contract:
+    /// - Arrange sets up schema + row states to trigger the behavior.
+    /// - Act runs the merge using MergeOptions.
+    /// - Assert verifies final data and invariants (row instances, row state, and merge result entries).
     /// </summary>
     public partial class ReplaceMerge
     {

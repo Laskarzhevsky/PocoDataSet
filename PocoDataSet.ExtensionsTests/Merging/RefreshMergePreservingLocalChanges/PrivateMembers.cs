@@ -9,12 +9,20 @@ using Xunit;
 namespace PocoDataSet.ExtensionsTests.Merging
 {
     /// <summary>
-    /// Composite primary key matrix (POCO).
-    /// NOTE: Your current merge contract differs by mode:
-    /// - RefreshPreservingLocalChanges rejects refreshed composite PK rows containing null parts (throws).
-    /// - RefreshIfNoChangesExist currently allows refreshed composite PK rows containing null parts and treats them as non-correlatable.
+    /// Composite primary key matrix (POCO). NOTE: Your current merge contract differs by mode: -
+    /// RefreshPreservingLocalChanges rejects refreshed composite PK rows containing null parts
+    /// (throws). - RefreshIfNoChangesExist currently allows refreshed composite PK rows containing
+    /// null parts and treats them as non-correlatable. These tests lock the CURRENT observed
+    /// behavior to prevent future regressions.
     ///
-    /// These tests lock the CURRENT observed behavior to prevent future regressions.
+    /// Scenario:
+    /// - Build a CURRENT DataSet (the client-side truth before the merge).
+    /// - Build a REFRESHED/CHANGESET DataSet (the server-side snapshot or post-save response).
+    /// - Execute RefreshPreservingLocalChanges merge (refresh unchanged rows, preserve local changes).
+    /// How the test proves the contract:
+    /// - Arrange sets up schema + row states to trigger the behavior.
+    /// - Act runs the merge using MergeOptions.
+    /// - Assert verifies final data and invariants (row instances, row state, and merge result entries).
     /// </summary>
     public partial class RefreshMergePreservingLocalChanges
     {
