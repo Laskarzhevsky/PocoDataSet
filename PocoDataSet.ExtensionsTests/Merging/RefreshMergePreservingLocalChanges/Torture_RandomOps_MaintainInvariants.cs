@@ -9,6 +9,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// A stress test that performs randomized operations and merges to ensure key *RefreshPreservingLocalChanges*
+        /// invariants always hold.  Invariants typically validated here include: - No duplicate keys after merge. - Row
+        /// states remain valid (no impossible transitions). - Local pending changes (Added/Modified/Deleted) are never
+        /// silently lost. - Merge does not throw for allowed inputs.  The goal is to catch edge-case regressions that
+        /// targeted unit tests might miss.
+        /// </summary>
+
         [Fact]
         public void Torture_RandomOps_MaintainInvariants()
         {

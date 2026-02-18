@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies behavior of *RefreshPreservingLocalChanges* when the table has **no primary keys** (cannot key
+        /// rows).  Scenario: - Table schema has no PK, so row matching is impossible.  Expected behavior: - The merge
+        /// falls back to a replace-like strategy: existing rows are treated as removed and refreshed rows are treated
+        /// as added. - The test locks that bookkeeping: current rows become Deleted (tracked) and snapshot rows become
+        /// Added (tracked/inserted).
+        /// </summary>
+
         [Fact]
         public void NoPrimaryKeys_ReplacesAllRows_TracksAddedDeleted()
         {

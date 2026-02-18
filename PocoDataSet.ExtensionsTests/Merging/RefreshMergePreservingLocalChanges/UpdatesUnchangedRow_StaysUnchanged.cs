@@ -7,6 +7,13 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies the no-op path: when an Unchanged row matches the refreshed snapshot exactly, the merge should not
+        /// change state.  Scenario: - Current Unchanged row equals refreshed row (same PK and same values).  Expected
+        /// behavior: - Values are identical after merge. - Row remains `Unchanged`. - This locks that the merge does
+        /// not introduce spurious modifications.
+        /// </summary>
+
         [Fact]
         public void UpdatesUnchangedRow_StaysUnchanged()
         {
@@ -34,6 +41,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             rt.AddLoadedRow(r1);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

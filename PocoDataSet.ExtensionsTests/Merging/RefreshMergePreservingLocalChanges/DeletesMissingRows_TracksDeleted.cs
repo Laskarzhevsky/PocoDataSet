@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that *RefreshPreservingLocalChanges* **deletes rows that disappear from the server snapshot** and
+        /// tracks them as Deleted.  Scenario: - Current has a row that is Unchanged. - Refreshed snapshot does not
+        /// contain that PK row.  Expected behavior: - The row is marked Deleted (or removed with Deleted tracking,
+        /// depending on implementation). - The test asserts the Deleted bookkeeping so later save/merge flows can
+        /// propagate the deletion.
+        /// </summary>
+
         [Fact]
         public void DeletesMissingRows_TracksDeleted()
         {
@@ -38,6 +46,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

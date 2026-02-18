@@ -9,6 +9,15 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class PostSaveMerge
     {
+        /// <summary>
+        /// Verifies the *PostSave* contract when the **server assigns a new identity** and returns it in the changeset,
+        /// using `__ClientKey` for correlation.  This test is intentionally similar to `ClientKey_Propagates_Identity`,
+        /// but it focuses on the idea that the identity originates from the server response and must be copied into the
+        /// existing client row *without creating a second row*.  Expected behavior: - The merge finds the client row by
+        /// `__ClientKey`. - The client row gets the server identity. - No duplicate row is added; the original instance
+        /// is updated in place and becomes `Unchanged`.
+        /// </summary>
+
         [Fact]
         public void ClientKey_Propagates_ServerIdentity()
         {
@@ -45,6 +54,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             changesetTable.AddRow(serverRow); // Added in changeset
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute PostSave merge: apply server-returned changes (Added/Modified/Deleted) onto current rows.
             current.DoPostSaveMerge(changeset, options);

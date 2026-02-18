@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that *RefreshPreservingLocalChanges* updates rows that match by PK and tracks the update
+        /// appropriately.  Scenario: - Current has an Unchanged row. - Refreshed snapshot has the same PK with
+        /// different non-key values.  Expected behavior: - Current row values are updated to the refreshed values. -
+        /// The row state is tracked as Updated/Modified according to the merge result policy (then often becomes
+        /// Unchanged as snapshot truth).
+        /// </summary>
+
         [Fact]
         public void UpdatesMatchingRows_TracksUpdated()
         {
@@ -32,6 +40,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             refreshedTable.AddLoadedRow(refreshedRow);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

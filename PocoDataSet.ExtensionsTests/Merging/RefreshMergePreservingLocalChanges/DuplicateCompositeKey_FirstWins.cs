@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies deterministic behavior when the refreshed snapshot contains **duplicate rows with the same
+        /// composite primary key**.  Scenario: - Refreshed dataset contains two rows with identical composite PK
+        /// values.  Expected behavior: - The merge must not create multiple matches for the same key. - The handler
+        /// resolves the ambiguity deterministically (this test locks the policy: *first occurrence wins*). - The final
+        /// current state matches the first refreshed row's values for that key.
+        /// </summary>
+
         [Fact]
         public void DuplicateCompositeKey_FirstWins()
         {

@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that *RefreshPreservingLocalChanges* does **not delete locally Added rows** that do not appear in
+        /// the refreshed snapshot.  Scenario: - Current contains a locally Added row (pending insert). - Refreshed
+        /// snapshot (server state) naturally does not contain that row yet.  Expected behavior: - The Added row is
+        /// preserved as Added (pending local change is kept). - The merge only deletes missing rows that are in-sync
+        /// (typically Unchanged), not pending local inserts.
+        /// </summary>
+
         [Fact]
         public void LocalAddedRow_NotDeleted()
         {
@@ -42,6 +50,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             refreshedTable.AddLoadedRow(rr1);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

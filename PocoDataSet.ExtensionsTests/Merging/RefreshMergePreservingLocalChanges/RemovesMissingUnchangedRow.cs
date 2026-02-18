@@ -7,6 +7,13 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that *RefreshPreservingLocalChanges* removes (deletes) an **Unchanged** row that is missing from
+        /// the refreshed snapshot.  This is the core "server snapshot is truth for unchanged rows" rule: - Unchanged
+        /// rows can be deleted if they disappeared on the server. - But Added/Modified/Deleted local rows must be
+        /// preserved (covered by other tests).
+        /// </summary>
+
         [Fact]
         public void RemovesMissingUnchangedRow()
         {
@@ -48,6 +55,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             refreshedTable.AddLoadedRow(rr3);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

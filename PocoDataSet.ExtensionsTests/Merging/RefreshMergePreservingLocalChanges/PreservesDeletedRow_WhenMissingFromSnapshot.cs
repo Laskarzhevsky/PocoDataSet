@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that a locally Deleted row remains Deleted after *RefreshPreservingLocalChanges* when the refreshed
+        /// snapshot omits it.  Scenario: - Client has already marked a row Deleted (pending delete). - Refreshed
+        /// snapshot does not contain the row (server may already be missing it, or snapshot is incomplete).  Expected
+        /// behavior: - The local Deleted intent is preserved (do not resurrect the row). - The Deleted row remains
+        /// Deleted / tracked appropriately.
+        /// </summary>
+
         [Fact]
         public void PreservesDeletedRow_WhenMissingFromSnapshot()
         {
@@ -30,6 +38,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

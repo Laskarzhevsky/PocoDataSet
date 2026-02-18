@@ -7,6 +7,13 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that *RefreshPreservingLocalChanges* honors merge options that **exclude a table** from being
+        /// merged.  Scenario: - Dataset contains multiple tables. - Options specify one table should be
+        /// skipped/excluded.  Expected behavior: - The excluded table is left untouched (rows and states unchanged). -
+        /// Non-excluded tables are merged normally.
+        /// </summary>
+
         [Fact]
         public void Skips_ExcludedTable()
         {

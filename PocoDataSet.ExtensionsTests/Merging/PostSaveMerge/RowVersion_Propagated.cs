@@ -9,6 +9,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class PostSaveMerge
     {
+        /// <summary>
+        /// Verifies the *PostSave* contract for **rowversion / concurrency tokens**.  Scenario: - The client has a row
+        /// with an old rowversion value. - The server PostSave changeset returns the same row with an updated
+        /// rowversion.  Expected behavior: - PostSave merge updates the concurrency token on the current row to the
+        /// server value. - The row ends `Unchanged` (it now represents the saved server snapshot). - This locks the
+        /// invariant that clients continue to use the latest server-issued concurrency token for the next update.
+        /// </summary>
+
         [Fact]
         public void RowVersion_Propagated()
         {
@@ -54,6 +62,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             changesetTable.AddRow(serverRow);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute PostSave merge: apply server-returned changes (Added/Modified/Deleted) onto current rows.
             current.DoPostSaveMerge(changeset, options);

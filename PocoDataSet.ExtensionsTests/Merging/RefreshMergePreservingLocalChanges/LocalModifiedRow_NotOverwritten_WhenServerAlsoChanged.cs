@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies conflict handling in *RefreshPreservingLocalChanges* when **both client and server changed the same
+        /// row**.  Scenario: - Current row is Modified locally. - Refreshed snapshot contains different values for the
+        /// same PK (server also changed).  Expected behavior: - Local modifications are preserved (the current values
+        /// are not overwritten). - The merge may still update non-conflicting metadata (depending on design), but the
+        /// key guarantee is: do not lose local edits.
+        /// </summary>
+
         [Fact]
         public void LocalModifiedRow_NotOverwritten_WhenServerAlsoChanged()
         {
@@ -37,6 +45,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             rt.AddLoadedRow(r1);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);

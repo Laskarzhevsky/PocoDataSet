@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class PostSaveMerge
     {
+        /// <summary>
+        /// Verifies the *PostSave* contract for **deletions**.  Scenario: - The current dataset contains an existing
+        /// row. - The server PostSave changeset contains a matching row marked as `Deleted`.  Expected behavior: - The
+        /// merge identifies the target row (by PK / correlation key depending on schema). - The row is removed (or
+        /// marked Deleted according to table semantics) so the current dataset reflects the server state after save. -
+        /// The result proves that server-side deletes win during PostSave synchronization.
+        /// </summary>
+
         [Fact]
         public void DeletesRow_WhenChangesetDeleted()
         {
@@ -53,6 +61,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             Assert.Equal(DataRowState.Deleted, changesetRow.DataRowState);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute PostSave merge: apply server-returned changes (Added/Modified/Deleted) onto current rows.
             currentDataSet.DoPostSaveMerge(changeset, options);

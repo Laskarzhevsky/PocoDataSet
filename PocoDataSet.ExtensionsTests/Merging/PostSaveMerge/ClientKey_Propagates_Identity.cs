@@ -9,6 +9,15 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class PostSaveMerge
     {
+        /// <summary>
+        /// Verifies the *PostSave* contract for **server-assigned identity values** when correlating an Added row via
+        /// `__ClientKey`.  Scenario: - The client has a newly Added row with `Id = 0` (identity not assigned yet) and a
+        /// stable `__ClientKey`. - The server returns a PostSave changeset containing the same logical row (same
+        /// `__ClientKey`) but with `Id` assigned.  Expected behavior: - The merge matches rows by `__ClientKey` (not by
+        /// `Id`, which is not reliable yet). - The current row receives the server-assigned `Id`. - The row transitions
+        /// to `Unchanged` (it is now in-sync with the server snapshot).
+        /// </summary>
+
         [Fact]
         public void ClientKey_Propagates_Identity()
         {
@@ -44,6 +53,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             serverTable.AddRow(saved); // Keep as Added in changeset
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute PostSave merge: apply server-returned changes (Added/Modified/Deleted) onto current rows.
             current.DoPostSaveMerge(serverChangeset, options);

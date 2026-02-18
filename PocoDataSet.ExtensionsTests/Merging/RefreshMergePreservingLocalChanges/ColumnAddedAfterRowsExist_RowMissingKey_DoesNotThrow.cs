@@ -7,6 +7,14 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Ensures *RefreshPreservingLocalChanges* tolerates **schema evolution** (adding a column after rows exist)
+        /// even when some rows are missing a value for that new column.  Scenario: - Current table already has rows. -
+        /// A new column is added (so existing rows naturally lack that field). - A refresh snapshot is merged.
+        /// Expected behavior: - The merge does not throw due to missing values for the newly added column. - Missing
+        /// values are treated as `null`/default and do not break keying or merge bookkeeping.
+        /// </summary>
+
         [Fact]
         public void ColumnAddedAfterRowsExist_RowMissingKey_DoesNotThrow()
         {

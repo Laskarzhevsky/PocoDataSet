@@ -7,6 +7,13 @@ namespace PocoDataSet.ExtensionsTests.Merging
 {
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies that locally Added rows remain present after *RefreshPreservingLocalChanges* even if the server
+        /// snapshot does not include them.  This is the "Added rows are authoritative locally until saved" guarantee.
+        /// Expected behavior: - The Added row remains in the table. - The row state remains Added and is not converted
+        /// to Deleted/Unchanged.
+        /// </summary>
+
         [Fact]
         public void PreservesAddedRow_WhenMissingFromSnapshot()
         {
@@ -28,6 +35,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             rt.AddColumn("Name", DataTypeNames.STRING);
 
             // Act
+            // Merge options are part of the contract surface; using defaults here exercises the standard behavior.
             MergeOptions options = new MergeOptions();
             // Execute RefreshPreservingLocalChanges merge: refresh server values where safe, while preserving local Added/Modified/Deleted rows.
             current.DoRefreshMergePreservingLocalChanges(refreshed, options);
