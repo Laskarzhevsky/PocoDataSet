@@ -12,6 +12,11 @@ namespace PocoDataSet.Extensions.Merging.DoReplaceMerge
     {
         public void Merge(IDataSet currentDataSet, IDataSet refreshedDataSet, IMergeOptions mergeOptions)
         {
+            // IMPORTANT: ensure MergeResult reflects only this merge run.
+            // This protects callers who reuse the same MergeOptions instance across multiple Replace merges,
+            // even if they call the lower-level merger directly instead of the extension method.
+            mergeOptions.DataSetMergeResult.Clear();
+
             HashSet<string> mergedTableNames = new HashSet<string>(StringComparer.Ordinal);
 
             MergeExistingTables(currentDataSet, refreshedDataSet, mergeOptions, mergedTableNames);
