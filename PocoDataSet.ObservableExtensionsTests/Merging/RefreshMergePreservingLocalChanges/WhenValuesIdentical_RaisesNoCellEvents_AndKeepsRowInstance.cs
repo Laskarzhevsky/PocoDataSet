@@ -1,5 +1,3 @@
-using System;
-
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
@@ -8,17 +6,17 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests
+namespace PocoDataSet.ObservableExtensionsTests.Merging
 {
     /// <summary>
     /// Locks the "no-op refresh" contract for Observable RefreshPreservingLocalChanges:
     /// if refreshed values are identical, the merge must not raise DataFieldValueChanged
     /// and must not replace the observable row instance.
     /// </summary>
-    public class ObservableRefreshNoOpStabilityTests
+    public partial class RefreshMergePreservingLocalChanges
     {
         [Fact]
-        public void RefreshPreservingLocalChanges_WhenValuesIdentical_RaisesNoCellEvents_AndKeepsRowInstance()
+        public void WhenValuesIdentical_RaisesNoCellEvents_AndKeepsRowInstance()
         {
             // ------------------------------------------------------------
             // Arrange

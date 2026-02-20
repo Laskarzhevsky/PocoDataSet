@@ -7,16 +7,16 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests
+namespace PocoDataSet.ObservableExtensionsTests.Merging
 {
     /// <summary>
     /// Options propagation coverage for RefreshIfNoChangesExist (observable).
     /// Locks that merge does not replace ObservableMergeOptions.ObservableDataSetMergeResult instance.
     /// </summary>
-    public class ObservableMergeOptionsPropagationRefreshIfNoChangesExistTests
+    public partial class RefreshMergeIfNoChangesExist
     {
         [Fact]
-        public void RefreshIfNoChangesExist_DoesNotReplace_ObservableDataSetMergeResult_Instance()
+        public void DoesNotReplace_ObservableDataSetMergeResult_Instance()
         {
             // Arrange
             IObservableDataSet current = new ObservableDataSet();

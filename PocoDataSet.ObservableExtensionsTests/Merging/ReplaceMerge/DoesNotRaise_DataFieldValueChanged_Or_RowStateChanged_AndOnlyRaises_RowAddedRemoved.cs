@@ -6,7 +6,7 @@ using PocoDataSet.ObservableExtensions;
 
 using Xunit;
 
-namespace PocoDataSet.ObservableExtensionsTests
+namespace PocoDataSet.ObservableExtensionsTests.Merging
 {
     /// <summary>
     /// Tightens Replace event contract:
@@ -14,10 +14,10 @@ namespace PocoDataSet.ObservableExtensionsTests
     /// - Replace should not raise RowStateChanged (table)
     /// - Replace should raise only RowsRemoved / RowsAdded for the replacement
     /// </summary>
-    public sealed class ObservableReplaceNoChangedEventsAdditionalTests
+    public partial class ReplaceMerge
     {
         [Fact]
-        public void Replace_DoesNotRaise_DataFieldValueChanged_Or_RowStateChanged_AndOnlyRaises_RowAddedRemoved()
+        public void DoesNotRaise_DataFieldValueChanged_Or_RowStateChanged_AndOnlyRaises_RowAddedRemoved()
         {
             // Arrange
             IObservableDataSet current = new ObservableDataSet();

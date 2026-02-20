@@ -68,6 +68,35 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
             return false;
         }
 
+        public static bool ContainsRow(IObservableDataSetMergeResult result, string tableName, IObservableDataRow row)
+        {
+            foreach (IObservableDataSetMergeResultEntry entry in result.UpdatedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            foreach (IObservableDataSetMergeResultEntry entry in result.AddedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            foreach (IObservableDataSetMergeResultEntry entry in result.DeletedObservableDataRows)
+            {
+                if (entry.TableName == tableName && object.ReferenceEquals(entry.ObservableDataRow, row))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static bool ContainsRowWithId(IObservableDataTable table, int id)
         {
             for (int i = 0; i < table.Rows.Count; i++)
@@ -80,6 +109,25 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
             }
 
             return false;
+        }
+
+        public static int CountUserColumns(IObservableDataTable table)
+        {
+            int count = 0;
+
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                string name = table.Columns[i].ColumnName;
+
+                if (name == SpecialColumnNames.CLIENT_KEY)
+                {
+                    continue;
+                }
+
+                count++;
+            }
+
+            return count;
         }
 
         public static IObservableDataSet CreateCurrentObservableCompositePk(int a, string b, string name)
@@ -249,6 +297,32 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
             }
 
             return null;
+        }
+
+        public static bool HasColumn(IObservableDataTable table, string columnName)
+        {
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                if (string.Equals(table.Columns[i].ColumnName, columnName, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool RowExistsById(IObservableDataTable t, int id)
+        {
+            for (int i = 0; i < t.Rows.Count; i++)
+            {
+                if ((int)t.Rows[i]["Id"]! == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
