@@ -45,6 +45,18 @@ namespace PocoDataSet.ObservableExtensions
             get; private set;
         }
 
+        /// <summary>
+        /// Gets or sets the mode used to merge data in the operation.
+        /// </summary>
+        /// <remarks>The merge mode determines how data is combined during the merge process. Different
+        /// modes may affect the outcome of the merge, such as whether to overwrite existing data or to append new
+        /// data.</remarks>
+        public MergeMode MergeMode
+        {
+            get; set;
+        }
+
+
         public IDictionary<string, List<string>> OverriddenPrimaryKeyNames
         {
             get; private set;

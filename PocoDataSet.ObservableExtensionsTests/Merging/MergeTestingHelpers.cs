@@ -324,5 +324,48 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
 
             return false;
         }
+
+        public static IObservableDataRow GetObservableRowById(IObservableDataTable table, int id)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                object? value = table.Rows[i]["Id"];
+                if (value is int v && v == id)
+                {
+                    return table.Rows[i];
+                }
+            }
+
+            throw new InvalidOperationException("Row with Id '" + id + "' was not found in table '" + table.TableName + "'.");
+        }
+
+        public static bool ContainsRowInstance(IObservableDataTable table, IObservableDataRow row)
+        {
+            if (table == null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                if (object.ReferenceEquals(table.Rows[i], row))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
+

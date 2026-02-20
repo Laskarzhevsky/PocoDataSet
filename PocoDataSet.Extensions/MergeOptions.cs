@@ -39,6 +39,11 @@ namespace PocoDataSet.Extensions
 
         public List<string> ExcludeTablesFromRowDeletion { get; private set; }
 
+        public MergeMode MergeMode
+        {
+            get; set;
+        }
+
         public IDictionary<string, List<string>> OverriddenPrimaryKeyNames { get; private set; }
         #endregion
 

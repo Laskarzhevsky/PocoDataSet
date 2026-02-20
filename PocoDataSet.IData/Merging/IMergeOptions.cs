@@ -42,6 +42,17 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
+        /// Gets or sets the mode used to merge data in the operation.
+        /// </summary>
+        /// <remarks>The merge mode determines how data is combined during the merge process. Different
+        /// modes may affect the outcome of the merge, such as whether to overwrite existing data or to append new
+        /// data.</remarks>
+        MergeMode MergeMode
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets overridden primary key names to replace primary keys defined by table schema
         /// </summary>
         IDictionary<string, List<string>> OverriddenPrimaryKeyNames
