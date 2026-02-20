@@ -8,12 +8,16 @@ using Xunit;
 
 namespace PocoDataSet.ObservableExtensionsTests.Merging
 {
-    /// <summary>
-    /// Observable merge result invariants: Added/Updated entries must refer to rows present in the final table,
-    /// Deleted entries must refer to PKs not present in the final table.
-    /// </summary>
     public partial class RefreshMergePreservingLocalChanges
     {
+        /// <summary>
+        /// Verifies ResultEntries MatchFinalTableState in RefreshMergePreservingLocalChanges merge.
+        ///
+        /// How the test proves this:
+        /// 1) Arrange: build a current observable table/data set and a refreshed (server) changeset that triggers the scenario.
+        /// 2) Act: execute MergeWith(...) using the merge mode under test.
+        /// 3) Assert: validate the observable row instances/state and that result semantics match the contract.
+        /// </summary>
         [Fact]
         public void ResultEntries_MatchFinalTableState()
         {
