@@ -36,7 +36,9 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergeIfNoChangesExist
                     continue;
                 }
 
-                currentTable.DoRefreshMergeIfNoChangesExist(refreshedTable, mergeOptions);
+//                currentTable.DoRefreshMergeIfNoChangesExist(refreshedTable, mergeOptions);
+                DataTableMerger merger = new DataTableMerger();
+                merger.Merge(currentTable, refreshedTable, mergeOptions);
             }
         }
     }

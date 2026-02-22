@@ -111,7 +111,9 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
             }
 
             // Delegate row value application to the row merger via extension chain.
-            targetRow.DoPostSaveMerge(changesetRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+//            targetRow.DoPostSaveMerge(changesetRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+            DataRowMerger merger = new DataRowMerger();
+            merger.Merge(targetRow, changesetRow, currentDataTable.Columns);
 
             if (isNewRowAddedToCurrent)
             {

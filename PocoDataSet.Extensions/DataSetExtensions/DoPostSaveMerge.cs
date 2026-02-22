@@ -10,7 +10,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Dose PostSave merge
+        /// Does PostSave merge
         /// </summary>
         /// <param name="currentDataSet">Current data set</param>
         /// <param name="refreshedDataSet">Refreshed data set</param>

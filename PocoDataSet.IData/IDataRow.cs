@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace PocoDataSet.IData
 {
@@ -90,6 +92,8 @@ namespace PocoDataSet.IData
         /// Not intended for business code.
         /// </summary>
         /// <param name="dataRowState">Data row state</param>
+        [Obsolete("For infrastructure use (adapters / merge). Not intended for business code.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SetDataRowState(DataRowState dataRowState);
         
         /// <summary>

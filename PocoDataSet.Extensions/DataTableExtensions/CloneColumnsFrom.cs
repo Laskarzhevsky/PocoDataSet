@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-using PocoDataSet.Data;
 using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
@@ -29,12 +28,6 @@ namespace PocoDataSet.Extensions
                 IColumnMetadata columnMetadata = sourceDataTable.Columns[i];
                 IColumnMetadata clonedColumnMetadata = sourceDataTable.Columns[i].Clone();
                 dataTable.AddColumn(clonedColumnMetadata);
-            }
-
-            // Preserve primary keys from source table
-            if (sourceDataTable.PrimaryKeys != null && sourceDataTable.PrimaryKeys.Count > 0)
-            {
-                dataTable.SetPrimaryKeys(new List<string>(sourceDataTable.PrimaryKeys));
             }
         }
         #endregion

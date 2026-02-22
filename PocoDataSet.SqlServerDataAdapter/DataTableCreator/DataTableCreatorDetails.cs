@@ -127,7 +127,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             // Primary keys are a table-level contract.
-            // Use the IDataTable primary key API so the table remains the single source of truth.
+            // Use the DataTable primary key API so the table remains the single source of truth.
             DataTable.ClearPrimaryKeys();
             if (PrimaryKeyData == null || PrimaryKeyData.Count == 0)
             {
@@ -145,7 +145,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             DataTable.SetPrimaryKeys(orderedPrimaryKeys);
-}
+        }
 
         /// <summary>
         /// Adds rows to data table

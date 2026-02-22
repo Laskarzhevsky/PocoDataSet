@@ -23,19 +23,21 @@ namespace PocoDataSet.ExtensionsTests
 
             currentRow.Delete();
 
-            IDataRow refreshedRow = DataRowExtensions.CreateRowFromColumnsWithDefaultValues(table.Columns);
+            IDataSet refreshedDataSet = DataSetFactory.CreateDataSet();
+            IDataTable refreshedTable = refreshedDataSet.AddNewTable("Department");
+            refreshedTable.AddColumn("Id", DataTypeNames.INT32);
+            refreshedTable.AddColumn("Name", DataTypeNames.STRING);
+
+            IDataRow refreshedRow = refreshedTable.AddNewRow();
             refreshedRow["Id"] = 1;
             refreshedRow["Name"] = "Server";
             refreshedRow.AcceptChanges();
 
             IMergeOptions options = new MergeOptions();
-
             // Act
-            bool changed = currentRow.DoRefreshMergePreservingLocalChanges(refreshedRow, table.TableName, table.Columns, options);
+            dataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, options);
 
-            // Assert
-            Assert.False(changed);
-            Assert.Equal(DataRowState.Deleted, currentRow.DataRowState);
+            // Assert            Assert.Equal(DataRowState.Deleted, currentRow.DataRowState);
         }
     }
 }

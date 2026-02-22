@@ -38,7 +38,7 @@ namespace PocoDataSet.ExtensionsTests
             IMergeOptions options = new MergeOptions();
 
             // Act
-            currentDepartment.DoRefreshMergePreservingLocalChanges(refreshedDepartment, options);
+            currentDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, options);
 
             // Assert
             string name = currentDepartment.Rows[0].GetDataFieldValue<string>("Name");
@@ -78,7 +78,7 @@ namespace PocoDataSet.ExtensionsTests
             Assert.Throws<System.InvalidOperationException>(
                 delegate
                 {
-                    currentDepartment.DoRefreshMergeIfNoChangesExist(refreshedDepartment, options);
+                    currentDataSet.DoRefreshMergeIfNoChangesExist(refreshedDataSet, options);
                 });
         }
 
@@ -109,7 +109,7 @@ namespace PocoDataSet.ExtensionsTests
             IMergeOptions options = new MergeOptions();
 
             // Act
-            currentDepartment.DoReplaceMerge(refreshedDepartment, options);
+            currentDataSet.DoReplaceMerge(refreshedDataSet, options);
 
             // Assert
             Assert.Single(currentDepartment.Rows);

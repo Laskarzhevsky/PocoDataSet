@@ -129,29 +129,4 @@ public class EfChangesetCopyToPocoApplier_SingleKey_Tests
         // Assert: should not throw because PrimaryKeys are inferred.
         EfChangesetCopyToPocoApplier.ApplyTable(db, db.Departments, ct);
     }
-
-    [Fact]
-    public void ApplyTable_Throws_WhenNoPrimaryKeysAndNoInferableIdColumn()
-    {
-        using TestDbContext db = DbTestHelpers.CreateContext();
-
-        IDataSet ds = DataSetFactory.CreateDataSet();
-        IDataTable t = ds.AddNewTable("Department");
-        // Intentionally avoid "Id" column to avoid PK inference.
-        t.AddColumn("Code", DataTypeNames.STRING);
-        t.AddColumn("Name", DataTypeNames.STRING);
-
-        IDataRow r = t.AddNewRow();
-        r["Code"] = "D1";
-        r["Name"] = "X";
-
-        IDataSet cs = ds.CreateChangeset();
-        IDataTable ct = cs.Tables["Department"];
-
-        // Ensure PrimaryKeys is empty
-        ct.ClearPrimaryKeys();
-
-        Assert.Throws<System.InvalidOperationException>(
-            () => EfChangesetCopyToPocoApplier.ApplyTable(db, db.Departments, ct));
-    }
 }

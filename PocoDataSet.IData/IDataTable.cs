@@ -9,7 +9,7 @@ namespace PocoDataSet.IData
     {
         #region Properties
         /// <summary>
-        /// Gets columns
+        /// Gets list of column metadata that defines the table schema
         /// </summary>
         IReadOnlyList<IColumnMetadata> Columns
         {
@@ -17,7 +17,8 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets primary keys
+        /// Gets the names of the columns that form the primary key.
+        /// This list is derived from IColumnMetadata.IsPrimaryKey flags.
         /// </summary>
         IReadOnlyList<string> PrimaryKeys
         {
@@ -25,7 +26,7 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets rows
+        /// Gets a read-only view of the data rows contained in the table.
         /// </summary>
         IReadOnlyList<IDataRow> Rows
         {
@@ -81,11 +82,6 @@ namespace PocoDataSet.IData
         void AddRow(IDataRow dataRow);
 
         /// <summary>
-        /// Clears table primary keys.
-        /// </summary>
-        void ClearPrimaryKeys();
-
-        /// <summary>
         /// Gets flag indicating whether data table contains column with specified name
         /// </summary>
         /// <param name="columnName">Column name</param>
@@ -121,12 +117,6 @@ namespace PocoDataSet.IData
         /// </summary>
         /// <param name="rowIndex">Row index</param>
         void RemoveRowAt(int rowIndex);
-
-        /// <summary>
-        /// Sets primary key column names for the table.
-        /// </summary>
-        /// <param name="primaryKeyColumnNames">Primary key column names</param>
-        void SetPrimaryKeys(IList<string> primaryKeyColumnNames);
         #endregion
     }
 }

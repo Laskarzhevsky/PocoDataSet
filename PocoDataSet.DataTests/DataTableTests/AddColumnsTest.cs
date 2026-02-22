@@ -6,7 +6,7 @@ using PocoDataSet.IData;
 
 using Xunit;
 
-namespace PocoDataSet.ExtensionsTests
+namespace PocoDataSet.DataTests.DataTableTests
 {
     public partial class DataTableExtensionsTests
     {

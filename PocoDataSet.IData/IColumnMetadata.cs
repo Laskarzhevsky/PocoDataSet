@@ -63,7 +63,9 @@
         }
 
         /// <summary>
-        /// Gets or sets flag indicating whether column is primary key
+        /// Gets or sets falg indicating whether this column participates in the table primary key.
+        /// This property is the single source of truth for primary key membership.
+        /// IDataTable.PrimaryKeys is derived from these flags.
         /// </summary>
         bool IsPrimaryKey
         {

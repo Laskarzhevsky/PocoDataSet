@@ -330,6 +330,8 @@ namespace PocoDataSet.Data
         /// IDataRow interface implementation
         /// </summary>
         /// <param name="dataRowState">Data row state</param>
+        [Obsolete("For infrastructure use (adapters / merge). Not intended for business code.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void SetDataRowState(DataRowState dataRowState)
         {
             DataRowState = dataRowState;

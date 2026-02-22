@@ -30,7 +30,9 @@ namespace PocoDataSet.Extensions.Merging.DoReplaceMerge
                 IDataRow refreshedRow = refreshedDataTable.Rows[i];
 
                 IDataRow newRow = DataRowFactory.CreateEmpty(refreshedRow.Values.Count);
-                newRow.DoReplaceMerge(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+//                newRow.DoReplaceMerge(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+                DataRowMerger merger = new DataRowMerger();
+                merger.Merge(newRow, refreshedRow, currentDataTable.Columns);
 
                 currentDataTable.AddLoadedRow(newRow);
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newRow));

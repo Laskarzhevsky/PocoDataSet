@@ -83,7 +83,10 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
                 IDataRow refreshedRow = refreshedDataTable.Rows[i];
                 IDataRow newRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable);
 
-                bool changed = newRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+//                bool changed = newRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+                DataRowMerger merger = new DataRowMerger();
+                bool changed = merger.Merge(newRow, refreshedRow, currentDataTable.Columns);
+
                 // new row was empty; treat as added regardless.
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newRow));
             }
@@ -132,7 +135,9 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
                     continue;
                 }
 
-                bool changed = currentRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+//                bool changed = currentRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+                DataRowMerger merger = new DataRowMerger();
+                bool changed = merger.Merge(currentRow, refreshedRow, currentDataTable.Columns);
                 if (changed)
                 {
                     mergeOptions.DataSetMergeResult.UpdatedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, currentRow));
@@ -159,7 +164,10 @@ namespace PocoDataSet.Extensions.Merging.RefreshMergePreservingLocalChanges
                 IDataRow newRow = AddNewDataRowWithDefaultValuesToDataTable(currentDataTable);
                 IDataRow refreshedRow = kvp.Value;
 
-                newRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+//                newRow.DoRefreshMergePreservingLocalChanges(refreshedRow, currentDataTable.TableName, currentDataTable.Columns, mergeOptions);
+                DataRowMerger merger = new DataRowMerger();
+                merger.Merge(newRow, refreshedRow, currentDataTable.Columns);
+
                 mergeOptions.DataSetMergeResult.AddedDataRows.Add(new DataSetMergeResultEntry(currentDataTable.TableName, newRow));
             }
         }

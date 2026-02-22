@@ -74,7 +74,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             MergeOptions options = new MergeOptions();
 
             // Act: apply server PostSave changeset onto current.
-            t.DoPostSaveMerge(ct, options);
+            current.DoPostSaveMerge(changeset, options);
 
             // Assert: schema is preserved (Age still exists).
             Assert.Equal(3, t.Columns.Count);

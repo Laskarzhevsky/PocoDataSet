@@ -39,7 +39,7 @@ namespace PocoDataSet.ExtensionsTests
             IMergeOptions options = new MergeOptions();
 
             // Act
-            currentDepartment.DoPostSaveMerge(postSaveDepartment, options);
+            currentDataSet.DoPostSaveMerge(postSaveDataSet, options);
 
             // Assert
             int id = currentDepartment.Rows[0].GetDataFieldValue<int>("Id");

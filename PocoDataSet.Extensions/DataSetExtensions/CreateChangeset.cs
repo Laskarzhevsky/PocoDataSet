@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using PocoDataSet.IData;
@@ -63,18 +62,6 @@ namespace PocoDataSet.Extensions
                     }
 
                     targetTable.AddColumn(sourceTableColumn.ColumnName, sourceTableColumn.DataType, sourceTableColumn.IsNullable, sourceTableColumn.IsPrimaryKey, sourceTableColumn.IsForeignKey);
-                }
-
-                // Preserve primary keys
-                if (sourceTable.PrimaryKeys != null && sourceTable.PrimaryKeys.Count > 0)
-                {
-                    List<string> primaryKeys = new List<string>();
-                    for (int i = 0; i < sourceTable.PrimaryKeys.Count; i++)
-                    {
-                        primaryKeys.Add(sourceTable.PrimaryKeys[i]);
-                    }
-
-                    targetTable.SetPrimaryKeys(primaryKeys);
                 }
 
                 // Copy rows as deltas

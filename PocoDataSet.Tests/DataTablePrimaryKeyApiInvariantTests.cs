@@ -40,30 +40,6 @@ namespace PocoDataSet.Tests
         }
 
         [Fact]
-        public void ClearPrimaryKeys_WhenCalled_ClearsPrimaryKeysAndColumnFlags()
-        {
-            // Arrange
-            IDataSet dataSet = DataSetFactory.CreateDataSet();
-            IDataTable table = dataSet.AddNewTable("T");
-
-            table.AddColumn("Id", DataTypeNames.INT32, false, true);
-            table.AddColumn("Name", DataTypeNames.STRING);
-
-            // Sanity check
-            Assert.Single(table.PrimaryKeys);
-            Assert.True(GetColumn(table, "Id").IsPrimaryKey);
-
-            // Act
-            table.ClearPrimaryKeys();
-
-            // Assert
-            Assert.NotNull(table.PrimaryKeys);
-            Assert.Empty(table.PrimaryKeys);
-            Assert.False(GetColumn(table, "Id").IsPrimaryKey);
-            Assert.False(GetColumn(table, "Name").IsPrimaryKey);
-        }
-
-        [Fact]
         public void AddPrimaryKey_WhenCalledTwice_DoesNotCreateDuplicates()
         {
             // Arrange

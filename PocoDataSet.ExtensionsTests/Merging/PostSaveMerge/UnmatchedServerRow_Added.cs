@@ -74,7 +74,7 @@ namespace PocoDataSet.ExtensionsTests.Merging
             MergeOptions options = new MergeOptions();
 
             // Act: apply server PostSave changeset onto CURRENT.
-            t.DoPostSaveMerge(ct, options);
+            current.DoPostSaveMerge(changeset, options);
 
             // Assert: because there was no match, a NEW row was added.
             Assert.Equal(2, t.Rows.Count);

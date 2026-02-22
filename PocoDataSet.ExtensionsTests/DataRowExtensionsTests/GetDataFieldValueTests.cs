@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
@@ -25,7 +22,6 @@ namespace PocoDataSet.ExtensionsTests
             IDataRow departmentDataRow = departmentDataTable.AddNewRow();
             departmentDataRow["Id"] = 1;
             departmentDataRow["Name"] = "Customer Service";
-            departmentDataTable.AddRow(departmentDataRow);
 
             // Act
             // 4. Read back a value from the row, observe "Customer Service" as a name<br />

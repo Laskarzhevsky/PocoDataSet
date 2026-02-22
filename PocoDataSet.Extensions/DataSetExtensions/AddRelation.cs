@@ -13,7 +13,7 @@ namespace PocoDataSet.Extensions
     {
         #region Public Methods
         /// <summary>
-        /// Adds relation
+        /// Adds relation between parent and child tables in a data set
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <param name="relationName">Relation name</param>

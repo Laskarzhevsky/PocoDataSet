@@ -36,7 +36,9 @@ namespace PocoDataSet.Extensions.Merging.PostSaveMerge
                     continue;
                 }
 
-                currentTable.DoPostSaveMerge(refreshedTable, mergeOptions);
+//                currentTable.DoPostSaveMerge(refreshedTable, mergeOptions);
+                DataTableMerger merger = new DataTableMerger();
+                merger.Merge(currentTable, refreshedTable, mergeOptions);
             }
         }
     }

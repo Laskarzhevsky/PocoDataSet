@@ -1,11 +1,9 @@
-using System.Collections.Generic;
-
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
 
 using Xunit;
 
-namespace PocoDataSet.ExtensionsTests
+namespace PocoDataSet.DataTests.DataTableTests
 {
     public partial class DataTableExtensionsTests
     {
@@ -24,7 +22,7 @@ namespace PocoDataSet.ExtensionsTests
             // Act
             // 2. Check for columns
             bool hasIdColumn = departmentTable.ContainsColumn("Id");
-            bool hasNameColumn = departmentTable.ContainsColumn("Name");
+            bool hasNameColumn = departmentTable.ContainsColumn("NAME");
 
             // Assert
             Assert.True(hasIdColumn);

@@ -36,7 +36,7 @@ namespace PocoDataSet.Data
 
         #region Public Properties
         /// <summary>
-        /// Gets columns
+        /// Gets list of column metadata that defines the table schema
         /// IDataTable interface implementation
         /// </summary>
         [JsonIgnore]
@@ -134,34 +134,6 @@ namespace PocoDataSet.Data
             get
             {
                 return _dataTableSchema.PrimaryKeyColumnNames;
-            }
-        }
-
-        /// <summary>
-        /// Legacy JSON hook: accepts "PrimaryKeys" from older payloads.
-        /// PK membership is stored only in <see cref="IColumnMetadata.IsPrimaryKey"/> flags.
-        /// This property is deserialization-only (no getter => it is not emitted).
-        /// </summary>
-        [JsonInclude]
-        [JsonPropertyName("PrimaryKeys")]
-        private List<string>? PrimaryKeysJson
-        {
-            set
-            {
-                // If columns are not available yet, defer.
-                if (_dataTableSchema.Items.Count == 0)
-                {
-                    _pendingPrimaryKeysJson = value;
-                    return;
-                }
-
-                if (value == null)
-                {
-                    // No explicit PK list provided; keep whatever flags came from columns.
-                    return;
-                }
-
-                _dataTableSchema.SetPrimaryKeysByName(value);
             }
         }
 
@@ -349,6 +321,11 @@ namespace PocoDataSet.Data
                 throw new InvalidOperationException("Cannot add a Deleted row to a table.");
             }
 
+            if (ContainsRow(dataRow))
+            {
+                throw new InvalidOperationException("Row already exists in this table.");
+            }
+
             // Ensure all columns exist in the row (non-floating rows only).
             if (!(dataRow is IFloatingDataRow))
             {
@@ -382,7 +359,7 @@ namespace PocoDataSet.Data
         /// Clears table primary keys.
         /// IDataTable interface implementation
         /// </summary>
-        public void ClearPrimaryKeys()
+        internal void ClearPrimaryKeys()
         {
             _dataTableSchema.ClearPrimaryKeyFlags();
         }
@@ -440,6 +417,11 @@ namespace PocoDataSet.Data
                 return false;
             }
 
+            if (!ContainsRow(dataRow))
+            {
+                throw new InvalidOperationException("Row does not belong to this table.");
+            }
+
             return _rows.Remove(dataRow);
         }
 
@@ -461,10 +443,9 @@ namespace PocoDataSet.Data
 
         /// <summary>
         /// Sets primary key column names for the table.
-        /// IDataTable interface implementation
         /// </summary>
         /// <param name="primaryKeyColumnNames">Primary key column names</param>
-        public void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
+        internal void SetPrimaryKeys(IList<string> primaryKeyColumnNames)
         {
             _dataTableSchema.SetPrimaryKeysByName(primaryKeyColumnNames);
         }
