@@ -38,7 +38,9 @@ namespace PocoDataSet.ObservableExtensions.Merging.RefreshMergeIfNoChangesExist
                     continue;
                 }
 
-                currentTable.DoRefreshMergeIfNoChangesExist(refreshedTable, observableMergeOptions);
+//                currentTable.DoRefreshMergeIfNoChangesExist(refreshedTable, observableMergeOptions);
+                ObservableDataTableMerger merger = new ObservableDataTableMerger();
+                merger.Merge(currentTable, refreshedTable, observableMergeOptions);
             }
         }
 

@@ -128,7 +128,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             // Act
             // 3. Merge refreshed values into observable table using Refresh mode
             IObservableMergeOptions observableMergeOptions = new ObservableMergeOptions();
-            departmentObservableDataTable.DoRefreshMergePreservingLocalChanges(refreshedDepartment, observableMergeOptions);
+            observableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, observableMergeOptions);
 
             // Assert
             // 4. Row in Unchanged state has refreshed values

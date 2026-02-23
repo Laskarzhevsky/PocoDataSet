@@ -51,7 +51,7 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
             IObservableMergeOptions options = new ObservableMergeOptions();
             // IMPORTANT: use your project's default/merge mode enum value here if it differs.
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => currentDept.DoRefreshMergeIfNoChangesExist(refreshedDept, options));
+            Assert.Throws<InvalidOperationException>(() => current.DoRefreshMergeIfNoChangesExist(refreshed, options));
         }
     }
 }

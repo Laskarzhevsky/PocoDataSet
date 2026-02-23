@@ -52,7 +52,7 @@ namespace PocoDataSet.ObservableExtensionsTests.Merging
 
             IObservableMergeOptions options = new ObservableMergeOptions();
             // Act
-            currentDept.DoRefreshMergeIfNoChangesExist(refreshedDept, options);
+            current.DoRefreshMergeIfNoChangesExist(refreshed, options);
 
             // Assert
             Assert.Equal(2, currentDept.Rows.Count);

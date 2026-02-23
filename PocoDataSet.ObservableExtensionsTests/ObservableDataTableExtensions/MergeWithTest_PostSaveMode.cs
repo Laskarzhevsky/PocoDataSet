@@ -113,7 +113,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             // Act
             // 3. Merge server-returned values into current table using PostSave mode
             IObservableMergeOptions observableMergeOptions = new ObservableMergeOptions();
-            departmentObservableDataTable.DoPostSaveMerge(postSaveDepartment, observableMergeOptions);
+            observableDataSet.DoPostSaveMerge(postSaveDataSet, observableMergeOptions);
 
             // Assert
             // Three rows left after merge

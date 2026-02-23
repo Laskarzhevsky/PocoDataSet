@@ -76,8 +76,7 @@ namespace PocoDataSet.IObservableData
         /// <param name="requestorName">Requestor name</param>
         /// <returns>Number of removed views</returns>
         int RemoveObservableDataViewsForRequestor(string requestorName);
-
-#endregion
+        #endregion
 
         #region Properties
         /// <summary>

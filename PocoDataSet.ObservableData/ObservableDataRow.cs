@@ -111,6 +111,21 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// Attempts to retrieve the original value of the specified column before any modifications were made.
+        /// IObservableDataRow interface implementation
+        /// </summary>
+        /// <remarks>This method is useful for tracking changes to data, allowing comparison between the
+        /// current and original values.</remarks>
+        /// <param name="columnName">The name of the column for which to retrieve the original value. This parameter cannot be null or empty.</param>
+        /// <param name="originalValue">When this method returns <see langword="true"/>, contains the original value of the specified column;
+        /// otherwise, is set to <see langword="null"/>.</param>
+        /// <returns>True if the original value was successfully retrieved, otherwise false</returns>
+        public bool TryGetOriginalValue(string columnName, out object? originalValue)
+        {
+            return InnerDataRow.TryGetValue(columnName, out originalValue);
+        }
+
+        /// <summary>
         /// Updates data field value
         /// IObservableDataRow interface implementation
         /// </summary>
@@ -280,13 +295,14 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// INTERNAL USE ONLY.
         /// Suppresses RowStateChanged notifications for the lifetime of the returned scope.
         /// This is used by merge operations (e.g., Refresh mode) where values may be updated
         /// and then committed back to Unchanged state, and intermediate state flips are not
         /// semantically meaningful to observers.
         /// </summary>
         /// <returns>Disposable scope that re-enables RowStateChanged when disposed</returns>
-        public System.IDisposable SuppressRowStateChanged()
+        internal System.IDisposable SuppressRowStateChanged()
         {
             _rowStateChangedSuppressionCount++;
             return new RowStateChangedSuppressionScope(this);

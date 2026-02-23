@@ -45,6 +45,17 @@ namespace PocoDataSet.IObservableData
         void RejectChanges(object? requestor = null);
 
         /// <summary>
+        /// Attempts to retrieve the original value of the specified column before any modifications were made.
+        /// </summary>
+        /// <remarks>This method is useful for tracking changes to data, allowing comparison between the
+        /// current and original values.</remarks>
+        /// <param name="columnName">The name of the column for which to retrieve the original value. This parameter cannot be null or empty.</param>
+        /// <param name="originalValue">When this method returns <see langword="true"/>, contains the original value of the specified column;
+        /// otherwise, is set to <see langword="null"/>.</param>
+        /// <returns>True if the original value was successfully retrieved, otherwise false</returns>
+        bool TryGetOriginalValue(string columnName, out object? originalValue);
+
+        /// <summary>
         /// Updates data field value
         /// </summary>
         /// <param name="columnName">Column name</param>

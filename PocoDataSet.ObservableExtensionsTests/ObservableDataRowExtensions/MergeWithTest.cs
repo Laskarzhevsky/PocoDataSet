@@ -46,7 +46,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is not done because the observable row in Modified state
-            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            observableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(departmentObservableDataRow.DataRowState.ToString(), DataRowState.Modified.ToString());
@@ -87,7 +87,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is not done because the observable row in Deleted state
-            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            observableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(DataRowState.Deleted.ToString(), departmentObservableDataRow.DataRowState.ToString());
@@ -127,7 +127,7 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataRowExtensions
 
             // Act
             // 5. Call MergeWith method and observe that merge is completed because the observable row was in Unchanged state
-            departmentObservableDataRow.DoRefreshMergePreservingLocalChanges(departmentRefreshedDataRow, "Department", departmentObservableDataTable.Columns, new ObservableMergeOptions());
+            observableDataSet.DoRefreshMergePreservingLocalChanges(refreshedDataSet, new ObservableMergeOptions());
 
             // Assert
             Assert.Equal(DataRowState.Unchanged.ToString(), departmentObservableDataRow.DataRowState.ToString());
