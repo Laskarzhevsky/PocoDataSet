@@ -14,29 +14,6 @@ namespace PocoDataSet.ObservableTests
     {
         #region Public Methods
         [Fact]
-        public void SettingSelected_OnObservableRow_RaisesDataFieldValueChanged_AndRowStateChanged()
-        {
-            // Arrange
-            IObservableDataView view = CreateObservableViewWithSelection();
-            IObservableDataRow row = view.Rows[0];
-
-            DataFieldValueChangedCounter dataFieldCounter = new DataFieldValueChangedCounter();
-            RowStateChangedCounter rowStateCounter = new RowStateChangedCounter();
-
-            row.DataFieldValueChanged += dataFieldCounter.Handler;
-            row.RowStateChanged += rowStateCounter.Handler;
-
-            // Act
-            bool updated = row.UpdateSelectedDataFieldValue(true, null);
-
-            // Assert
-            Assert.True(updated);
-            Assert.Equal(1, dataFieldCounter.Count);
-            Assert.Equal(1, rowStateCounter.Count);
-            Assert.True(row.GetDataFieldValue<bool>(ColumnNames.SELECTED) == true);
-        }
-
-        [Fact]
         public void RemovingSelectedRow_FromTable_DoesNotTransferSelectionToAnotherRow()
         {
             // Arrange

@@ -9,7 +9,7 @@ namespace PocoDataSet.ObservableExtensions
     {
         #region Public Methods
         /// <summary>
-        /// Tries to get value from the field by using both, case sensitive and then case-insensitive cloumn name
+        /// Tries to get value from the field by using both, case sensitive and then case-insensitive column name
         /// </summary>
         /// <param name="observableDataRow">Observable Data row</param>
         /// <param name="columnName">Column name</param>

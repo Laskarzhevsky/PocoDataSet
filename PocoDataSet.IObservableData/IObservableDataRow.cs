@@ -65,14 +65,6 @@ namespace PocoDataSet.IObservableData
         [Obsolete("Use the indexer (observableDataRow[columnName]) which raises observable events.", false)]
 
         bool UpdateDataFieldValue(string columnName, object? value, object? requestor);
-
-        /// <summary>
-        /// Updates Selected data field value
-        /// </summary>
-        /// <param name="value">Value for setting into data row</param>
-        /// <param name="requestor">Object which requests update</param>
-        /// <returns>Flag indicating whether value was set</returns>
-        bool UpdateSelectedDataFieldValue(object? value, object? requestor);
         #endregion
 
         #region Public Properties

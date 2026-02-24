@@ -5,9 +5,10 @@ using PocoDataSet.IData;
 namespace PocoDataSet.Data
 {
     /// <summary>
+    /// INTERNAL USE ONLY.
     /// Provides DataRowFactory functionality
     /// </summary>
-    public static class DataRowFactory
+    internal static class DataRowFactory
     {
         #region Public Methods
         /// <summary>

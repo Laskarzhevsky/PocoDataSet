@@ -177,18 +177,6 @@ namespace PocoDataSet.ObservableData
 
             return dataFieldValueUpdated;
         }
-
-        /// <summary>
-        /// Updates Selected data field value
-        /// IObservableDataRow interface implementation
-        /// </summary>
-        /// <param name="value">Value for setting into data row</param>
-        /// <param name="requestor">Object which requests update</param>
-        /// <returns>Flag indicating whether value was set</returns>
-        public bool UpdateSelectedDataFieldValue(object? value, object? requestor)
-        {
-            return UpdateDataFieldValue(ColumnNames.SELECTED, value, requestor);
-        }
         #endregion
 
         #region Public Properties

@@ -22,8 +22,8 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataSetExtensions
             departmentObservableDataTable.AddColumn("Name", DataTypeNames.STRING);
 
             IObservableDataRow departmentObservableDataRow = departmentObservableDataTable.AddNewRow();
-            departmentObservableDataRow.UpdateDataFieldValue("Id", 1);
-            departmentObservableDataRow.UpdateDataFieldValue("Name", "Customer Service");
+            departmentObservableDataRow["Id"] = 1;
+            departmentObservableDataRow["Name"] = "Customer Service";
 
             // Act
             // 3. Call Clear method
