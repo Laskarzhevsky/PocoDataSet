@@ -21,7 +21,7 @@ The solution contains the following projects:
   Interfaces and contracts only:
   - `IDataSet`, `IDataTable`, `IDataRow`
   - `IColumnMetadata`, `IDataRelation`, `IForeignKeyData`
-  - `IDataSetValidator`, `IMergeOptions`, `IDataRowFilter`
+  - `IDataSetValidator`, `IMergeOptions`
   - `IValueConverter` (for pluggable value conversion)
 
   Interfaces and contracts for the merge infrastructure:
@@ -29,7 +29,6 @@ The solution contains the following projects:
   - `IDataSetMergeConfiguration` – provides merge policies and handlers
   - `ITableMergeHandler` – table-level merge behavior
   - `IRowMergeHandler` – row-level merge behavior
-  - `IDataTypeDefaultValueProvider` – pluggable provider for metadata-based default values
 
 - **PocoDataSet.Data**  
   Concrete implementations of the interfaces:

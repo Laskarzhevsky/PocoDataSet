@@ -7,7 +7,7 @@ namespace PocoDataSet.Data
     /// <summary>
     /// Provides default values based on POCO DataSet column metadata.
     /// </summary>
-    public static class MetadataDefaults
+    internal static class MetadataDefaults
     {
         /// <summary>
         /// Gets default value by data type token (for example, DataTypeNames.INT32) and nullability.

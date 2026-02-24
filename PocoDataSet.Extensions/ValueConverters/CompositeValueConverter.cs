@@ -4,7 +4,7 @@ using PocoDataSet.IData;
 
 namespace PocoDataSet.Extensions
 {
-    public class CompositeFieldValueConverter : IValueConverter
+    internal class CompositeFieldValueConverter : IValueConverter
     {
         readonly IValueConverter[] _converters;
 

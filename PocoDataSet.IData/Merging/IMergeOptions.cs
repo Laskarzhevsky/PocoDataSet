@@ -17,14 +17,6 @@ namespace PocoDataSet.IData
         }
 
         /// <summary>
-        /// Gets data type default value provider
-        /// </summary>
-        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets list of table names which need to be excluded from merge
         /// Data in mentioned tables will not be changed during the merge process
         /// </summary>

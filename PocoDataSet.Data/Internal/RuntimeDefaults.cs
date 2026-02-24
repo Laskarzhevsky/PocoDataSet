@@ -2,7 +2,7 @@
 
 namespace PocoDataSet.Data
 {
-    public static class RuntimeDefaults
+    internal static class RuntimeDefaults
     {
         #region Public Methods
         /// <summary>

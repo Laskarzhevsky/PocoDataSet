@@ -18,19 +18,12 @@ namespace PocoDataSet.ObservableExtensions
                 new List<IObservableDataSetMergeResultEntry>(),
                 new List<IObservableDataSetMergeResultEntry>());
 
-            DataTypeDefaultValueProvider = new MetadataDefaultsProvider();
-
             ExcludeTablesFromMerge = new List<string>();
             ExcludeTablesFromRowDeletion = new List<string>();
             OverriddenPrimaryKeyNames = new Dictionary<string, List<string>>();
         }
 
         public IObservableDataSetMergeResult ObservableDataSetMergeResult
-        {
-            get; private set;
-        }
-
-        public IDataTypeDefaultValueProvider DataTypeDefaultValueProvider
         {
             get; private set;
         }

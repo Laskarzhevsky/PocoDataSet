@@ -324,7 +324,7 @@ namespace PocoDataSet.ObservableExtensions.Merging.RefreshMergeIfNoChangesExist
             IDataRow newDataRow = observableDataTable.InnerDataTable.AddNewRow();
             foreach (IColumnMetadata columnMetadata in observableDataTable.Columns)
             {
-                newDataRow[columnMetadata.ColumnName] = observableMergeOptions.DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                newDataRow[columnMetadata.ColumnName] = DataTypeDefaultValueProvider.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
             newDataRow.AcceptChanges();

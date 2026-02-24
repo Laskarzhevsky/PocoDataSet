@@ -39,20 +39,36 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
-        /// Create a row and initialize each column with its default value
+        /// Creates data row from list of column metadata
         /// </summary>
         /// <param name="listOfColumnMetadata">List of column metadata</param>
-        /// <returns></returns>
-        public static IDataRow CreateFromColumnsWithDefaults(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
+        /// <returns>Created data row</returns>
+        public static IDataRow CreateRowFromColumns(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
         {
-            DataRow row = new DataRow(listOfColumnMetadata.Count);
+            IDataRow dataRow = CreateEmpty(listOfColumnMetadata.Count);
+            foreach (IColumnMetadata columnMetadata in listOfColumnMetadata)
+            {
+                dataRow[columnMetadata.ColumnName] = null;
+            }
+
+            return dataRow;
+        }
+
+        /// <summary>
+        /// Creates data row from list of column metadata and initialize each data field with its default value
+        /// </summary>
+        /// <param name="listOfColumnMetadata">List of column metadata</param>
+        /// <returns>Created data row</returns>
+        public static IDataRow CreateRowFromColumnsWithDefaults(IReadOnlyList<IColumnMetadata> listOfColumnMetadata)
+        {
+            IDataRow dataRow = CreateEmpty(listOfColumnMetadata.Count);
             for (int i = 0; i < listOfColumnMetadata.Count; i++)
             {
                 IColumnMetadata columnMetadata = listOfColumnMetadata[i];
-                row[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
+                dataRow[columnMetadata.ColumnName] = MetadataDefaults.GetDefaultValue(columnMetadata.DataType, columnMetadata.IsNullable);
             }
 
-            return row;
+            return dataRow;
         }
         #endregion
     }

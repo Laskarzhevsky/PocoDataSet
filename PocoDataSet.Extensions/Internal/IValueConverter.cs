@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace PocoDataSet.IData
+namespace PocoDataSet.Extensions
 {
     /// <summary>
     /// Defines value converter functionality
     /// </summary>
-    public interface IValueConverter
+    internal interface IValueConverter
     {
         #region Methods
         /// <summary>

@@ -6,7 +6,7 @@ namespace PocoDataSet.Extensions
     {
         static readonly IValueConverter _default = CreateDefault();
 
-        public static IValueConverter Default
+        internal static IValueConverter Default
         {
             get
             {
