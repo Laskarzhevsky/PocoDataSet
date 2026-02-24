@@ -354,10 +354,14 @@ namespace PocoDataSet.ObservableData
         /// <param name="e">Event arguments</param>
         void ObservableDataRow_DataFieldValueChanged(object? sender, DataFieldValueChangedEventArgs e)
         {
-            if (DataFieldValueChanged != null)
+            if (DataFieldValueChanged == null)
             {
-                DataFieldValueChanged(sender, e);
+                return;
             }
+
+            DataFieldValueChangedEventArgs forwarded = new DataFieldValueChangedEventArgs(e.ColumnName, e.OldValue, e.NewValue, e.Requestor, TableName);
+
+            DataFieldValueChanged(sender, forwarded);
         }
 
         /// <summary>

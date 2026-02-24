@@ -80,7 +80,7 @@ namespace PocoDataSet.ObservableTests
         }
 
         [Fact]
-        public void Indexer_WhenValueChangesBackToOriginal_DoesNotRaiseEvents_ButRowRemainsModified()
+        public void Indexer_WhenValueChangesBackToOriginal_RaisesValueChangedEvents_ButRowRemainsModified()
         {
             // Arrange
             DataRow innerRow = CreateLoadedRowWithCount(1);
@@ -93,12 +93,20 @@ namespace PocoDataSet.ObservableTests
             observableRow.RowStateChanged += rowStateCounter.Handler;
 
             // Act
-            observableRow["Count"] = 2; // change away from original
-            observableRow["Count"] = 1; // back to original
+            observableRow["Count"] = 2; // change away from original (1 -> 2)
+            observableRow["Count"] = 1; // change back to original (2 -> 1)
 
             // Assert
-            Assert.Equal(1, dataFieldCounter.Count);
+            // DataFieldValueChanged should be raised for every real value change (old != new),
+            // including reverting back to the original value.
+            Assert.Equal(2, dataFieldCounter.Count);
+
+            // RowStateChanged should only be raised when the row state actually transitions.
+            // In this implementation, the first change transitions Unchanged -> Modified.
+            // Reverting the value does not transition the state back, so no additional event.
             Assert.Equal(1, rowStateCounter.Count);
+
+            // Value is back to original, but row remains Modified according to existing contract.
             Assert.Equal(1, observableRow.GetDataFieldValue<int>("Count"));
             Assert.Equal(PocoDataSet.IData.DataRowState.Modified, observableRow.DataRowState);
         }

@@ -134,7 +134,6 @@ namespace PocoDataSet.ObservableData
         /// <param name="requestor">Object which requests update</param>
         /// <returns>Flag indicating whether value was set</returns>
         [Obsolete("Use the indexer (observableDataRow[columnName]) which raises observable events.", false)]
-
         public bool UpdateDataFieldValue(string columnName, object? value, object? requestor)
         {
             if (string.IsNullOrWhiteSpace(columnName))
@@ -142,40 +141,31 @@ namespace PocoDataSet.ObservableData
                 throw new ArgumentException("Column name must be provided.", nameof(columnName));
             }
 
-            // If the value is not changing, do nothing.
-            // NOTE: Previously, this method only compared against the *original* value, which could
-            // raise duplicate events if the same value was assigned repeatedly.
-            object? currentValue = _innerDataRow[columnName];
-            if (object.Equals(currentValue, value))
+            object? oldValue = _innerDataRow[columnName];
+
+            // Raise only on real change.
+            if (ValueComparer.AreValuesEqual(oldValue, value))
             {
                 return false;
             }
 
             DataRowState oldState = _innerDataRow.DataRowState;
+
             _innerDataRow[columnName] = value;
 
-            bool dataFieldValueUpdated = false;
-            object ? originalValue;
-            _innerDataRow.TryGetOriginalValue(columnName, out originalValue);
-            if (!object.Equals(originalValue, value))
-            {
-                dataFieldValueUpdated = true;
-            }
+            object? newValue = value;
 
-            if (dataFieldValueUpdated)
-            {
-                RaiseDataFieldValueChangedEvent(columnName, requestor);
+            RaiseDataFieldValueChangedEvent(columnName, oldValue, newValue, requestor);
 
-                // Interop: notify that the "property" named by the column key has changed.
-                // Also notify the conventional indexer name used by some binding engines.
-                RaisePropertyChanged(columnName);
-                RaisePropertyChanged("Item[]");
+            // Interop: notify that the "property" named by the column key has changed.
+            // Also notify the conventional indexer name used by some binding engines.
+            RaisePropertyChanged(columnName);
+            RaisePropertyChanged("Item[]");
 
-                DataRowState newState = _innerDataRow.DataRowState;
-                RaiseRowStateChangedEvent(oldState, newState, requestor);
-            }
+            DataRowState newState = _innerDataRow.DataRowState;
+            RaiseRowStateChangedEvent(oldState, newState, requestor);
 
-            return dataFieldValueUpdated;
+            return true;
         }
         #endregion
 
@@ -261,12 +251,14 @@ namespace PocoDataSet.ObservableData
         /// Raises DataFieldValueChanged event
         /// </summary>
         /// <param name="columnName">Column name</param>
+        /// <param name="oldValue">Old value</param>
+        /// <param name="newValue">New value</param>
         /// <param name="requestor">Object which requests update</param>
-        void RaiseDataFieldValueChangedEvent(string columnName, object? requestor)
+        void RaiseDataFieldValueChangedEvent(string columnName, object? oldValue, object? newValue, object? requestor)
         {
             if (DataFieldValueChanged != null)
             {
-                DataFieldValueChanged(this, new DataFieldValueChangedEventArgs(columnName, requestor));
+                DataFieldValueChanged(this, new DataFieldValueChangedEventArgs(columnName, oldValue, newValue, requestor, null));
             }
         }
 
