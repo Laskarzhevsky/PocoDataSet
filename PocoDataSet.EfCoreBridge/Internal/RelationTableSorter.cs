@@ -46,7 +46,7 @@ namespace PocoDataSet.EfCoreBridge
                 indegree[node] = 0;
             }
 
-            List<IDataRelation> relations = changeset.Relations;
+            IReadOnlyList<IDataRelation> relations = changeset.Relations;
             if (relations != null)
             {
                 for (int i = 0; i < relations.Count; i++)

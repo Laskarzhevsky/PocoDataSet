@@ -114,6 +114,36 @@ namespace PocoDataSet.ObservableData
         }
 
         /// <summary>
+        /// Adds relation between parent and child tables in a data set
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        /// <param name="relationName">Relation name</param>
+        /// <param name="parentTableName">Parent table name</param>
+        /// <param name="parentColumnName">Parent column name</param>
+        /// <param name="childTableName">Child table name</param>
+        /// <param name="childColumnName">Child column name</param>
+        /// <returns>Added relation between parent and child tables in a data set</returns>
+        public IDataRelation AddRelation(string relationName, string parentTableName, string parentColumnName, string childTableName, string childColumnName)
+        {
+            return _innerDataSet.AddRelation(relationName, parentTableName, parentColumnName, childTableName, childColumnName);
+        }
+
+        /// <summary>
+        /// Adds relation between parent and child tables in a data set.
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        /// <param name="relationName">Relation name</param>
+        /// <param name="parentTableName">Parent table name</param>
+        /// <param name="parentColumnNames">Parent column names</param>
+        /// <param name="childTableName">Child table name</param>
+        /// <param name="childColumnNames">Child column names</param>
+        /// <returns>Created relation</returns>
+        public IDataRelation AddRelation(string relationName, string parentTableName, IList<string> parentColumnNames, string childTableName, IList<string> childColumnNames)
+        {
+            return _innerDataSet.AddRelation(relationName, parentTableName, parentColumnNames, childTableName, childColumnNames);
+        }
+
+        /// <summary>
         /// Gets observable data view
         /// IObservableDataSet interface implementation
         /// </summary>
@@ -245,6 +275,17 @@ namespace PocoDataSet.ObservableData
                 }
             }
         }
+
+        /// <summary>
+        /// Removes relation by name
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        /// <param name="relationName">Relation name</param>
+        /// <returns>Flag indicating whether relation was removed</returns>
+        public bool RemoveRelation(string relationName)
+        {
+            return _innerDataSet.RemoveRelation(relationName);
+        }
         #endregion
 
         #region Public Properties
@@ -282,7 +323,7 @@ namespace PocoDataSet.ObservableData
         /// Gets relations
         /// IObservableDataSet interface implementation
         /// </summary>
-        public List<IDataRelation> Relations
+        public IReadOnlyList<IDataRelation> Relations
         {
             get
             {

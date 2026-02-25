@@ -26,13 +26,7 @@ namespace PocoDataSet.Tests
             emp.AddColumn("Name", DataTypeNames.STRING);
 
             // Add relation metadata (no behavior enforced today)
-            IDataRelation relation = new DataRelation();
-            relation.RelationName = "Department_Employee";
-            relation.ParentTableName = "Department";
-            relation.ChildTableName = "Employee";
-            relation.ParentColumnNames = new List<string> { "Id" };
-            relation.ChildColumnNames = new List<string> { "DepartmentId" };
-            dataSet.Relations.Add(relation);
+            dataSet.AddRelation("Department_Employee", "Department", new List<string> { "Id" }, "Employee", new List<string> { "DepartmentId" });
 
             IDataRow d1 = DataRowExtensions.CreateRowFromColumns(dept.Columns);
             d1["Id"] = 10;

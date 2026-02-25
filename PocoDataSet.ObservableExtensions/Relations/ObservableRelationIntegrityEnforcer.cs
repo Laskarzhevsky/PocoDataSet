@@ -95,7 +95,7 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            List<IDataRelation> relations = innerDataSet.Relations;
+            IReadOnlyList<IDataRelation> relations = innerDataSet.Relations;
             if (relations == null)
             {
                 return;

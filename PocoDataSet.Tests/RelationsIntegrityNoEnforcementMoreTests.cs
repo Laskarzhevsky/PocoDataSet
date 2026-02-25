@@ -22,13 +22,7 @@ namespace PocoDataSet.Tests
             child.AddColumn("Id", DataTypeNames.INT32);
             child.AddColumn("DepartmentId", DataTypeNames.INT32);
 
-            IDataRelation relation = new DataRelation();
-            relation.RelationName = "Department_Employee";
-            relation.ParentTableName = "Department";
-            relation.ChildTableName = "Employee";
-            relation.ParentColumnNames = new List<string> { "Id" };
-            relation.ChildColumnNames = new List<string> { "DepartmentId" };
-            dataSet.Relations.Add(relation);
+            dataSet.AddRelation("Department_Employee", "Department", new List<string> { "Id" }, "Employee", new List<string> { "DepartmentId" });
 
             IDataRow d = DataRowExtensions.CreateRowFromColumns(parent.Columns);
             d["Id"] = 10;
@@ -57,13 +51,7 @@ namespace PocoDataSet.Tests
             child.AddColumn("Id", DataTypeNames.INT32);
             child.AddColumn("DepartmentId", DataTypeNames.INT32);
 
-            IDataRelation relation = new DataRelation();
-            relation.RelationName = "Department_Employee";
-            relation.ParentTableName = "Department";
-            relation.ChildTableName = "Employee";
-            relation.ParentColumnNames = new List<string> { "Id" };
-            relation.ChildColumnNames = new List<string> { "DepartmentId" };
-            dataSet.Relations.Add(relation);
+            dataSet.AddRelation("Department_Employee", "Department", new List<string> { "Id" }, "Employee", new List<string> { "DepartmentId" });
 
             // No parent row with Id=999 exists, but we can still add child
             IDataRow e = DataRowExtensions.CreateRowFromColumns(child.Columns);

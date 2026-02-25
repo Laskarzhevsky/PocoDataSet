@@ -233,14 +233,7 @@ public class EfChangesetDataSetApplier_RelationsAndResolver_Tests
             throw new ArgumentNullException(nameof(dataSet));
         }
 
-        IDataRelation relation = new DataRelation();
-        relation.RelationName = relationName;
-        relation.ParentTableName = parentTable;
-        relation.ChildTableName = childTable;
-        relation.ParentColumnNames = parentColumns;
-        relation.ChildColumnNames = childColumns;
-
-        dataSet.Relations.Add(relation);
+        dataSet.AddRelation(relationName, parentTable, parentColumns, childTable, childColumns);
     }
 
 

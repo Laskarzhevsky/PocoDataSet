@@ -192,14 +192,7 @@ namespace PocoDataSet.EfCoreBridge
                         continue;
                     }
 
-                    IDataRelation relation = new DataRelation();
-                    relation.RelationName = relationName;
-                    relation.ParentTableName = principalTableName;
-                    relation.ChildTableName = dependentTableName;
-                    relation.ParentColumnNames = parentColumns;
-                    relation.ChildColumnNames = childColumns;
-
-                    dataSet.Relations.Add(relation);
+                    dataSet.AddRelation(relationName, principalTableName, parentColumns, dependentTableName, childColumns);
                 }
             }
         }
