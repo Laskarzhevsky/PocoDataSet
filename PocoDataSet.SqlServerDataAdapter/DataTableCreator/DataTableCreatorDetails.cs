@@ -111,7 +111,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         void AddDataTableToDataSet()
         {
-            DataSet!.Tables[DataTable!.TableName] = DataTable;
+            DataSet!.AddTable(DataTable!);
             DataTableIndex++;
         }
 

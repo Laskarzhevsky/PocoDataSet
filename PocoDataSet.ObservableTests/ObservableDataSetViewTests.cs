@@ -18,11 +18,11 @@ namespace PocoDataSet.ObservableTests
 
             DataTable tableAB = new DataTable();
             tableAB.TableName = "AB";
-            dataSet.Tables.Add(tableAB.TableName, tableAB);
+            dataSet.AddTable(tableAB);
 
             DataTable tableA = new DataTable();
             tableA.TableName = "A";
-            dataSet.Tables.Add(tableA.TableName, tableA);
+            dataSet.AddTable(tableA);
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 
@@ -43,7 +43,7 @@ namespace PocoDataSet.ObservableTests
             DataSet dataSet = new DataSet();
             DataTable table = new DataTable();
             table.TableName = "Department";
-            dataSet.Tables.Add(table.TableName, table);
+            dataSet.AddTable(table);
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 
@@ -81,7 +81,7 @@ namespace PocoDataSet.ObservableTests
             DataSet dataSet = new DataSet();
             DataTable table = new DataTable();
             table.TableName = "Department";
-            dataSet.Tables.Add(table.TableName, table);
+            dataSet.AddTable(table);
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
             IObservableDataView? view = observableDataSet.GetObservableDataView("Department", null, false, null, "ScreenX");
@@ -103,7 +103,7 @@ namespace PocoDataSet.ObservableTests
             DataSet dataSet = new DataSet();
             DataTable table = new DataTable();
             table.TableName = "T1";
-            dataSet.Tables.Add(table.TableName, table);
+            dataSet.AddTable(table);
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 
             // Act
@@ -120,7 +120,7 @@ namespace PocoDataSet.ObservableTests
             DataSet dataSet = new DataSet();
             DataTable table = new DataTable();
             table.TableName = "Department";
-            dataSet.Tables.Add(table.TableName, table);
+            dataSet.AddTable(table);
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 
             IObservableDataView? view = observableDataSet.GetObservableDataView("Department", null, false, null, "ScreenDispose");
@@ -141,7 +141,7 @@ namespace PocoDataSet.ObservableTests
             DataSet dataSet = new DataSet();
             DataTable table = new DataTable();
             table.TableName = "Department";
-            dataSet.Tables.Add(table.TableName, table);
+            dataSet.AddTable(table);
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
             IObservableDataTable observableTable = observableDataSet.Tables["Department"];
@@ -182,11 +182,11 @@ namespace PocoDataSet.ObservableTests
 
             DataTable t1 = new DataTable();
             t1.TableName = "T1";
-            dataSet.Tables.Add(t1.TableName, t1);
+            dataSet.AddTable(t1);
 
             DataTable t2 = new DataTable();
             t2.TableName = "T2";
-            dataSet.Tables.Add(t2.TableName, t2);
+            dataSet.AddTable(t2);
 
             ObservableDataSet observableDataSet = new ObservableDataSet(dataSet);
 

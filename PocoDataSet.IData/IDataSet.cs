@@ -27,13 +27,19 @@ namespace PocoDataSet.IData
         /// <summary>
         /// Gets or sets tables
         /// </summary>
-        Dictionary<string, IDataTable> Tables
+        IReadOnlyDictionary<string, IDataTable> Tables
         {
-            get; set;
+            get;
         }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Adds table to data set
+        /// </summary>
+        /// <param name="dataTable">Data table for addition</param>
+        void AddTable(IDataTable dataTable);
+
         /// <summary>
         /// Adds relation between parent and child tables in a data set
         /// </summary>
@@ -62,6 +68,12 @@ namespace PocoDataSet.IData
         /// <param name="relationName">Relation name</param>
         /// <returns>Flag indicating whether relation was removed</returns>
         bool RemoveRelation(string relationName);
+
+        /// <summary>
+        /// Removes table from data set by name
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        void RemoveTable(string tableName);
         #endregion
     }
 }

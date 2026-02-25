@@ -271,7 +271,7 @@ namespace PocoDataSet.ObservableData
                 // Keep inner dataset consistent
                 if (_innerDataSet.Tables.ContainsKey(tableName))
                 {
-                    _innerDataSet.Tables.Remove(tableName);
+                    _innerDataSet.RemoveTable(tableName);
                 }
             }
         }

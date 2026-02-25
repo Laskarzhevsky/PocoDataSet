@@ -1,17 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using PocoDataSet.IData;
+using System.Text.Json.Serialization;
 
 namespace PocoDataSet.Data
 {
     /// <summary>
     /// Provides data set functionality
     /// </summary>
-    public class DataSet : IDataSet
+    public class DataSet : IDataSet, IJsonOnDeserialized
     {
         #region Data Fields
         readonly List<IDataRelation> _relations = new List<IDataRelation>();
+
+        readonly Dictionary<string, IDataTable> _tables = new();
         #endregion
 
         #region Public Properties
@@ -37,13 +40,30 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
-        /// Gets or sets tables
+        /// Gets tables
         /// IDataSet interface implementation
         /// </summary>
-        public Dictionary<string, IDataTable> Tables
+        [JsonIgnore]
+        public IReadOnlyDictionary<string, IDataTable> Tables
         {
-            get; set;
-        } = new();
+            get
+            {
+                return _tables;
+            }
+        }
+
+        /// <summary>
+        /// Serialization helper for tables.
+        /// System.Text.Json cannot populate IReadOnlyDictionary<string, IDataTable> directly,
+        /// and it cannot instantiate interface types. This property is used for JSON only.
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("Tables")]
+        public Dictionary<string, DataTable> TablesJson
+        {
+            get; private set;
+        } = new Dictionary<string, DataTable>();
+
         #endregion
 
         #region Public Methods
@@ -121,6 +141,33 @@ namespace PocoDataSet.Data
             return relation;
         }
 
+
+        /// <summary>
+        /// Adds table to data set
+        /// IDataSet interface implementation
+        /// </summary>
+        /// <param name="dataTable">Data table for addition</param>
+        public void AddTable(IDataTable dataTable)
+        {
+            if (string.IsNullOrEmpty(dataTable.TableName))
+            {
+                throw new System.ArgumentException("Table name cannot be null");
+            }
+
+            if (_tables.ContainsKey(dataTable.TableName))
+            {
+                throw new KeyDuplicationException($"DataSet contains table with name {dataTable.TableName} already");
+            }
+
+            _tables.Add(dataTable.TableName, dataTable);
+        
+            DataTable? concrete = dataTable as DataTable;
+            if (concrete != null)
+            {
+                TablesJson[dataTable.TableName] = concrete;
+            }
+}
+
         /// <summary>
         /// Removes relation by name
         /// IDataSet interface implementation
@@ -145,6 +192,58 @@ namespace PocoDataSet.Data
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Removes table from data set by name
+        /// IDataSet interface implementation
+        /// </summary>
+        /// <param name="tableName">Table name</param>
+        public void RemoveTable(string tableName)
+        {
+            if (_tables.ContainsKey(tableName))
+            {
+                _tables.Remove(tableName);
+            
+                TablesJson.Remove(tableName);
+}
+            else
+            {
+                throw new System.Collections.Generic.KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
+            }
+        }
+        #endregion
+
+        #region JSON Serializer
+        /// <summary>
+        /// Called by System.Text.Json after deserialization (.NET 8+ / .NET 9)
+        /// </summary>
+        public void OnDeserialized()
+        {
+            _tables.Clear();
+
+            if (TablesJson == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, DataTable> kvp in TablesJson)
+            {
+                if (kvp.Key == null)
+                {
+                    continue;
+                }
+
+                if (kvp.Value == null)
+                {
+                    continue;
+                }
+
+                // Ensure table name consistency if your DataTable has a TableName property
+                // kvp.Value.TableName = kvp.Key; // only if needed/allowed
+
+                _tables.Add(kvp.Key, kvp.Value);
+            }
         }
         #endregion
     }
