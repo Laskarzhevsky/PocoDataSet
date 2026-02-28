@@ -286,6 +286,27 @@ namespace PocoDataSet.ObservableData
         {
             return _innerDataSet.RemoveRelation(relationName);
         }
+
+        /// <summary>
+        /// Attempts to retrieve the data table associated with the specified table name
+        /// IObservableDataSet interface implementation
+        /// </summary>
+        /// <param name="tableName">The name of the table to retrieve</param>
+        /// <param name="dataTable">When this method returns true, contains the data table associated with the specified table name, otherwise null</param>
+        /// <returns>True if a table with the specified name was found, otherwise false</returns>
+        public bool TryGetTable(string tableName, out IObservableDataTable? dataTable)
+        {
+            if (_observableDataTables.TryGetValue(tableName, out IObservableDataTable? foundDataTable))
+            {
+                dataTable = foundDataTable;
+                return true;
+            }
+            else
+            {
+                dataTable = null;
+                return false;
+            }
+        }
         #endregion
 
         #region Public Properties
@@ -352,6 +373,27 @@ namespace PocoDataSet.ObservableData
             get
             {
                 return _observableDataViews;
+            }
+        }
+        #endregion
+
+        #region Inexers
+        /// <summary>
+        /// Gets the observable data table associated with the specified table name.
+        /// </summary>
+        /// <returns>An instance of IObservableDataTable representing the specified table.</returns>
+        public IObservableDataTable this[string tableName]
+        {
+            get
+            {
+                if (_observableDataTables.TryGetValue(tableName, out IObservableDataTable? observableDataTable))
+                {
+                    return observableDataTable;
+                }
+                else
+                {
+                    throw new KeyNotFoundException($"ObservableDataSet does not contain table with name {tableName}");
+                }
             }
         }
         #endregion

@@ -73,6 +73,14 @@ namespace PocoDataSet.IObservableData
         /// <param name="rowIndex">Row index</param>
         /// <returns>Removed observable data row </returns>
         IObservableDataRow RemoveRowAt(int rowIndex);
+
+        /// <summary>
+        /// Attempts to retrieve the metadata for a column with the specified name
+        /// </summary>
+        /// <param name="columnName">The name of the column for which to retrieve metadata</param>
+        /// <param name="columnMetadata">When this method returns, contains the metadata for the specified column if found, otherwise null</param>
+        /// <returns>True if the metadata for the specified column is found; otherwise, false.</returns>
+        bool TryGetColumn(string columnName, out IColumnMetadata? columnMetadata);
         #endregion
 
         #region Properties
@@ -120,6 +128,18 @@ namespace PocoDataSet.IObservableData
         /// Gets table name
         /// </summary>
         string TableName
+        {
+            get;
+        }
+        #endregion
+
+        #region Indexers
+        /// <summary>
+        /// Gets the metadata for the column with the specified name.
+        /// </summary>
+        /// <returns>An instance of IColumnMetadata that contains the metadata for the specified column,
+        /// or null if the column does not exist.</returns>
+        IColumnMetadata this[string columnName]
         {
             get;
         }

@@ -18,7 +18,7 @@ namespace PocoDataSet.ExtensionsTests
 
             // Act
             // 3. Try to retrieve the table safely
-            if (dataSet.TryGetTable("department", out IDataTable? foundTable))
+            if (dataSet.TryGetTable("Department", out IDataTable? foundTable))
             {
                 // foundTable is not null
             }

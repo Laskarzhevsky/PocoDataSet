@@ -1,7 +1,9 @@
+using PocoDataSet.IData;
+
 using System;
 using System.Collections.Generic;
-
-using PocoDataSet.IData;
+using System.Data.Common;
+using System.Xml.Linq;
 
 namespace PocoDataSet.Data.Internal
 {
@@ -300,6 +302,27 @@ namespace PocoDataSet.Data.Internal
 
             RebuildPrimaryKeysFromColumnFlags();
         }
+
+        /// <summary>
+        /// Attempts to retrieve the metadata for a column with the specified name
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <param name="columnName">The name of the column for which to retrieve metadata</param>
+        /// <param name="columnMetadata">When this method returns, contains the metadata for the specified column if found, otherwise null</param>
+        /// <returns>True if the metadata for the specified column is found; otherwise, false.</returns>
+        public bool TryGetColumn(string columnName, out IColumnMetadata? columnMetadata)
+        {
+            if (_columnsByName.TryGetValue(columnName, out IColumnMetadata? foundColumnMetadata))
+            {
+                columnMetadata = foundColumnMetadata;
+                return true;
+            }
+            else
+            {
+                columnMetadata = null;
+                return false;
+            }
+        }
         #endregion
 
         #region Public Properties
@@ -332,7 +355,27 @@ namespace PocoDataSet.Data.Internal
         {
             get; set;
         } = string.Empty;
+        #endregion
 
+        #region Indexers
+        /// <summary>
+        /// Gets the metadata for the column with the specified name.
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <returns>An instance of IColumnMetadata that contains the metadata for the specified column,
+        /// or null if the column does not exist</returns>
+        public IColumnMetadata this[string columnName]
+        {
+            get
+            {
+                if (ContainsColumn(columnName))
+                {
+                    return _columnsByName[columnName];
+                }
+
+                throw new KeyNotFoundException($"Column '{columnName}' does not exist in table '{TableName}'.");
+            }
+        }
         #endregion
 
         #region Private Methods

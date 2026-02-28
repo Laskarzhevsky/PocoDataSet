@@ -18,7 +18,7 @@ namespace PocoDataSet.Data
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets principal column name
+        /// Gets or sets principal column name (name of the column that holds the foreign key value)
         /// IForeignKeyData interface implementation
         /// </summary>
         public string PrincipalColumnName
@@ -27,7 +27,7 @@ namespace PocoDataSet.Data
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets principal table name
+        /// Gets or sets principal table name (name of the table that contains the foreign key column
         /// IForeignKeyData interface implementation
         /// </summary>
         public string PrincipalTableName
@@ -36,7 +36,7 @@ namespace PocoDataSet.Data
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets referenced column name
+        /// Gets or sets referenced column name (name of the column that holds the primary key value)
         /// IForeignKeyData interface implementation
         /// </summary>
         public string ReferencedColumnName
@@ -45,7 +45,7 @@ namespace PocoDataSet.Data
         } = string.Empty;
 
         /// <summary>
-        /// Gets or sets referenced table name
+        /// Gets or sets referenced table name (table that contains the primary key column)
         /// IForeignKeyData interface implementation
         /// </summary>
         public string ReferencedTableName

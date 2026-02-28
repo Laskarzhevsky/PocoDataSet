@@ -177,6 +177,27 @@ namespace PocoDataSet.ObservableData
 
             return observableDataRow;
         }
+
+        /// <summary>
+        /// Attempts to retrieve the metadata for a column with the specified name
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        /// <param name="columnName">The name of the column for which to retrieve metadata</param>
+        /// <param name="columnMetadata">When this method returns, contains the metadata for the specified column if found, otherwise null</param>
+        /// <returns>True if the metadata for the specified column is found; otherwise, false.</returns>
+        public bool TryGetColumn(string columnName, out IColumnMetadata? columnMetadata)
+        {
+            if (InnerDataTable.TryGetColumn(columnName, out IColumnMetadata? foundColumnMetadata))
+            {
+                columnMetadata = foundColumnMetadata;
+                return true;
+            }
+            else
+            {
+                columnMetadata = null;
+                return false;
+            }
+        }
         #endregion
 
         #region Public Properties
@@ -246,6 +267,22 @@ namespace PocoDataSet.ObservableData
             get
             {
                 return _innerDataTable.TableName;
+            }
+        }
+        #endregion
+
+        #region Indexers
+        /// <summary>
+        /// Gets the metadata for the column with the specified name.
+        /// IObservableDataTable interface implementation
+        /// </summary>
+        /// <returns>An instance of IColumnMetadata that contains the metadata for the specified column,
+        /// or null if the column does not exist.</returns>
+        public IColumnMetadata this[string columnName]
+        {
+            get
+            {
+                return InnerDataTable[columnName];
             }
         }
         #endregion

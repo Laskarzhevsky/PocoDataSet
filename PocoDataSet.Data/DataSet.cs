@@ -66,6 +66,28 @@ namespace PocoDataSet.Data
 
         #endregion
 
+        #region Indexers
+        /// <summary>
+        /// Gets the data table associated with the specified table name
+        /// IDataSet interface implementation
+        /// </summary>
+        /// <returns>An instance of IDataTable representing the specified table</returns>
+        public IDataTable this[string tableName]
+        {
+            get
+            {
+                if (_tables.TryGetValue(tableName, out IDataTable? dataTable))
+                {
+                    return dataTable;
+                }
+                else
+                {
+                    throw new KeyNotFoundException($"DataSet does not contain table with name {tableName}");
+                }
+            }
+        }
+        #endregion
+
         #region Public Methods
         /// <summary>
         /// Adds relation between parent and child tables in a data set
@@ -160,13 +182,13 @@ namespace PocoDataSet.Data
             }
 
             _tables.Add(dataTable.TableName, dataTable);
-        
+
             DataTable? concrete = dataTable as DataTable;
             if (concrete != null)
             {
                 TablesJson[dataTable.TableName] = concrete;
             }
-}
+        }
 
         /// <summary>
         /// Removes relation by name
@@ -204,12 +226,33 @@ namespace PocoDataSet.Data
             if (_tables.ContainsKey(tableName))
             {
                 _tables.Remove(tableName);
-            
+
                 TablesJson.Remove(tableName);
-}
+            }
             else
             {
                 throw new System.Collections.Generic.KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
+            }
+        }
+
+        /// <summary>
+        /// Attempts to retrieve the data table associated with the specified table name
+        /// IDataSet interface implementation
+        /// </summary>
+        /// <param name="tableName">The name of the table to retrieve</param>
+        /// <param name="dataTable">When this method returns true, contains the data table associated with the specified table name, otherwise null</param>
+        /// <returns>True if a table with the specified name was found, otherwise false</returns>
+        public bool TryGetTable(string tableName, out IDataTable? dataTable)
+        {
+            if (_tables.TryGetValue(tableName, out IDataTable? foundDataTable))
+            {
+                dataTable = foundDataTable;
+                return true;
+            }
+            else
+            {
+                dataTable= null;
+                return false;
             }
         }
         #endregion

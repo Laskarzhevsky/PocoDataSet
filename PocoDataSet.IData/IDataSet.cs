@@ -33,6 +33,17 @@ namespace PocoDataSet.IData
         }
         #endregion
 
+        #region Indexers
+        /// <summary>
+        /// Gets the data table associated with the specified table name
+        /// </summary>
+        /// <returns>An instance of IDataTable representing the specified table</returns>
+        IDataTable this[string tableName]
+        {
+            get;
+        }
+        #endregion
+
         #region Methods
         /// <summary>
         /// Adds table to data set
@@ -74,6 +85,14 @@ namespace PocoDataSet.IData
         /// </summary>
         /// <param name="tableName">Table name</param>
         void RemoveTable(string tableName);
+
+        /// <summary>
+        /// Attempts to retrieve the data table associated with the specified table name
+        /// </summary>
+        /// <param name="tableName">The name of the table to retrieve</param>
+        /// <param name="dataTable">When this method returns true, contains the data table associated with the specified table name, otherwise null</param>
+        /// <returns>True if a table with the specified name was found, otherwise false</returns>
+        bool TryGetTable(string tableName, out IDataTable? dataTable);
         #endregion
     }
 }

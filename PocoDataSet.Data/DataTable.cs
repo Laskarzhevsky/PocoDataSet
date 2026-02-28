@@ -16,7 +16,7 @@ namespace PocoDataSet.Data
         /// <summary>
         /// Holds reference to data table schema (columns and primary keys)
         /// </summary>
-        readonly DataTableSchema _dataTableSchema = new ();
+        readonly DataTableSchema _dataTableSchema = new();
 
         /// <summary>
         /// "Rows" property data field
@@ -195,6 +195,27 @@ namespace PocoDataSet.Data
             {
                 _tableName = value ?? string.Empty;
                 _dataTableSchema.TableName = _tableName;
+            }
+        }
+        #endregion
+
+        #region Indexers
+        /// <summary>
+        /// Gets the metadata for the column with the specified name.
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <returns>An instance of IColumnMetadata that contains the metadata for the specified column,
+        /// or null if the column does not exist</returns>
+        public IColumnMetadata this[string columnName]
+        {
+            get
+            {
+                if (columnName == null)
+                {
+                    throw new KeyNotFoundException($"DataTable does not contain column with name {columnName}");
+                }
+
+                return _dataTableSchema[columnName];
             }
         }
         #endregion
@@ -449,6 +470,27 @@ namespace PocoDataSet.Data
         {
             _dataTableSchema.SetPrimaryKeysByName(primaryKeyColumnNames);
         }
+
+        /// <summary>
+        /// Attempts to retrieve the metadata for a column with the specified name
+        /// IDataTable interface implementation
+        /// </summary>
+        /// <param name="columnName">The name of the column for which to retrieve metadata</param>
+        /// <param name="columnMetadata">When this method returns, contains the metadata for the specified column if found, otherwise null</param>
+        /// <returns>True if the metadata for the specified column is found; otherwise, false.</returns>
+        public bool TryGetColumn(string columnName, out IColumnMetadata? columnMetadata)
+        {
+            if (_dataTableSchema.TryGetColumn(columnName, out IColumnMetadata? foundColumnMetadata))
+            {
+                columnMetadata = foundColumnMetadata;
+                return true;
+            }
+            else
+            {
+                columnMetadata = null;
+                return false;
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -456,7 +498,7 @@ namespace PocoDataSet.Data
         /// Ensures that existing rows have column
         /// </summary>
         /// <param name="columnName">column name</param>
-        
+
         void ApplyPendingPrimaryKeysIfAny()
         {
             if (_dataTableSchema.Items.Count == 0)

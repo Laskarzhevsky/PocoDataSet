@@ -105,6 +105,14 @@ namespace PocoDataSet.IObservableData
         /// <param name="relationName">Relation name</param>
         /// <returns>Flag indicating whether relation was removed</returns>
         bool RemoveRelation(string relationName);
+
+        /// <summary>
+        /// Attempts to retrieve the data table associated with the specified table name
+        /// </summary>
+        /// <param name="tableName">The name of the table to retrieve</param>
+        /// <param name="dataTable">When this method returns true, contains the data table associated with the specified table name, otherwise null</param>
+        /// <returns>True if a table with the specified name was found, otherwise false</returns>
+        bool TryGetTable(string tableName, out IObservableDataTable? dataTable);
         #endregion
 
         #region Properties
@@ -144,6 +152,17 @@ namespace PocoDataSet.IObservableData
         /// Gets or sets tables
         /// </summary>
         IReadOnlyDictionary<string, IObservableDataTable> Tables
+        {
+            get;
+        }
+        #endregion
+
+        #region Inexers
+        /// <summary>
+        /// Gets the observable data table associated with the specified table name.
+        /// </summary>
+        /// <returns>An instance of IObservableDataTable representing the specified table.</returns>
+        IObservableDataTable this[string tableName]
         {
             get;
         }
