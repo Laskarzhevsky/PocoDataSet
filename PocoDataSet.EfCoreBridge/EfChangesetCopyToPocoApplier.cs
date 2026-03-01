@@ -97,6 +97,28 @@ namespace PocoDataSet.EfCoreBridge
         {
             ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.NonDeletesOnly);
         }
+
+        /// <summary>
+        /// Applies only Added and Modified rows (skips Deleted rows) and collects affected entity mappings.
+        /// INTERNAL USE ONLY.
+        /// </summary>
+        internal static List<AppliedEntityRow> ApplyTableNonDeletesOnlyCollect<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable, string tableName) where TEntity : class, new()
+        {
+            List<AppliedEntityRow> collected = new List<AppliedEntityRow>();
+            ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.NonDeletesOnly, collected, tableName);
+            return collected;
+        }
+
+        /// <summary>
+        /// Applies only Deleted rows and collects affected entity mappings.
+        /// INTERNAL USE ONLY.
+        /// </summary>
+        internal static List<AppliedEntityRow> ApplyTableDeletesOnlyCollect<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable, string tableName) where TEntity : class, new()
+        {
+            List<AppliedEntityRow> collected = new List<AppliedEntityRow>();
+            ApplyTableInternal(dbContext, dbSet, changesetTable, ApplyTableMode.DeletesOnly, collected, tableName);
+            return collected;
+        }
         #endregion
 
 
@@ -235,6 +257,14 @@ namespace PocoDataSet.EfCoreBridge
         /// <exception cref="InvalidOperationException">Thrown if the changeset table does not define a primary key.</exception>
         private static void ApplyTableInternal<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable, ApplyTableMode mode) where TEntity : class, new()
         {
+            ApplyTableInternal(dbContext, dbSet, changesetTable, mode, null, null);
+        }
+
+        /// <summary>
+        /// Applies changes from a data table to the specified DbSet and optionally collects affected entity mappings.
+        /// </summary>
+        private static void ApplyTableInternal<TEntity>(DbContext dbContext, DbSet<TEntity> dbSet, IDataTable changesetTable, ApplyTableMode mode, List<AppliedEntityRow>? collected, string? tableName) where TEntity : class, new()
+        {
             if (changesetTable.PrimaryKeys == null || changesetTable.PrimaryKeys.Count == 0)
             {
                 throw new InvalidOperationException("Changeset table must have single or composite primary key");
@@ -257,6 +287,16 @@ namespace PocoDataSet.EfCoreBridge
                     TEntity entity = new TEntity();
                     dataRow.CopyToPoco(entity);
                     dbSet.Add(entity);
+
+                    if (collected != null && tableName != null)
+                    {
+                        AppliedEntityRow info = new AppliedEntityRow();
+                        info.TableName = tableName;
+                        info.SourceRow = dataRow;
+                        info.Entity = entity;
+                        info.SourceState = DataRowState.Added;
+                        collected.Add(info);
+                    }
                     continue;
                 }
 
@@ -276,6 +316,16 @@ namespace PocoDataSet.EfCoreBridge
                     // - Unknown columns are ignored.
                     // - Provided fields are explicitly marked modified.
                     ApplyFloatingPatchToTrackedEntity(dbContext, tracked, dataRow, keyPropertyNames, concurrencyPropertyNames);
+
+                    if (collected != null && tableName != null)
+                    {
+                        AppliedEntityRow info = new AppliedEntityRow();
+                        info.TableName = tableName;
+                        info.SourceRow = dataRow;
+                        info.Entity = tracked;
+                        info.SourceState = DataRowState.Modified;
+                        collected.Add(info);
+                    }
                     continue;
                 }
 
@@ -295,6 +345,16 @@ namespace PocoDataSet.EfCoreBridge
                     ApplyConcurrencyTokenOriginalValues(dbContext, tracked, dataRow, concurrencyPropertyNames);
 
                     dbSet.Remove(tracked);
+
+                    if (collected != null && tableName != null)
+                    {
+                        AppliedEntityRow info = new AppliedEntityRow();
+                        info.TableName = tableName;
+                        info.SourceRow = dataRow;
+                        info.Entity = tracked;
+                        info.SourceState = DataRowState.Deleted;
+                        collected.Add(info);
+                    }
                     continue;
                 }
             }
