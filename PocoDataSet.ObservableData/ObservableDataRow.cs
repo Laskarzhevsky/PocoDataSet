@@ -48,7 +48,7 @@ namespace PocoDataSet.ObservableData
         /// Default construcot
         /// </summary>
         /// <param name="dataRow">Data row</param>
-        public ObservableDataRow(IDataRow dataRow, string key = "")
+        internal ObservableDataRow(IDataRow dataRow, string key = "")
         {
             if (dataRow == null)
             {

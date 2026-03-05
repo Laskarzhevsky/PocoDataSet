@@ -148,38 +148,47 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             Assert.Equal(0, dataFieldValueChangedEventHandler.GetEventCount());
 
             // Verify all rows are in Unchanged state and with correct data
-            IObservableDataRow? refreshedOobservableDataRow1;
-            departmentObservableDataTable.TryFindRowByPrimaryKey("Id", 1, out refreshedOobservableDataRow1);
-            Assert.NotNull(refreshedOobservableDataRow1);
-            Assert.Equal("Sales Department", refreshedOobservableDataRow1["Name"]);
-            Assert.Equal(DataRowState.Unchanged, refreshedOobservableDataRow1.DataRowState);
+            var refreshedObservableDataRow1 = FindRow(departmentObservableDataTable, 1);
+            Assert.NotNull(refreshedObservableDataRow1);
+            Assert.Equal("Sales Department", refreshedObservableDataRow1["Name"]);
+            Assert.Equal(DataRowState.Unchanged, refreshedObservableDataRow1.DataRowState);
 
-            IObservableDataRow? refreshedOobservableDataRow2;
-            departmentObservableDataTable.TryFindRowByPrimaryKey("Id", 2, out refreshedOobservableDataRow2);
-            Assert.NotNull(refreshedOobservableDataRow2);
-            Assert.Equal("Emergency Department", refreshedOobservableDataRow2["Name"]);
-            Assert.Equal(DataRowState.Unchanged, refreshedOobservableDataRow2.DataRowState);
+            var refreshedObservableDataRow2 = FindRow(departmentObservableDataTable, 2);
+            Assert.NotNull(refreshedObservableDataRow2);
+            Assert.Equal("Emergency Department", refreshedObservableDataRow2["Name"]);
+            Assert.Equal(DataRowState.Unchanged, refreshedObservableDataRow2.DataRowState);
 
-            IObservableDataRow? refreshedOobservableDataRow3;
-            departmentObservableDataTable.TryFindRowByPrimaryKey("Id", 3, out refreshedOobservableDataRow3);
-            Assert.NotNull(refreshedOobservableDataRow3);
-            Assert.Equal("Reception Department", refreshedOobservableDataRow3["Name"]);
-            Assert.Equal(DataRowState.Unchanged, refreshedOobservableDataRow3.DataRowState);
+            var refreshedObservableDataRow3 = FindRow(departmentObservableDataTable, 3);
+            Assert.NotNull(refreshedObservableDataRow3);
+            Assert.Equal("Reception Department", refreshedObservableDataRow3["Name"]);
+            Assert.Equal(DataRowState.Unchanged, refreshedObservableDataRow3.DataRowState);
 
-            IObservableDataRow? refreshedOobservableDataRow4;
-            departmentObservableDataTable.TryFindRowByPrimaryKey("Id", 4, out refreshedOobservableDataRow4);
-            Assert.NotNull(refreshedOobservableDataRow4);
-            Assert.Equal("Finance Department", refreshedOobservableDataRow4["Name"]);
-            Assert.Equal(DataRowState.Unchanged, refreshedOobservableDataRow4.DataRowState);
+            var refreshedObservableDataRow4 = FindRow(departmentObservableDataTable, 4);
+            Assert.NotNull(refreshedObservableDataRow4);
+            Assert.Equal("Finance Department", refreshedObservableDataRow4["Name"]);
+            Assert.Equal(DataRowState.Unchanged, refreshedObservableDataRow4.DataRowState);
 
             // Verify that table subscribed to RowStateChanged and DataFieldValueChanged event of refreshed rows
-            refreshedOobservableDataRow1.RowStateChanged += rowStateChangedEventHandler.Handle;
-            refreshedOobservableDataRow1.DataFieldValueChanged += dataFieldValueChangedEventHandler.Handle;
-            refreshedOobservableDataRow1["Name"] = "Sales";
+            refreshedObservableDataRow1.RowStateChanged += rowStateChangedEventHandler.Handle;
+            refreshedObservableDataRow1.DataFieldValueChanged += dataFieldValueChangedEventHandler.Handle;
+            refreshedObservableDataRow1["Name"] = "Sales";
 
-            Assert.Equal(DataRowState.Modified, refreshedOobservableDataRow1.DataRowState);
-            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(refreshedOobservableDataRow1, DataRowState.Unchanged, DataRowState.Modified));
-            Assert.Equal(1, dataFieldValueChangedEventHandler.GetEventCount(refreshedOobservableDataRow1, "Name"));
+            Assert.Equal(DataRowState.Modified, refreshedObservableDataRow1.DataRowState);
+            Assert.Equal(1, rowStateChangedEventHandler.GetEventCount(refreshedObservableDataRow1, DataRowState.Unchanged, DataRowState.Modified));
+            Assert.Equal(1, dataFieldValueChangedEventHandler.GetEventCount(refreshedObservableDataRow1, "Name"));
+        }
+
+        private static IObservableDataRow? FindRow(IObservableDataTable table, int id)
+        {
+            foreach (IObservableDataRow row in table.Rows)
+            {
+                if (Convert.ToInt32(row["Id"]) == id)
+                {
+                    return row;
+                }
+            }
+
+            return null;
         }
     }
 }

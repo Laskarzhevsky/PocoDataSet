@@ -11,8 +11,6 @@ namespace PocoDataSet.ObservableExtensions
         #region Public Methods
         /// <summary>
         /// Enables relation integrity validation during editing for an observable data set.
-        /// Subscribe to subscription.RelationValidationFailed to receive violations.
-        /// Dispose the returned subscription to detach handlers and prevent leaks.
         /// </summary>
         /// <param name="observableDataSet">Observable data set.</param>
         /// <param name="relationValidationOptions">Relation validation options (null uses defaults).</param>
@@ -25,7 +23,6 @@ namespace PocoDataSet.ObservableExtensions
             }
 
             RelationValidationOptions effectiveOptions;
-
             if (relationValidationOptions == null)
             {
                 effectiveOptions = new RelationValidationOptions();

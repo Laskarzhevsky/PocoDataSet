@@ -40,13 +40,6 @@ namespace PocoDataSet.IObservableData
         IObservableDataRow AddNewRow();
 
         /// <summary>
-        /// Adds observable data row
-        /// </summary>
-        /// <param name="observableDataRow">Observable data row</param>
-        /// <returns>Added observable data row</returns>
-        IObservableDataRow AddObservableDataRow(IObservableDataRow observableDataRow);
-
-        /// <summary>
         /// Adds data row by wrapping it into observable data row
         /// </summary>
         /// <param name="dataRow">Data row</param>
@@ -85,7 +78,7 @@ namespace PocoDataSet.IObservableData
 
         #region Properties
         /// <summary>
-        /// Gets or sets list of columns
+        /// Gets list of column metadata that defines the table schema
         /// </summary>
         IReadOnlyList<IColumnMetadata> Columns
         {

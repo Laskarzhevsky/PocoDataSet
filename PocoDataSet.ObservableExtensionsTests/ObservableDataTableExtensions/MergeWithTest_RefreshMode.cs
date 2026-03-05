@@ -168,10 +168,8 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             Assert.Equal(1, rowsAddedEventHandler.GetEventCount());
 
             // Assert: refreshed-only row was added and ends as Unchanged
-            IObservableDataRow? addedRow;
-            bool wasFound = departmentObservableDataTable.TryFindRowByPrimaryKey("Id", 21, out addedRow);
+            var addedRow = FindRow(departmentObservableDataTable, 21);
 
-            Assert.True(wasFound);
             Assert.NotNull(addedRow);
             Assert.Equal("Management", addedRow!.GetDataFieldValue<string>("Name"));
             Assert.Equal(DataRowState.Unchanged, addedRow.DataRowState);
@@ -182,5 +180,6 @@ namespace PocoDataSet.ObservableExtensionsTests.ObservableDataTableExtensions
             Assert.Equal(0, rowStateChangedEventHandler.GetEventCount(departmentObservableDataRow22));
             Assert.Equal(0, dataFieldValueChangedEventHandler.GetEventCount(departmentObservableDataRow22));
         }
+
     }
 }

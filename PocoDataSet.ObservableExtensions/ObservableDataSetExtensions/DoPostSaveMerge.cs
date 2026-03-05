@@ -1,5 +1,3 @@
-using System;
-
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 using PocoDataSet.ObservableExtensions.Merging.PostSaveMerge;
@@ -11,27 +9,24 @@ namespace PocoDataSet.ObservableExtensions
     /// </summary>
     public static partial class ObservableDataSetExtensions
     {
-        public static void DoPostSaveMerge(this IObservableDataSet currentObservableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions observableMergeOptions)
+        /// <summary>
+        /// Merges a post-save response (refreshed data set returned by the server after applying a changeset) into the current
+        /// observable data set. This is the merge mode you typically call right after a successful Save
+        /// </summary>
+        /// <param name="observableDataSet">Observable data set</param>
+        /// <param name="refreshedDataSet">Refreshed data set</param>
+        /// <param name="observableMergeOptions">Observable merge options</param>
+        public static void DoPostSaveMerge(this IObservableDataSet? observableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions observableMergeOptions)
         {
-            if (currentObservableDataSet == null)
+            if (observableDataSet == null)
             {
-                throw new ArgumentNullException(nameof(currentObservableDataSet));
-            }
-
-            if (refreshedDataSet == null)
-            {
-                throw new ArgumentNullException(nameof(refreshedDataSet));
-            }
-
-            if (observableMergeOptions == null)
-            {
-                throw new ArgumentNullException(nameof(observableMergeOptions));
+                return;
             }
 
             observableMergeOptions.ObservableDataSetMergeResult.Clear();
 
             ObservableDataSetMerger merger = new ObservableDataSetMerger();
-            merger.Merge(currentObservableDataSet, refreshedDataSet, observableMergeOptions);
+            merger.Merge(observableDataSet, refreshedDataSet, observableMergeOptions);
         }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-
 using PocoDataSet.IData;
 using PocoDataSet.IObservableData;
 using PocoDataSet.ObservableExtensions.Merging.DoReplaceMerge;
@@ -11,27 +9,23 @@ namespace PocoDataSet.ObservableExtensions
     /// </summary>
     public static partial class ObservableDataSetExtensions
     {
-        public static void DoReplaceMerge(this IObservableDataSet currentObservableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions observableMergeOptions)
+        /// <summary>
+        /// Refreshes the observable data set by replacing its content with the content of the refreshed data set
+        /// </summary>
+        /// <param name="observableDataSet">Observable data set</param>
+        /// <param name="refreshedDataSet">Refreshed data set</param>
+        /// <param name="observableMergeOptions">Observable merge options</param>
+        public static void DoReplaceMerge(this IObservableDataSet? observableDataSet, IDataSet refreshedDataSet, IObservableMergeOptions observableMergeOptions)
         {
-            if (currentObservableDataSet == null)
+            if (observableDataSet == null)
             {
-                throw new ArgumentNullException(nameof(currentObservableDataSet));
-            }
-
-            if (refreshedDataSet == null)
-            {
-                throw new ArgumentNullException(nameof(refreshedDataSet));
-            }
-
-            if (observableMergeOptions == null)
-            {
-                throw new ArgumentNullException(nameof(observableMergeOptions));
+                return;
             }
 
             observableMergeOptions.ObservableDataSetMergeResult.Clear();
 
             ObservableDataSetMerger merger = new ObservableDataSetMerger();
-            merger.Merge(currentObservableDataSet, refreshedDataSet, observableMergeOptions);
+            merger.Merge(observableDataSet, refreshedDataSet, observableMergeOptions);
         }
     }
 }

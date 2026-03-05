@@ -10,15 +10,15 @@ namespace PocoDataSet.ObservableExtensions
     public static partial class ObservableDataSetExtensions
     {
         /// <summary>
-        /// Merges outbound changes from observable dataset into an existing target dataset.
-        /// Useful if you already created a dataset instance for a service request.
+        /// Merges changes from observable dataset into provided dataset
+        /// Useful if you already created a dataset instance for a service request
         /// </summary>
-        /// <param name="currentObservableDataSet">Current observable data set</param>
+        /// <param name="observableDataSet">Observable data set</param>
         /// <param name="targetDataSet">Target dataset to receive changes</param>
         /// <param name="mergeOptions">Merge options</param>
-        public static void MergeChangesetInto(this IObservableDataSet? currentObservableDataSet, IDataSet? targetDataSet, IMergeOptions? mergeOptions = null)
+        public static void MergeChangesetInto(this IObservableDataSet? observableDataSet, IDataSet? targetDataSet, IMergeOptions? mergeOptions = null)
         {
-            if (currentObservableDataSet == null)
+            if (observableDataSet == null)
             {
                 return;
             }
@@ -28,7 +28,7 @@ namespace PocoDataSet.ObservableExtensions
                 return;
             }
 
-            IDataSet? outboundChangeset = currentObservableDataSet.CreateChangeset();
+            IDataSet? outboundChangeset = observableDataSet.CreateChangeset();
             if (outboundChangeset == null)
             {
                 return;
