@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\\SharedObjectBuildSettings.props" />
+  <PropertyGroup>
+    <Description>POCO Object DataSet JSON serializer. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. Technical support: support@businessprocessprogramming.net</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>PocoDataSet.ObjectSerializer</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PocoDataSet.IObjectData\PocoDataSet.IObjectData.csproj" />
+    <ProjectReference Include="..\PocoDataSet.ObjectData\PocoDataSet.ObjectData.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+		SharedObjectBuildSettings.props = SharedObjectBuildSettings.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NugetPackageProject", "NugetPackageProject", "{0B3F8A31-3A9E-4361-94DF-046F07D170F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IObjectData", "PocoDataSet.IObjectData\PocoDataSet.IObjectData.csproj", "{C1D596C6-1694-194B-8F73-DB209AEA833B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObjectData", "PocoDataSet.ObjectData\PocoDataSet.ObjectData.csproj", "{A89ACA48-E74F-24B9-DD0D-EC94005FA259}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObjectSerializer", "PocoDataSet.ObjectSerializer\PocoDataSet.ObjectSerializer.csproj", "{D8156FCF-5E54-4CC7-B923-44F753D891FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObjectEfCoreBridge", "PocoDataSet.ObjectEfCoreBridge\PocoDataSet.ObjectEfCoreBridge.csproj", "{2886BCAF-EC7A-4DA1-A9FD-C5B75949C90D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObjectEfCoreBridgeTests", "PocoDataSet.ObjectEfCoreBridgeTests\PocoDataSet.ObjectEfCoreBridgeTests.csproj", "{98AEE537-BB1B-BD1D-CFB7-237667606FB9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1D596C6-1694-194B-8F73-DB209AEA833B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D596C6-1694-194B-8F73-DB209AEA833B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1D596C6-1694-194B-8F73-DB209AEA833B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1D596C6-1694-194B-8F73-DB209AEA833B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A89ACA48-E74F-24B9-DD0D-EC94005FA259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A89ACA48-E74F-24B9-DD0D-EC94005FA259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A89ACA48-E74F-24B9-DD0D-EC94005FA259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A89ACA48-E74F-24B9-DD0D-EC94005FA259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8156FCF-5E54-4CC7-B923-44F753D891FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8156FCF-5E54-4CC7-B923-44F753D891FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8156FCF-5E54-4CC7-B923-44F753D891FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8156FCF-5E54-4CC7-B923-44F753D891FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2886BCAF-EC7A-4DA1-A9FD-C5B75949C90D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2886BCAF-EC7A-4DA1-A9FD-C5B75949C90D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2886BCAF-EC7A-4DA1-A9FD-C5B75949C90D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2886BCAF-EC7A-4DA1-A9FD-C5B75949C90D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98AEE537-BB1B-BD1D-CFB7-237667606FB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98AEE537-BB1B-BD1D-CFB7-237667606FB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98AEE537-BB1B-BD1D-CFB7-237667606FB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98AEE537-BB1B-BD1D-CFB7-237667606FB9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33CA3A1D-AE80-41E9-9040-220D5A66995A}
+	EndGlobalSection
+EndGlobal
