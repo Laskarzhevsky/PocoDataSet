@@ -13,7 +13,7 @@ namespace PocoDataSet.Serializer
     /// - missing or "regular" -> DataRow
     /// - "floating" -> FloatingDataRow
     /// </summary>
-    public sealed class DataRowPolymorphicConverter : JsonConverter<IDataRow>
+    internal sealed class DataRowPolymorphicConverter : JsonConverter<IDataRow>
     {
         #region Constants
         /// <summary>

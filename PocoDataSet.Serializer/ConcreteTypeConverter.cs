@@ -9,7 +9,7 @@ namespace PocoDataSet.Serializer
     /// </summary>
     /// <typeparam name="TInterface">Interface which concrete type implements</typeparam>
     /// <typeparam name="TConcrete">Concrete type</typeparam>
-    public class ConcreteTypeConverter<TInterface, TConcrete> : JsonConverter<TInterface> where TConcrete : TInterface
+    internal class ConcreteTypeConverter<TInterface, TConcrete> : JsonConverter<TInterface> where TConcrete : TInterface
     {
         #region Overridden Methods
         /// <summary>

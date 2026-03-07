@@ -11,7 +11,7 @@ namespace PocoDataSet.Serializer
         /// <summary>
         /// Restores data set from JSON string
         /// </summary>
-        /// <param name="serializedDataSet"></param>
+        /// <param name="serializedDataSet">Serialized data set</param>
         /// <returns>Restored data set from JSON string</returns>
         public static IDataSet? FromJsonString(string? serializedDataSet)
         {
@@ -43,8 +43,13 @@ namespace PocoDataSet.Serializer
         /// </summary>
         /// <param name="dataSet">Data set</param>
         /// <returns>Data set JSON string representation</returns>
-        public static string? ToJsonString(IDataSet dataSet)
+        public static string? ToJsonString(IDataSet? dataSet)
         {
+            if (dataSet == null)
+            {
+                return null;
+            }
+
             JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
             jsonSerializerOptions.PropertyNamingPolicy = null;
             jsonSerializerOptions.WriteIndented = true;
