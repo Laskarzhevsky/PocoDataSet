@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿ <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
     <Description>POCO DataSet components. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. Technical support: support@businessprocessprogramming.net</Description>

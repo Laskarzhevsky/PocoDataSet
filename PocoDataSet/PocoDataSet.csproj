@@ -12,8 +12,8 @@
     <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
-    <TargetFramework>net9.0</TargetFramework>
-    <Version>2.0.0</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <Version>2.0.1</Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -21,14 +21,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="PocoDataSet.Data" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.Extensions" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.IData" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.IObservableData" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.ObservableData" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.Serializer" Version="2.0.0" />
-    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="2.0.0" />
+    <PackageReference Include="PocoDataSet.Data" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.EfCoreBridge" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.Extensions" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.IData" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.IObservableData" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.ObservableData" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.ObservableExtensions" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.Serializer" Version="2.0.1" />
+    <PackageReference Include="PocoDataSet.SqlServerDataAdapter" Version="2.0.1" />
   </ItemGroup>
 </Project>
