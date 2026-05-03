@@ -37,6 +37,21 @@ namespace PocoDataSet.Extensions
 
             return dataRow;
         }
+
+        /// <summary>
+        /// Creates new data row in data table with default values taken from columns metadata
+        /// and returns the new row as a live POCO interface projection
+        /// </summary>
+        /// <typeparam name="TInterface">POCO interface type</typeparam>
+        /// <param name="dataTable">Data table</param>
+        /// <returns>New data row created in data table as a live POCO interface projection</returns>
+        public static TInterface? AddNewRow<TInterface>(this IDataTable? dataTable) where TInterface : class
+        {
+            IDataRow dataRow = dataTable.AddNewRow();
+            TInterface? result = DataRowExtensions.AsInterface<TInterface>(dataRow);
+
+            return result;
+        }
         #endregion
     }
 }
