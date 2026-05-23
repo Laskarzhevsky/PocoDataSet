@@ -22,9 +22,27 @@ namespace PocoDataSet.SqlServerDataAdapter
 
         public async Task<int> SaveChangesAsync(IDataSet changeset)
         {
+            return await SaveChangesAsync(changeset, null).ConfigureAwait(false);
+        }
+
+        public async Task<int> SaveChangesAsync(IDataSet changeset, SqlDataAdapterOptions? options)
+        {
             if (changeset == null)
             {
                 throw new ArgumentNullException(nameof(changeset));
+            }
+
+            SqlDataAdapterOptions effectiveOptions = options;
+            if (effectiveOptions == null)
+            {
+                effectiveOptions = new SqlDataAdapterOptions();
+            }
+
+            if (effectiveOptions.SaveMode == SqlSaveMode.BatchStoredProcedure)
+            {
+                throw new NotSupportedException(
+                    "BatchStoredProcedure save mode requires generated Save stored procedure execution support. " +
+                    "The adapter can create __ChangeState TVP DataTables, but this runtime save pipeline is not wired yet.");
             }
 
             List<IDataTable> tablesWithChanges = ChangesetProcessor.GetTablesWithChanges(changeset);

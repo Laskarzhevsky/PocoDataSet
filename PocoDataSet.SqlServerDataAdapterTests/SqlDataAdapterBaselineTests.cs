@@ -43,5 +43,28 @@ namespace PocoDataSet.SqlServerDataAdapterTests
 
             Assert.Equal(0, affected);
         }
+
+        [Fact]
+        public async Task SaveChangesAsync_EmptyChangeset_WithBatchStoredProcedureMode_IsNoOp_ReturnsZero()
+        {
+            SqlDataAdapter adapter = new SqlDataAdapter(null);
+            PocoDataSet.IData.IDataSet emptyChangeset = new PocoDataSet.Data.DataSet();
+
+            SqlDataAdapterOptions options = new SqlDataAdapterOptions();
+            options.SaveMode = SqlSaveMode.BatchStoredProcedure;
+
+            int affected = await adapter.SaveChangesAsync(emptyChangeset, options);
+
+            Assert.Equal(0, affected);
+        }
+
+        [Fact]
+        public void SqlDataAdapterOptions_DefaultSaveMode_IsRowByRow()
+        {
+            SqlDataAdapterOptions options = new SqlDataAdapterOptions();
+
+            Assert.Equal(SqlSaveMode.RowByRow, options.SaveMode);
+        }
+
     }
 }

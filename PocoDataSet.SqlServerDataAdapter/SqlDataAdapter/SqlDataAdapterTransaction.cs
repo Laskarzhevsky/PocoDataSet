@@ -96,6 +96,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         public async Task<int> SaveChangesAsync(IDataSet changeset)
         {
+            return await SaveChangesAsync(changeset, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Saves the provided changeset within the current transaction using the requested save options.
+        /// </summary>
+        public async Task<int> SaveChangesAsync(IDataSet changeset, SqlDataAdapterOptions? options)
+        {
             if (changeset == null)
             {
                 throw new ArgumentNullException(nameof(changeset));
@@ -107,6 +115,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return 0;
             }
 
+            SqlDataAdapterOptions effectiveOptions = options;
+            if (effectiveOptions == null)
+            {
+                effectiveOptions = new SqlDataAdapterOptions();
+            }
+
             RelationValidationOptions relationValidationOptions = new RelationValidationOptions();
             relationValidationOptions.EnforceDeleteRestrict = true;
             relationValidationOptions.ReportInvalidRelationDefinitions = true;
@@ -115,7 +129,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             changeset.EnsureRelationsValid(relationValidationOptions);
 
             return await _adapter.ExecutionEngine
-                .SaveChangesAsync(changeset, _sqlConnection, _sqlTransaction)
+                .SaveChangesAsync(changeset, effectiveOptions, _sqlConnection, _sqlTransaction)
                 .ConfigureAwait(false);
         }
 

@@ -181,6 +181,11 @@ namespace PocoDataSet.SqlServerDataAdapter
 
         public async Task<int> SaveChangesAsync(IDataSet changeset, SqlConnection sqlConnection, SqlTransaction sqlTransaction)
         {
+            return await SaveChangesAsync(changeset, null, sqlConnection, sqlTransaction).ConfigureAwait(false);
+        }
+
+        public async Task<int> SaveChangesAsync(IDataSet changeset, SqlDataAdapterOptions? options, SqlConnection sqlConnection, SqlTransaction sqlTransaction)
+        {
             if (changeset == null)
             {
                 throw new ArgumentNullException(nameof(changeset));
@@ -196,6 +201,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 throw new ArgumentNullException(nameof(sqlTransaction));
             }
 
+            SqlDataAdapterOptions effectiveOptions = options;
+            if (effectiveOptions == null)
+            {
+                effectiveOptions = new SqlDataAdapterOptions();
+            }
+
             SqlConnection? priorConnection = _adapter.SqlConnection;
             SqlTransaction? priorTransaction = _adapter.SqlTransaction;
 
@@ -205,7 +216,7 @@ namespace PocoDataSet.SqlServerDataAdapter
                 _adapter.SqlTransaction = sqlTransaction;
 
                 SaveChangesDataPersistenceLogicHandler handler = new SaveChangesDataPersistenceLogicHandler(_adapter);
-                return await handler.SaveChangesAsync(changeset).ConfigureAwait(false);
+                return await handler.SaveChangesAsync(changeset, effectiveOptions).ConfigureAwait(false);
             }
             finally
             {

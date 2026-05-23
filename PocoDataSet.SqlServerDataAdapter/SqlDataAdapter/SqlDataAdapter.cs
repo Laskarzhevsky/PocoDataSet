@@ -57,6 +57,33 @@ namespace PocoDataSet.SqlServerDataAdapter
             return await ExecuteNonQueryAsync(baseQuery, isStoredProcedure, parameters, connectionString);
         }
 
+
+        /// <summary>
+        /// Creates ADO.NET DataTables for generated Save stored procedures that accept SQL Server TVPs.
+        /// Each returned table includes the __ChangeState metadata column used to classify
+        /// Added / Modified / Deleted rows without relying on negative primary-key values.
+        /// </summary>
+        /// <param name="changeset">Source data set or changeset.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <returns>ADO.NET DataTables keyed by POCO table name.</returns>
+        public Dictionary<string, System.Data.DataTable> CreateTableValuedParameterDataTables(IDataSet changeset, bool changedRowsOnly = true)
+        {
+            return SqlServerTableValuedParameterBuilder.CreateDataTables(changeset, changedRowsOnly);
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated Save stored procedure.
+        /// </summary>
+        /// <param name="parameterName">SQL parameter name.</param>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <returns>Configured SQL structured parameter.</returns>
+        public SqlParameter CreateTableValuedParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = true)
+        {
+            return SqlServerTableValuedParameterBuilder.CreateStructuredParameter(parameterName, typeName, dataTable, changedRowsOnly);
+        }
+
         /// <summary>
         /// Fills data set
         /// </summary>
@@ -177,6 +204,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         public async Task<int> SaveChangesAsync(IDataSet changeset, string? connectionString = null)
         {
+            return await SaveChangesAsync(changeset, null, connectionString).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Saves data set changes to SQL Server using the requested save options.
+        /// </summary>
+        public async Task<int> SaveChangesAsync(IDataSet changeset, SqlDataAdapterOptions? options, string? connectionString = null)
+        {
             if (changeset == null)
             {
                 throw new ArgumentNullException(nameof(changeset));
@@ -188,13 +223,15 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return 0;
             }
 
+            SqlDataAdapterOptions effectiveOptions = ResolveOptions(options);
+
             SqlDataAdapterTransaction? transaction = null;
 
             try
             {
                 transaction = await BeginTransactionAsync(connectionString).ConfigureAwait(false);
 
-                int affectedRows = await transaction.SaveChangesAsync(changeset).ConfigureAwait(false);
+                int affectedRows = await transaction.SaveChangesAsync(changeset, effectiveOptions).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
 
                 return affectedRows;
@@ -222,12 +259,30 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         public async Task<int> SaveChangesAndMergePostSaveAsync(IDataSet changeset, string? connectionString = null)
         {
-            int affectedRows = await SaveChangesAsync(changeset, connectionString);
+            return await SaveChangesAndMergePostSaveAsync(changeset, null, connectionString).ConfigureAwait(false);
+        }
 
-            IMergeOptions options = new MergeOptions();
-            changeset.DoPostSaveMerge(changeset, options);
+        /// <summary>
+        /// Saves data set changes to SQL Server using the requested save options and merges post-save values.
+        /// </summary>
+        public async Task<int> SaveChangesAndMergePostSaveAsync(IDataSet changeset, SqlDataAdapterOptions? options, string? connectionString = null)
+        {
+            int affectedRows = await SaveChangesAsync(changeset, options, connectionString).ConfigureAwait(false);
+
+            IMergeOptions mergeOptions = new MergeOptions();
+            changeset.DoPostSaveMerge(changeset, mergeOptions);
 
             return affectedRows;
+        }
+
+        static SqlDataAdapterOptions ResolveOptions(SqlDataAdapterOptions? options)
+        {
+            if (options == null)
+            {
+                return new SqlDataAdapterOptions();
+            }
+
+            return options;
         }
         #endregion
 
