@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -422,6 +422,11 @@ namespace PocoDataSet.Data
         /// </summary>
         public void RemoveAllRows()
         {
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                DetachRowFromTable(_rows[i]);
+            }
+
             _rows.Clear();
         }
 
@@ -443,7 +448,13 @@ namespace PocoDataSet.Data
                 throw new InvalidOperationException("Row does not belong to this table.");
             }
 
-            return _rows.Remove(dataRow);
+            bool removed = _rows.Remove(dataRow);
+            if (removed)
+            {
+                DetachRowFromTable(dataRow);
+            }
+
+            return removed;
         }
 
         /// <summary>
@@ -459,7 +470,9 @@ namespace PocoDataSet.Data
                 throw new System.ArgumentOutOfRangeException(nameof(rowIndex));
             }
 
+            IDataRow dataRow = _rows[rowIndex];
             _rows.RemoveAt(rowIndex);
+            DetachRowFromTable(dataRow);
         }
 
         /// <summary>
@@ -498,6 +511,17 @@ namespace PocoDataSet.Data
         /// Ensures that existing rows have column
         /// </summary>
         /// <param name="columnName">column name</param>
+
+        static void DetachRowFromTable(IDataRow dataRow)
+        {
+            DataRow? concreteRow = dataRow as DataRow;
+            if (concreteRow == null)
+            {
+                return;
+            }
+
+            concreteRow.DetachFromTable();
+        }
 
         void ApplyPendingPrimaryKeysIfAny()
         {

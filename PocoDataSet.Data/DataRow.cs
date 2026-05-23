@@ -350,6 +350,16 @@ namespace PocoDataSet.Data
         }
 
         /// <summary>
+        /// Clears table-owned attachment metadata when the row is physically removed from a table.
+        /// </summary>
+        internal void DetachFromTable()
+        {
+            IsLoadedRow = false;
+            PrimaryKeyColumns.Clear();
+            DataRowState = DataRowState.Detached;
+        }
+
+        /// <summary>
         /// Tries to get original value by column name
         /// IDataRow interface implementation
         /// </summary>

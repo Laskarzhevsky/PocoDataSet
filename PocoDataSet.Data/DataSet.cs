@@ -228,12 +228,37 @@ namespace PocoDataSet.Data
                 _tables.Remove(tableName);
 
                 TablesJson.Remove(tableName);
+
+                RemoveRelationsForTable(tableName);
             }
             else
             {
                 throw new System.Collections.Generic.KeyNotFoundException($"DataSet does not contain table with name {tableName}.");
             }
         }
+
+        /// <summary>
+        /// Removes all relations that reference the specified table as either parent or child.
+        /// </summary>
+        /// <param name="tableName">Removed table name</param>
+        private void RemoveRelationsForTable(string tableName)
+        {
+            for (int i = _relations.Count - 1; i >= 0; i--)
+            {
+                IDataRelation relation = _relations[i];
+                if (relation == null)
+                {
+                    continue;
+                }
+
+                if (string.Equals(relation.ParentTableName, tableName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(relation.ChildTableName, tableName, StringComparison.OrdinalIgnoreCase))
+                {
+                    _relations.RemoveAt(i);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Attempts to retrieve the data table associated with the specified table name
