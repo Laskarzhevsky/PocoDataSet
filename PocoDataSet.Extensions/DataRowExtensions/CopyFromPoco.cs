@@ -49,10 +49,10 @@ namespace PocoDataSet.Extensions
                 object? propertyValue = property.GetValue(poco);
 
                 // Prefer an existing key ignoring case to avoid duplicates (e.g., "name" vs "Name")
-                string existingKey;
+                string? existingKey;
                 if (dataRow.TryGetFieldKeyByColumnName(propertyName, out existingKey))
                 {
-                    dataRow[existingKey] = propertyValue;
+                    dataRow[existingKey!] = propertyValue;
                 }
                 else
                 {

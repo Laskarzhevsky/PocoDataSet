@@ -22,12 +22,12 @@ namespace PocoDataSet.ObservableData
 
         public bool Include(IDataRow row)
         {
-            object v;
+            object? v;
             bool ok = row.TryGetValue(_col, out v);
             if (!ok)
                 return false;
-            string sLeft = v == null ? null : Convert.ToString(v);
-            string sRight = _value == null ? null : Convert.ToString(_value);
+            string? sLeft = v == null ? null : Convert.ToString(v);
+            string? sRight = _value == null ? null : Convert.ToString(_value);
 
             if (sLeft == null || sRight == null)
             {

@@ -10,7 +10,7 @@ namespace PocoDataSet.Extensions
 {
     public class InterfaceRowProxy<TInterface> : System.Reflection.DispatchProxy where TInterface : class
     {
-        IDataRow _row;
+        IDataRow _row = default!;
         IDictionary<string, string>? _nameMap; // property name -> column name (case-sensitive unless you pass a CI dictionary)
 
         public InterfaceRowProxy()
@@ -139,7 +139,7 @@ namespace PocoDataSet.Extensions
                 return propertyName;
             }
 
-            string mapped;
+            string? mapped;
             bool ok = _nameMap.TryGetValue(propertyName, out mapped);
             if (ok)
             {

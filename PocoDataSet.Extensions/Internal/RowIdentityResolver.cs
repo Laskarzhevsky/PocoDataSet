@@ -22,7 +22,7 @@ namespace PocoDataSet.Extensions
                 return false;
             }
 
-            bool hasPrimaryKey = primaryKeyColumnNames != null && primaryKeyColumnNames.Count > 0;
+            bool hasPrimaryKey = primaryKeyColumnNames.Count > 0;
             if (hasPrimaryKey)
             {
                 string pkValue = CompilePrimaryKeyValue(row, primaryKeyColumnNames);

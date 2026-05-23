@@ -52,7 +52,7 @@ namespace PocoDataSet.Extensions
             _values = CaptureValues(interfaceType, row, nameMap);
         }
 
-        protected override object? Invoke(MethodInfo targetMethod, object?[]? args)
+        protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
         {
             if (targetMethod == null)
                 throw new ArgumentNullException(nameof(targetMethod));

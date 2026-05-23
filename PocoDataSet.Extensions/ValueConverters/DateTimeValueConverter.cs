@@ -84,7 +84,7 @@ namespace PocoDataSet.Extensions
                 return true;
             }
 
-            object dt;
+            object? dt;
             bool ok = TryHandle(value, underlyingTargetType, formatProvider, out dt);
             if (ok)
             {

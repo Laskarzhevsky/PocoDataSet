@@ -301,7 +301,7 @@ namespace PocoDataSet.ObservableExtensions.Merging.DoReplaceMerge
             for (int i = 0; i < currentObservableDataTable.Columns.Count; i++)
             {
                 IColumnMetadata currentColumn = currentObservableDataTable.Columns[i];
-                IColumnMetadata refreshedColumn = FindColumnByName(refreshedDataTable, currentColumn.ColumnName);
+                IColumnMetadata? refreshedColumn = FindColumnByName(refreshedDataTable, currentColumn.ColumnName);
 
                 if (refreshedColumn != null)
                 {
@@ -315,7 +315,7 @@ namespace PocoDataSet.ObservableExtensions.Merging.DoReplaceMerge
             }
         }
 
-        private static IColumnMetadata FindColumnByName(IDataTable table, string columnName)
+        private static IColumnMetadata? FindColumnByName(IDataTable table, string columnName)
         {
             for (int i = 0; i < table.Columns.Count; i++)
             {

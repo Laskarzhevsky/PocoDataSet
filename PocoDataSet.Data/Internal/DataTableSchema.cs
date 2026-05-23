@@ -211,7 +211,7 @@ namespace PocoDataSet.Data.Internal
                 return;
             }
 
-            if (_columnsByName.TryGetValue(SpecialColumnNames.CLIENT_KEY, out IColumnMetadata existing))
+            if (_columnsByName.TryGetValue(SpecialColumnNames.CLIENT_KEY, out IColumnMetadata? existing))
             {
                 _clientKeyColumn = existing;
                 return;
@@ -292,7 +292,7 @@ namespace PocoDataSet.Data.Internal
                     continue;
                 }
 
-                if (!_columnsByName.TryGetValue(name, out IColumnMetadata column))
+                if (!_columnsByName.TryGetValue(name, out IColumnMetadata? column))
                 {
                     throw new InvalidOperationException($"Column '{name}' does not exist in table '{TableName}'.");
                 }
