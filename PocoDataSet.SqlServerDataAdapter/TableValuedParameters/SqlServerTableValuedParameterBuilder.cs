@@ -22,7 +22,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// Creates ADO.NET DataTables for every POCO table that contains saveable rows.
         /// </summary>
         /// <param name="dataSet">Source data set or changeset.</param>
-        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
         /// <returns>ADO.NET DataTables keyed by POCO table name.</returns>
         public static Dictionary<string, AdoDataTable> CreateDataTables(IDataSet dataSet, bool changedRowsOnly = true)
         {
@@ -57,9 +57,9 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// Creates an ADO.NET DataTable from a POCO DataTable and appends the __ChangeState metadata column.
         /// </summary>
         /// <param name="dataTable">Source POCO DataTable.</param>
-        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
         /// <returns>ADO.NET DataTable suitable for use as a SQL Server TVP value.</returns>
-        public static AdoDataTable CreateDataTable(IDataTable dataTable, bool changedRowsOnly = true)
+        public static AdoDataTable CreateDataTable(IDataTable dataTable, bool changedRowsOnly = false)
         {
             if (dataTable == null)
             {
@@ -68,6 +68,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             AdoDataTable adoDataTable = new AdoDataTable(dataTable.TableName);
             AddBusinessColumns(adoDataTable, dataTable);
+            AddClientKeyColumn(adoDataTable);
             AddChangeStateColumn(adoDataTable);
             AddRows(adoDataTable, dataTable, changedRowsOnly);
 
@@ -75,14 +76,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Creates a structured SQL parameter for a generated Save stored procedure.
+        /// Creates a structured SQL parameter for a generated table-valued parameter type.
         /// </summary>
         /// <param name="parameterName">SQL parameter name.</param>
         /// <param name="typeName">SQL Server table type name.</param>
         /// <param name="dataTable">Source POCO DataTable.</param>
-        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
         /// <returns>Configured SQL structured parameter.</returns>
-        public static SqlParameter CreateStructuredParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = true)
+        public static SqlParameter CreateStructuredParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
         {
             if (string.IsNullOrWhiteSpace(parameterName))
             {
@@ -140,6 +141,18 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
         }
 
+        static void AddClientKeyColumn(AdoDataTable adoDataTable)
+        {
+            if (adoDataTable.Columns.Contains(SqlServerClientKeyColumn.ColumnName))
+            {
+                return;
+            }
+
+            DataColumn clientKeyColumn = new DataColumn(SqlServerClientKeyColumn.ColumnName, typeof(Guid));
+            clientKeyColumn.AllowDBNull = true;
+            adoDataTable.Columns.Add(clientKeyColumn);
+        }
+
         static void AddChangeStateColumn(AdoDataTable adoDataTable)
         {
             if (adoDataTable.Columns.Contains(SqlServerChangeStateColumn.ColumnName))
@@ -180,6 +193,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                     {
                         adoRow[columnName] = DBNull.Value;
                     }
+                }
+
+                if (adoDataTable.Columns.Contains(SqlServerClientKeyColumn.ColumnName) &&
+                    adoRow[SqlServerClientKeyColumn.ColumnName] == DBNull.Value)
+                {
+                    adoRow[SqlServerClientKeyColumn.ColumnName] = Guid.NewGuid();
                 }
 
                 adoRow[SqlServerChangeStateColumn.ColumnName] = (int)changeState;

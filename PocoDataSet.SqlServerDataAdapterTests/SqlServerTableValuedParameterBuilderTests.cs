@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 using Microsoft.Data.SqlClient;
 
@@ -11,6 +12,7 @@ using PocoDataRowState = PocoDataSet.IData.DataRowState;
 using PocoDataSetModel = PocoDataSet.Data.DataSet;
 using PocoDataRow = PocoDataSet.Data.DataRow;
 using PocoDataTable = PocoDataSet.Data.DataTable;
+using PocoSqlDataAdapter = PocoDataSet.SqlServerDataAdapter.SqlDataAdapter;
 using AdoDataTable = System.Data.DataTable;
 
 namespace PocoDataSet.SqlServerDataAdapterTests
@@ -36,7 +38,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataRow unchangedRow = CreateRow(12, "Unchanged customer");
             table.AddLoadedRow(unchangedRow);
 
-            AdoDataTable adoDataTable = SqlServerTableValuedParameterBuilder.CreateDataTable(table);
+            AdoDataTable adoDataTable = SqlServerTableValuedParameterBuilder.CreateDataTable(table, true);
 
             Assert.Equal("Customer", adoDataTable.TableName);
             Assert.True(adoDataTable.Columns.Contains("Id"));
@@ -106,6 +108,78 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             Assert.Equal((int)SqlServerChangeState.Added, adoDataTable.Rows[0][SqlServerChangeStateColumn.ColumnName]);
         }
 
+
+        [Fact]
+        public void CreateDataTable_SearchMode_IncludesUnchangedRowsAndAdapterMetadataColumns()
+        {
+            PocoDataTable table = CreateHostedApplicationLayerTable();
+
+            IDataRow row = CreateHostedApplicationLayerRow("HR", "Accounting", "DAL", "http://localhost:5075");
+            table.AddLoadedRow(row);
+
+            AdoDataTable adoDataTable = SqlServerTableValuedParameterBuilder.CreateDataTable(table, false);
+
+            Assert.Equal("HostedApplicationLayer", adoDataTable.TableName);
+            Assert.True(adoDataTable.Columns.Contains("DomainName"));
+            Assert.True(adoDataTable.Columns.Contains("UseCaseName"));
+            Assert.True(adoDataTable.Columns.Contains("ApplicationLayerName"));
+            Assert.True(adoDataTable.Columns.Contains("Url"));
+            Assert.True(adoDataTable.Columns.Contains(SqlServerClientKeyColumn.ColumnName));
+            Assert.True(adoDataTable.Columns.Contains(SqlServerChangeStateColumn.ColumnName));
+
+            Assert.Equal(1, adoDataTable.Rows.Count);
+            Assert.Equal("HR", adoDataTable.Rows[0]["DomainName"]);
+            Assert.Equal("Accounting", adoDataTable.Rows[0]["UseCaseName"]);
+            Assert.Equal("DAL", adoDataTable.Rows[0]["ApplicationLayerName"]);
+            Assert.Equal((int)SqlServerChangeState.Unchanged, adoDataTable.Rows[0][SqlServerChangeStateColumn.ColumnName]);
+            Assert.NotEqual(DBNull.Value, adoDataTable.Rows[0][SqlServerClientKeyColumn.ColumnName]);
+        }
+
+        [Fact]
+        public void AdapterCreateTableValuedParameter_FullEntityTable_CreatesStructuredParameter()
+        {
+            PocoSqlDataAdapter adapter = new PocoSqlDataAdapter("Server=(fake);Database=(fake);Trusted_Connection=True;");
+            PocoDataTable table = CreateHostedApplicationLayerTable();
+            table.AddLoadedRow(CreateHostedApplicationLayerRow("HR", "Accounting", "DPL", "http://localhost:5075"));
+
+            SqlParameter parameter = adapter.CreateTableValuedParameter(
+                "@HostedApplicationLayer",
+                "dbo.HostedApplicationLayer",
+                table);
+
+            Assert.Equal("@HostedApplicationLayer", parameter.ParameterName);
+            Assert.Equal(SqlDbType.Structured, parameter.SqlDbType);
+            Assert.Equal("dbo.HostedApplicationLayer", parameter.TypeName);
+
+            AdoDataTable adoDataTable = Assert.IsType<AdoDataTable>(parameter.Value);
+            Assert.True(adoDataTable.Columns.Contains("DomainName"));
+            Assert.True(adoDataTable.Columns.Contains("UseCaseName"));
+            Assert.True(adoDataTable.Columns.Contains("ApplicationLayerName"));
+            Assert.True(adoDataTable.Columns.Contains(SqlServerClientKeyColumn.ColumnName));
+            Assert.True(adoDataTable.Columns.Contains(SqlServerChangeStateColumn.ColumnName));
+            Assert.Equal(1, adoDataTable.Rows.Count);
+        }
+
+        [Fact]
+        public void SqlDataAdapter_ExposesFillIntoExistingDataSetAsync_WithSqlParameterArrayOverload()
+        {
+            Type adapterType = typeof(PocoSqlDataAdapter);
+
+            Type[] parameterTypes = new Type[]
+            {
+                typeof(IDataSet),
+                typeof(string),
+                typeof(bool),
+                typeof(SqlParameter[])
+            };
+
+            System.Reflection.MethodInfo? method = adapterType.GetMethod(
+                "FillIntoExistingDataSetAsync",
+                parameterTypes);
+
+            Assert.NotNull(method);
+        }
+
         [Fact]
         public void GetChangeState_UsesSqlServerContractValues_NotPocoEnumValues()
         {
@@ -132,6 +206,42 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             });
 
             Assert.Contains(SqlServerChangeStateColumn.ColumnName, exception.Message);
+        }
+
+
+        static PocoDataTable CreateHostedApplicationLayerTable()
+        {
+            PocoDataTable table = new PocoDataTable();
+            table.TableName = "HostedApplicationLayer";
+            table.AddColumn("Id", "bigint", true, true, false);
+            table.AddColumn("ApplicationLayerName", "varchar", true, false, false);
+            table.AddColumn("DomainName", "varchar", true, false, false);
+            table.AddColumn("Guid", "uniqueidentifier", true, false, false);
+            table.AddColumn("Url", "varchar", true, false, false);
+            table.AddColumn("UseCaseName", "varchar", true, false, false);
+            table.AddColumn("BusinessGuid", "uniqueidentifier", true, false, false);
+            table.AddColumn("BusinessStringRepresentation", "nvarchar", true, false, false);
+            table.AddColumn("CreatedByUserGuid", "uniqueidentifier", true, false, false);
+            table.AddColumn("CreatedByUserName", "varchar", true, false, false);
+            table.AddColumn("DateOfCreation", "datetime2", true, false, false);
+            table.AddColumn("DateOfModification", "datetime2", true, false, false);
+            table.AddColumn("IsArchived", "bit", true, false, false);
+            table.AddColumn("IsDeleted", "bit", true, false, false);
+            table.AddColumn("ModifiedByUserGuid", "uniqueidentifier", true, false, false);
+            table.AddColumn("ModifiedByUserName", "varchar", true, false, false);
+            return table;
+        }
+
+        static IDataRow CreateHostedApplicationLayerRow(string domainName, string useCaseName, string applicationLayerName, string url)
+        {
+#pragma warning disable CS0618
+            IDataRow row = new PocoDataRow();
+#pragma warning restore CS0618
+            row["DomainName"] = domainName;
+            row["UseCaseName"] = useCaseName;
+            row["ApplicationLayerName"] = applicationLayerName;
+            row["Url"] = url;
+            return row;
         }
 
         static PocoDataTable CreateCustomerTable()

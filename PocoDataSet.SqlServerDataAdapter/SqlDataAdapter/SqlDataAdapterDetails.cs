@@ -54,6 +54,31 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
         }
 
+
+        /// <summary>
+        /// Adds SQL parameters to SQL command. Use this overload for parameters that require
+        /// provider-specific settings such as SqlDbType.Structured and TypeName.
+        /// </summary>
+        /// <param name="parameters">SQL parameters to add to SQL command</param>
+        internal void AddParametersToSqlCommand(SqlParameter[]? parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                SqlParameter parameter = parameters[i];
+                if (parameter == null)
+                {
+                    continue;
+                }
+
+                SqlCommand!.Parameters.Add(parameter);
+            }
+        }
+
         /// <summary>
         /// Creates SQL command
         /// </summary>

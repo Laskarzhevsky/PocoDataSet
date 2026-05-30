@@ -64,7 +64,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// Added / Modified / Deleted rows without relying on negative primary-key values.
         /// </summary>
         /// <param name="changeset">Source data set or changeset.</param>
-        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
         /// <returns>ADO.NET DataTables keyed by POCO table name.</returns>
         public Dictionary<string, System.Data.DataTable> CreateTableValuedParameterDataTables(IDataSet changeset, bool changedRowsOnly = true)
         {
@@ -72,14 +72,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Creates a structured SQL parameter for a generated Save stored procedure.
+        /// Creates a structured SQL parameter for a generated table-valued parameter type.
         /// </summary>
         /// <param name="parameterName">SQL parameter name.</param>
         /// <param name="typeName">SQL Server table type name.</param>
         /// <param name="dataTable">Source POCO DataTable.</param>
-        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
         /// <returns>Configured SQL structured parameter.</returns>
-        public SqlParameter CreateTableValuedParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = true)
+        public SqlParameter CreateTableValuedParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
         {
             return SqlServerTableValuedParameterBuilder.CreateStructuredParameter(parameterName, typeName, dataTable, changedRowsOnly);
         }
@@ -133,6 +133,58 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
+        /// Fills data set using provider-specific SQL parameters.
+        /// Use this overload for table-valued parameters and other parameters that need
+        /// SqlParameter-specific configuration.
+        /// </summary>
+        public async Task<IDataSet> FillAsync(string baseQuery, bool isStoredProcedure, params SqlParameter[] parameters)
+        {
+            return await FillAsync(baseQuery, isStoredProcedure, parameters, null, null, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Fills data set using provider-specific SQL parameters.
+        /// </summary>
+        public async Task<IDataSet> FillAsync(string baseQuery, bool isStoredProcedure, SqlParameter[]? parameters, List<string>? returnedTableNames, string? connectionString, IDataSet? dataSet)
+        {
+            InitializeComponent(returnedTableNames);
+            DataTableCreator!.DataSet = dataSet;
+
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            CreateSqlCommand(baseQuery, isStoredProcedure);
+            AddParametersToSqlCommand(parameters);
+
+            try
+            {
+                await GetDataFromDatabaseAsync().ConfigureAwait(false);
+                await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
+
+                if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
+                {
+                    await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
+                        .ConfigureAwait(false);
+                }
+
+                dataSet = DataTableCreator.DataSet;
+                dataSet!.AcceptChanges();
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await DisposeAsync().ConfigureAwait(false);
+            }
+
+            return dataSet!;
+        }
+
+        /// <summary>
         /// Fills an existing data set by adding one or more result-set tables into it.
         /// </summary>
         public IDataSet FillIntoExistingDataSet(IDataSet dataSet, string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString)
@@ -146,6 +198,39 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// Fills an existing data set by adding one or more result-set tables into it.
         /// </summary>
         public async Task<IDataSet> FillIntoExistingDataSetAsync(IDataSet dataSet, string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, List<string>? returnedTableNames, string? connectionString)
+        {
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException(nameof(dataSet));
+            }
+
+            return await FillAsync(baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString, dataSet)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Fills an existing data set by adding one or more result-set tables into it using provider-specific SQL parameters.
+        /// </summary>
+        public IDataSet FillIntoExistingDataSet(IDataSet dataSet, string baseQuery, bool isStoredProcedure, params SqlParameter[] parameters)
+        {
+            return FillIntoExistingDataSetAsync(dataSet, baseQuery, isStoredProcedure, parameters)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Fills an existing data set by adding one or more result-set tables into it using provider-specific SQL parameters.
+        /// </summary>
+        public async Task<IDataSet> FillIntoExistingDataSetAsync(IDataSet dataSet, string baseQuery, bool isStoredProcedure, params SqlParameter[] parameters)
+        {
+            return await FillIntoExistingDataSetAsync(dataSet, baseQuery, isStoredProcedure, parameters, null, null)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Fills an existing data set by adding one or more result-set tables into it using provider-specific SQL parameters.
+        /// </summary>
+        public async Task<IDataSet> FillIntoExistingDataSetAsync(IDataSet dataSet, string baseQuery, bool isStoredProcedure, SqlParameter[]? parameters, List<string>? returnedTableNames, string? connectionString)
         {
             if (dataSet == null)
             {

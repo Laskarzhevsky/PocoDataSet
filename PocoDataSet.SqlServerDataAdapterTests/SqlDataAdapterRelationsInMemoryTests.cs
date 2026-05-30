@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -219,8 +219,8 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             IDataSet dataSet = DataSetFactory.CreateDataSet();
 
             // Act: two independent queries, same dataset
-            await adapter.FillIntoExistingDataSetAsync(dataSet, "SELECT * FROM Department", false, null, null, null);
-            await adapter.FillIntoExistingDataSetAsync(dataSet, "SELECT * FROM Employee", false, null, null, null);
+            await adapter.FillIntoExistingDataSetAsync(dataSet, "SELECT * FROM Department", false, (Dictionary<string, object?>?)null, null, null);
+            await adapter.FillIntoExistingDataSetAsync(dataSet, "SELECT * FROM Employee", false, (Dictionary<string, object?>?)null, null, null);
 
             // Assert: both tables exist in the same dataset
             Assert.True(dataSet.Tables.ContainsKey("Department"));
@@ -249,7 +249,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
             // Act / Assert
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                await adapter.FillIntoExistingDataSetAsync(null!, "SELECT 1", false, null, null, null);
+                await adapter.FillIntoExistingDataSetAsync(null!, "SELECT 1", false, (Dictionary<string, object?>?)null, null, null);
             });
         }
     }

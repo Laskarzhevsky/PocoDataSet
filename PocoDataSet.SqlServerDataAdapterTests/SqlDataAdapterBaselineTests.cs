@@ -23,7 +23,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
                 await adapter.FillAsync(
                     baseQuery: "select 1",
                     isStoredProcedure: false,
-                    parameters: null,
+                    parameters: (Dictionary<string, object?>?)null,
                     returnedTableNames: new List<string> { "T" },
                     connectionString: connectionString,
                     dataSet: new DataSet());
