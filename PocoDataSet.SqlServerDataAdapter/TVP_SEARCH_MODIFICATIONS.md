@@ -25,3 +25,8 @@ await adapter.FillIntoExistingDataSetAsync(
 ```
 
 The source `IDataTable` should have a schema compatible with the generated SQL TVP type. Missing generated adapter metadata `__ClientKey` and `__ChangeState` is handled by the adapter.
+
+
+## Event-based SQL type schema loading
+
+`SqlDataAdapter.CreateTableValuedParameterAsync(...)` now uses `SqlServerTableValuedParameterCreator`, which raises `LoadTableValuedParameterSchemaRequest`. The adapter handles that event and loads the SQL user-defined table type schema, then the builder creates the ADO.NET `DataTable` with the exact SQL column order. The static builder does not open database connections.

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -72,7 +72,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Creates a structured SQL parameter for a generated table-valued parameter type.
+        /// Creates a structured SQL parameter for a generated table-valued parameter type using POCO columns plus adapter metadata columns.
         /// </summary>
         /// <param name="parameterName">SQL parameter name.</param>
         /// <param name="typeName">SQL Server table type name.</param>
@@ -82,6 +82,59 @@ namespace PocoDataSet.SqlServerDataAdapter
         public SqlParameter CreateTableValuedParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
         {
             return SqlServerTableValuedParameterBuilder.CreateStructuredParameter(parameterName, typeName, dataTable, changedRowsOnly);
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated table-valued parameter type using the supplied SQL Server TVP schema.
+        /// Missing POCO columns are sent as DBNull.Value. Extra POCO columns are ignored.
+        /// </summary>
+        /// <param name="parameterName">SQL parameter name.</param>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="columns">SQL Server TVP columns in exact SQL type order.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
+        /// <returns>Configured SQL structured parameter.</returns>
+        public SqlParameter CreateTableValuedParameter(string parameterName, string typeName, IDataTable dataTable, IEnumerable<SqlServerTableValuedParameterColumn> columns, bool changedRowsOnly = false)
+        {
+            return SqlServerTableValuedParameterBuilder.CreateStructuredParameter(parameterName, typeName, dataTable, columns, changedRowsOnly);
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated table-valued parameter type by requesting the SQL type column schema.
+        /// This overload is useful when the POCO table contains only request/business columns, but the generated SQL type also contains standard persistence columns.
+        /// </summary>
+        /// <param name="parameterName">SQL parameter name.</param>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
+        /// <returns>Configured SQL structured parameter.</returns>
+        public async Task<SqlParameter> CreateTableValuedParameterAsync(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
+        {
+            SqlServerTableValuedParameterCreator creator = new SqlServerTableValuedParameterCreator();
+            creator.LoadTableValuedParameterSchemaRequest += TableValuedParameterCreator_LoadTableValuedParameterSchemaRequestAsync;
+
+            try
+            {
+                return await creator.CreateStructuredParameterAsync(parameterName, typeName, dataTable, changedRowsOnly).ConfigureAwait(false);
+            }
+            finally
+            {
+                creator.LoadTableValuedParameterSchemaRequest -= TableValuedParameterCreator_LoadTableValuedParameterSchemaRequestAsync;
+            }
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated table-valued parameter type by requesting the SQL type column schema.
+        /// Kept for compatibility with earlier adapter builds.
+        /// </summary>
+        /// <param name="parameterName">SQL parameter name.</param>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
+        /// <returns>Configured SQL structured parameter.</returns>
+        public async Task<SqlParameter> CreateTableValuedParameterFromSqlTypeAsync(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
+        {
+            return await CreateTableValuedParameterAsync(parameterName, typeName, dataTable, changedRowsOnly).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -147,6 +200,12 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         public async Task<IDataSet> FillAsync(string baseQuery, bool isStoredProcedure, SqlParameter[]? parameters, List<string>? returnedTableNames, string? connectionString, IDataSet? dataSet)
         {
+            // TEST SEAM: bypass SQL Server when FillWithSqlParametersOverride is provided
+            if (FillWithSqlParametersOverride != null)
+            {
+                return await FillWithSqlParametersOverride(baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString, dataSet).ConfigureAwait(false);
+            }
+
             InitializeComponent(returnedTableNames);
             DataTableCreator!.DataSet = dataSet;
 
@@ -385,6 +444,22 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// When set, FillAsync delegates execution to this override instead of accessing SQL Server.
         /// </summary>
         internal FillOverrideDelegate? FillOverride
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// INTERNAL TEST HOOK.
+        /// Allows tests to bypass SQL Server access when the SqlParameter overloads are used.
+        /// This delegate MUST remain null in production.
+        /// </summary>
+        internal delegate Task<IDataSet> FillWithSqlParametersOverrideDelegate(string baseQuery, bool isStoredProcedure, SqlParameter[]? parameters, List<string>? returnedTableNames, string? connectionString, IDataSet? existingDataSet);
+
+        /// <summary>
+        /// INTERNAL TEST HOOK.
+        /// When set, provider-specific FillAsync overloads delegate execution to this override instead of accessing SQL Server.
+        /// </summary>
+        internal FillWithSqlParametersOverrideDelegate? FillWithSqlParametersOverride
         {
             get; set;
         }

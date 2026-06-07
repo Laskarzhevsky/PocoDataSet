@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -314,6 +314,112 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
         #endregion
 
         #region Event Handlers
+        /// <summary>
+        /// Handles SqlServerTableValuedParameterCreator.LoadTableValuedParameterSchemaRequest event.
+        /// </summary>
+        /// <param name="sender">Event source.</param>
+        /// <param name="e">Event arguments.</param>
+        async Task TableValuedParameterCreator_LoadTableValuedParameterSchemaRequestAsync(object? sender, LoadTableValuedParameterSchemaEventArgs e)
+        {
+            if (e == null)
+            {
+                return;
+            }
+
+            e.Columns = await LoadTableValuedParameterColumnsAsync(e.TypeName).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Loads SQL Server table-valued parameter column metadata for a user-defined table type.
+        /// </summary>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <returns>TVP columns in SQL Server column order.</returns>
+        async Task<List<SqlServerTableValuedParameterColumn>> LoadTableValuedParameterColumnsAsync(string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                throw new ArgumentException("SQL Server table type name is required.", nameof(typeName));
+            }
+
+            if (string.IsNullOrWhiteSpace(ConnectionString))
+            {
+                throw new InvalidOperationException("Connection string is required to load SQL Server table-valued parameter schema.");
+            }
+
+            string schemaName;
+            string tableTypeName;
+            SplitSqlTypeName(typeName, out schemaName, out tableTypeName);
+
+            List<SqlServerTableValuedParameterColumn> columns = new List<SqlServerTableValuedParameterColumn>();
+
+            await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            {
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
+
+                await using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
+                {
+                    sqlCommand.CommandText =
+@"select
+    c.[name] as ColumnName,
+    st.[name] as DataType
+from
+    sys.table_types tt
+    inner join sys.schemas s on tt.[schema_id] = s.[schema_id]
+    inner join sys.columns c on tt.type_table_object_id = c.[object_id]
+    inner join sys.types st on c.system_type_id = st.system_type_id and st.system_type_id = st.user_type_id
+where
+    s.[name] = @SchemaName
+    and tt.[name] = @TypeName
+order by
+    c.column_id";
+
+                    sqlCommand.Parameters.AddWithValue("@SchemaName", schemaName);
+                    sqlCommand.Parameters.AddWithValue("@TypeName", tableTypeName);
+
+                    await using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+                    {
+                        while (await sqlDataReader.ReadAsync().ConfigureAwait(false))
+                        {
+                            string columnName = sqlDataReader.GetString(0);
+                            string dataType = sqlDataReader.GetString(1);
+                            columns.Add(new SqlServerTableValuedParameterColumn(columnName, dataType));
+                        }
+                    }
+                }
+            }
+
+            if (columns.Count == 0)
+            {
+                throw new InvalidOperationException("SQL Server table-valued parameter type was not found: " + typeName);
+            }
+
+            return columns;
+        }
+
+        /// <summary>
+        /// Splits schema-qualified SQL type name into schema and type name.
+        /// </summary>
+        /// <param name="typeName">SQL type name.</param>
+        /// <param name="schemaName">Schema name.</param>
+        /// <param name="tableTypeName">Table type name.</param>
+        static void SplitSqlTypeName(string typeName, out string schemaName, out string tableTypeName)
+        {
+            string normalized = typeName.Trim();
+            normalized = normalized.Replace("[", string.Empty);
+            normalized = normalized.Replace("]", string.Empty);
+
+            int dotIndex = normalized.LastIndexOf('.');
+            if (dotIndex < 0)
+            {
+                schemaName = "dbo";
+                tableTypeName = normalized;
+                return;
+            }
+
+            schemaName = normalized.Substring(0, dotIndex);
+            tableTypeName = normalized.Substring(dotIndex + 1);
+        }
+
         /// <summary>
         /// Handles DataTableCreator.LoadDataTableKeysInformationRequest event
         /// </summary>

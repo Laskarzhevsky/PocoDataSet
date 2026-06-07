@@ -13,7 +13,7 @@ namespace PocoDataSet.SqlServerDataAdapter
 {
     /// <summary>
     /// Converts POCO DataSet tables into ADO.NET DataTable instances suitable for
-    /// SQL Server table-valued parameters used by generated Save stored procedures.
+    /// SQL Server table-valued parameters used by generated stored procedures.
     /// </summary>
     public static class SqlServerTableValuedParameterBuilder
     {
@@ -54,7 +54,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Creates an ADO.NET DataTable from a POCO DataTable and appends the __ChangeState metadata column.
+        /// Creates an ADO.NET DataTable from a POCO DataTable using the POCO table columns and appending adapter metadata columns.
         /// </summary>
         /// <param name="dataTable">Source POCO DataTable.</param>
         /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
@@ -76,7 +76,34 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Creates a structured SQL parameter for a generated table-valued parameter type.
+        /// Creates an ADO.NET DataTable from a POCO DataTable using the supplied SQL Server TVP column schema.
+        /// Missing POCO columns are sent as DBNull.Value. Extra POCO columns are ignored.
+        /// </summary>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="columns">SQL Server TVP columns in exact SQL type order.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
+        /// <returns>ADO.NET DataTable suitable for use as a SQL Server TVP value.</returns>
+        public static AdoDataTable CreateDataTable(IDataTable dataTable, IEnumerable<SqlServerTableValuedParameterColumn> columns, bool changedRowsOnly = false)
+        {
+            if (dataTable == null)
+            {
+                throw new ArgumentNullException(nameof(dataTable));
+            }
+
+            if (columns == null)
+            {
+                throw new ArgumentNullException(nameof(columns));
+            }
+
+            AdoDataTable adoDataTable = new AdoDataTable(dataTable.TableName);
+            AddSchemaColumns(adoDataTable, columns);
+            AddRows(adoDataTable, dataTable, changedRowsOnly);
+
+            return adoDataTable;
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated table-valued parameter type using POCO columns plus adapter metadata columns.
         /// </summary>
         /// <param name="parameterName">SQL parameter name.</param>
         /// <param name="typeName">SQL Server table type name.</param>
@@ -85,19 +112,32 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <returns>Configured SQL structured parameter.</returns>
         public static SqlParameter CreateStructuredParameter(string parameterName, string typeName, IDataTable dataTable, bool changedRowsOnly = false)
         {
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                throw new ArgumentException("Parameter name is required.", nameof(parameterName));
-            }
-
-            if (string.IsNullOrWhiteSpace(typeName))
-            {
-                throw new ArgumentException("SQL Server table type name is required.", nameof(typeName));
-            }
+            ValidateParameterArguments(parameterName, typeName);
 
             SqlParameter sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured);
             sqlParameter.TypeName = typeName;
             sqlParameter.Value = CreateDataTable(dataTable, changedRowsOnly);
+
+            return sqlParameter;
+        }
+
+        /// <summary>
+        /// Creates a structured SQL parameter for a generated table-valued parameter type using the supplied SQL Server TVP schema.
+        /// Missing POCO columns are sent as DBNull.Value. Extra POCO columns are ignored.
+        /// </summary>
+        /// <param name="parameterName">SQL parameter name.</param>
+        /// <param name="typeName">SQL Server table type name.</param>
+        /// <param name="dataTable">Source POCO DataTable.</param>
+        /// <param name="columns">SQL Server TVP columns in exact SQL type order.</param>
+        /// <param name="changedRowsOnly">When true, only Added, Modified and Deleted rows are copied. For search/read procedures pass false or omit the argument.</param>
+        /// <returns>Configured SQL structured parameter.</returns>
+        public static SqlParameter CreateStructuredParameter(string parameterName, string typeName, IDataTable dataTable, IEnumerable<SqlServerTableValuedParameterColumn> columns, bool changedRowsOnly = false)
+        {
+            ValidateParameterArguments(parameterName, typeName);
+
+            SqlParameter sqlParameter = new SqlParameter(parameterName, SqlDbType.Structured);
+            sqlParameter.TypeName = typeName;
+            sqlParameter.Value = CreateDataTable(dataTable, columns, changedRowsOnly);
 
             return sqlParameter;
         }
@@ -129,16 +169,65 @@ namespace PocoDataSet.SqlServerDataAdapter
         #endregion
 
         #region Private Methods
+        static void ValidateParameterArguments(string parameterName, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException("Parameter name is required.", nameof(parameterName));
+            }
+
+            if (string.IsNullOrWhiteSpace(typeName))
+            {
+                throw new ArgumentException("SQL Server table type name is required.", nameof(typeName));
+            }
+        }
+
         static void AddBusinessColumns(AdoDataTable adoDataTable, IDataTable sourceTable)
         {
             for (int i = 0; i < sourceTable.Columns.Count; i++)
             {
                 IColumnMetadata columnMetadata = sourceTable.Columns[i];
-                Type columnType = ResolveColumnType(columnMetadata.DataType);
-                DataColumn dataColumn = new DataColumn(columnMetadata.ColumnName, columnType);
-                dataColumn.AllowDBNull = true;
-                adoDataTable.Columns.Add(dataColumn);
+                AddColumn(adoDataTable, columnMetadata.ColumnName, columnMetadata.DataType);
             }
+        }
+
+        static void AddSchemaColumns(AdoDataTable adoDataTable, IEnumerable<SqlServerTableValuedParameterColumn> columns)
+        {
+            int columnCount = 0;
+
+            foreach (SqlServerTableValuedParameterColumn column in columns)
+            {
+                if (column == null)
+                {
+                    continue;
+                }
+
+                AddColumn(adoDataTable, column.ColumnName, column.DataType);
+                columnCount++;
+            }
+
+            if (columnCount == 0)
+            {
+                throw new ArgumentException("At least one SQL Server TVP column must be supplied.", nameof(columns));
+            }
+        }
+
+        static void AddColumn(AdoDataTable adoDataTable, string columnName, string? dataType)
+        {
+            if (string.IsNullOrWhiteSpace(columnName))
+            {
+                throw new ArgumentException("Column name is required.", nameof(columnName));
+            }
+
+            if (adoDataTable.Columns.Contains(columnName))
+            {
+                throw new InvalidOperationException("Duplicate SQL Server TVP column name '" + columnName + "'.");
+            }
+
+            Type columnType = ResolveColumnType(dataType);
+            DataColumn dataColumn = new DataColumn(columnName, columnType);
+            dataColumn.AllowDBNull = true;
+            adoDataTable.Columns.Add(dataColumn);
         }
 
         static void AddClientKeyColumn(AdoDataTable adoDataTable)
@@ -163,7 +252,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             DataColumn changeStateColumn = new DataColumn(SqlServerChangeStateColumn.ColumnName, typeof(int));
-            changeStateColumn.AllowDBNull = false;
+            changeStateColumn.AllowDBNull = true;
             adoDataTable.Columns.Add(changeStateColumn);
         }
 
@@ -181,9 +270,9 @@ namespace PocoDataSet.SqlServerDataAdapter
 
                 DataRow adoRow = adoDataTable.NewRow();
 
-                for (int c = 0; c < sourceTable.Columns.Count; c++)
+                for (int c = 0; c < adoDataTable.Columns.Count; c++)
                 {
-                    string columnName = sourceTable.Columns[c].ColumnName;
+                    string columnName = adoDataTable.Columns[c].ColumnName;
                     object? value;
                     if (sourceRow.TryGetValue(columnName, out value))
                     {
@@ -201,7 +290,11 @@ namespace PocoDataSet.SqlServerDataAdapter
                     adoRow[SqlServerClientKeyColumn.ColumnName] = Guid.NewGuid();
                 }
 
-                adoRow[SqlServerChangeStateColumn.ColumnName] = (int)changeState;
+                if (adoDataTable.Columns.Contains(SqlServerChangeStateColumn.ColumnName))
+                {
+                    adoRow[SqlServerChangeStateColumn.ColumnName] = (int)changeState;
+                }
+
                 adoDataTable.Rows.Add(adoRow);
             }
         }
@@ -276,12 +369,17 @@ namespace PocoDataSet.SqlServerDataAdapter
                 return typeof(double);
             }
 
-            if (normalized.Equals("decimal", StringComparison.OrdinalIgnoreCase) || normalized.Equals("numeric", StringComparison.OrdinalIgnoreCase) || normalized.Equals("money", StringComparison.OrdinalIgnoreCase) || normalized.Equals("smallmoney", StringComparison.OrdinalIgnoreCase) || normalized.Equals("System.Decimal", StringComparison.OrdinalIgnoreCase))
+            if (normalized.Equals("decimal", StringComparison.OrdinalIgnoreCase) || normalized.Equals("numeric", StringComparison.OrdinalIgnoreCase) || normalized.Equals("money", StringComparison.OrdinalIgnoreCase) || normalized.Equals("smallmoney", StringComparison.OrdinalIgnoreCase))
             {
                 return typeof(decimal);
             }
 
-            if (normalized.Equals("date", StringComparison.OrdinalIgnoreCase) || normalized.Equals("datetime", StringComparison.OrdinalIgnoreCase) || normalized.Equals("datetime2", StringComparison.OrdinalIgnoreCase) || normalized.Equals("smalldatetime", StringComparison.OrdinalIgnoreCase) || normalized.Equals("System.DateTime", StringComparison.OrdinalIgnoreCase))
+            if (normalized.Equals("System.Decimal", StringComparison.OrdinalIgnoreCase))
+            {
+                return typeof(decimal);
+            }
+
+            if (normalized.Equals("date", StringComparison.OrdinalIgnoreCase) || normalized.Equals("datetime", StringComparison.OrdinalIgnoreCase) || normalized.Equals("datetime2", StringComparison.OrdinalIgnoreCase) || normalized.Equals("datetime2(7)", StringComparison.OrdinalIgnoreCase) || normalized.Equals("smalldatetime", StringComparison.OrdinalIgnoreCase) || normalized.Equals("System.DateTime", StringComparison.OrdinalIgnoreCase))
             {
                 return typeof(DateTime);
             }
