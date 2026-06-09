@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -163,6 +163,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             {
                 await GetDataFromDatabaseAsync().ConfigureAwait(false);
                 await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
+                await CloseDataReaderAsync().ConfigureAwait(false);
 
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {
@@ -221,6 +222,7 @@ namespace PocoDataSet.SqlServerDataAdapter
             {
                 await GetDataFromDatabaseAsync().ConfigureAwait(false);
                 await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
+                await CloseDataReaderAsync().ConfigureAwait(false);
 
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {

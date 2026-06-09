@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -165,6 +165,18 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
     DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
 }
 
+
+        /// <summary>
+        /// Closes the active SQL data reader before another command is executed on the same connection.
+        /// </summary>
+        internal async Task CloseDataReaderAsync()
+        {
+            if (DataTableCreator != null && DataTableCreator.SqlDataReader != null)
+            {
+                await DataTableCreator.SqlDataReader.DisposeAsync().ConfigureAwait(false);
+                DataTableCreator.SqlDataReader = null;
+            }
+        }
 
         /// <summary>
         /// Initializes component
@@ -427,13 +439,22 @@ order by
         /// <param name="e">Event arguments</param>
         async Task DataTableCreator_LoadDataTableKeysInformationRequestAsync(object? sender, EventArgs e)
         {
-            if (DataTableCreator == null || SqlConnection == null)
+            if (DataTableCreator == null)
             {
                 return;
             }
 
-            await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
-            await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(ConnectionString))
+            {
+                return;
+            }
+
+            await using (SqlConnection metadataConnection = new SqlConnection(ConnectionString))
+            {
+                await metadataConnection.OpenAsync().ConfigureAwait(false);
+                await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, metadataConnection).ConfigureAwait(false);
+                await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, metadataConnection).ConfigureAwait(false);
+            }
         }
         #endregion
     }
