@@ -165,6 +165,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
                 await CloseDataReaderAsync().ConfigureAwait(false);
 
+                if (DataTableCreator.DataSet is not null)
+                {
+                    await RelationsManager.PopulateColumnMetadataFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
+                        .ConfigureAwait(false);
+                }
+
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {
                     await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
@@ -223,6 +229,12 @@ namespace PocoDataSet.SqlServerDataAdapter
                 await GetDataFromDatabaseAsync().ConfigureAwait(false);
                 await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
                 await CloseDataReaderAsync().ConfigureAwait(false);
+
+                if (DataTableCreator.DataSet is not null)
+                {
+                    await RelationsManager.PopulateColumnMetadataFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
+                        .ConfigureAwait(false);
+                }
 
                 if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
                 {

@@ -186,7 +186,6 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
         {
             DataTableCreator = new DataTableCreator();
             DataTableCreator.ListOfTableNames = returnedTableNames;
-            DataTableCreator.LoadDataTableKeysInformationRequest += DataTableCreator_LoadDataTableKeysInformationRequestAsync;
         }
 
         /// <summary>
@@ -197,7 +196,6 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
             // event unsubscriptions & synchronous nulling
             if (DataTableCreator is not null)
             {
-                DataTableCreator.LoadDataTableKeysInformationRequest -= DataTableCreator_LoadDataTableKeysInformationRequestAsync;
                 DataTableCreator.DataSet = null;
                 DataTableCreator = null;
             }
@@ -444,17 +442,18 @@ order by
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(ConnectionString))
+            if (SqlConnection == null)
             {
                 return;
             }
 
-            await using (SqlConnection metadataConnection = new SqlConnection(ConnectionString))
+            if (SqlConnection.State != System.Data.ConnectionState.Open)
             {
-                await metadataConnection.OpenAsync().ConfigureAwait(false);
-                await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, metadataConnection).ConfigureAwait(false);
-                await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, metadataConnection).ConfigureAwait(false);
+                await SqlConnection.OpenAsync().ConfigureAwait(false);
             }
+
+            await RelationsManager.LoadDataTablePrimaryKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
+            await RelationsManager.LoadDataTableForeignKeysAsync(DataTableCreator, SqlConnection).ConfigureAwait(false);
         }
         #endregion
     }

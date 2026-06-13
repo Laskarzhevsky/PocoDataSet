@@ -99,6 +99,50 @@ namespace PocoDataSet.SqlServerDataAdapter
             dataTableCreator.PrimaryKeyData = primaryKeysData;
         }
 
+
+        /// <summary>
+        /// Populates column-level primary-key and foreign-key metadata after the result reader is closed.
+        /// This keeps FillAsync as one continuous operation on one SQL connection: read result sets,
+        /// close the reader, then query database metadata using the same still-open connection.
+        /// </summary>
+        /// <param name="dataSet">Filled data set</param>
+        /// <param name="sqlConnection">Open SQL connection used by the current adapter operation</param>
+        public static async Task PopulateColumnMetadataFromDatabaseSchemaAsync(IDataSet dataSet, SqlConnection sqlConnection)
+        {
+            if (dataSet == null)
+            {
+                return;
+            }
+
+            if (sqlConnection == null)
+            {
+                throw new ArgumentNullException(nameof(sqlConnection));
+            }
+
+            if (sqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
+            }
+
+            foreach (IDataTable dataTable in dataSet.Tables.Values)
+            {
+                PocoDataSet.Data.DataTable? concreteDataTable = dataTable as PocoDataSet.Data.DataTable;
+                if (concreteDataTable == null)
+                {
+                    continue;
+                }
+
+                DataTableCreator dataTableCreator = new DataTableCreator();
+                dataTableCreator.DataTable = concreteDataTable;
+
+                await LoadDataTablePrimaryKeysAsync(dataTableCreator, sqlConnection).ConfigureAwait(false);
+                await LoadDataTableForeignKeysAsync(dataTableCreator, sqlConnection).ConfigureAwait(false);
+
+                ApplyColumnMetadata(dataTable, dataTableCreator.PrimaryKeyData, dataTableCreator.ForeignKeysData);
+                ApplyTablePrimaryKeys(concreteDataTable, dataTableCreator.PrimaryKeyData);
+            }
+        }
+
         /// <summary>
         /// Populates relations in the filled data set by reading database schema (foreign keys).
         /// This supports composite foreign keys and relations that reference alternate (unique) keys.
@@ -133,6 +177,56 @@ namespace PocoDataSet.SqlServerDataAdapter
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Applies loaded primary-key and foreign-key metadata to the already-created columns.
+        /// </summary>
+        static void ApplyColumnMetadata(IDataTable dataTable, HashSet<string>? primaryKeyData, Dictionary<string, IForeignKeyData>? foreignKeysData)
+        {
+            foreach (IColumnMetadata columnMetadata in dataTable.Columns)
+            {
+                columnMetadata.IsPrimaryKey = false;
+                if (primaryKeyData != null && primaryKeyData.Contains(columnMetadata.ColumnName))
+                {
+                    columnMetadata.IsPrimaryKey = true;
+                }
+
+                columnMetadata.IsForeignKey = false;
+                columnMetadata.ReferencedTableName = null;
+                columnMetadata.ReferencedColumnName = null;
+
+                if (foreignKeysData != null && foreignKeysData.TryGetValue(columnMetadata.ColumnName, out IForeignKeyData? foreignKeyData))
+                {
+                    columnMetadata.IsForeignKey = true;
+                    columnMetadata.ReferencedTableName = foreignKeyData.ReferencedTableName;
+                    columnMetadata.ReferencedColumnName = foreignKeyData.ReferencedColumnName;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates table primary-key collection after column metadata has been populated.
+        /// </summary>
+        static void ApplyTablePrimaryKeys(PocoDataSet.Data.DataTable dataTable, HashSet<string>? primaryKeyData)
+        {
+            dataTable.ClearPrimaryKeys();
+            if (primaryKeyData == null || primaryKeyData.Count == 0)
+            {
+                return;
+            }
+
+            List<string> orderedPrimaryKeys = new List<string>();
+            foreach (IColumnMetadata columnMetadata in dataTable.Columns)
+            {
+                if (primaryKeyData.Contains(columnMetadata.ColumnName))
+                {
+                    orderedPrimaryKeys.Add(columnMetadata.ColumnName);
+                }
+            }
+
+            dataTable.SetPrimaryKeys(orderedPrimaryKeys);
+        }
+
         /// <summary>
         /// Applies foreign key groups to the data set relations.
         /// Parent = dependent table, Referenced = principal table.
