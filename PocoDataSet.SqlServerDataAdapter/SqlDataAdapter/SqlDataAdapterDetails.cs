@@ -99,18 +99,20 @@ namespace PocoDataSet.SqlServerDataAdapter
         }
 
         /// <summary>
-        /// Executes non-query asynchronously
+        /// Executes non-query asynchronously.
         /// </summary>
-        /// <param name="baseQuery">Base query</param>
-        /// <param name="isStoredProcedure">Flag indicating whether base query is stored procedure</param>
-        /// <param name="parameters">Query parameters</param>
-        /// <returns>Execution result</returns>
+        /// <param name="baseQuery">Base query.</param>
+        /// <param name="isStoredProcedure">Flag indicating whether base query is stored procedure.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="connectionString">Optional connection string override.</param>
+        /// <returns>Execution result.</returns>
         async Task<int> ExecuteNonQueryAsync(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, string? connectionString)
         {
             if (!string.IsNullOrEmpty(connectionString))
             {
                 ConnectionString = connectionString;
             }
+
             try
             {
                 await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
@@ -125,7 +127,42 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
             finally
             {
-                await DisposeAsync();
+                await DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Executes non-query asynchronously using table-valued parameter descriptions.
+        /// The adapter opens one connection, creates the TVP parameters on that connection,
+        /// executes the command, and then disposes the connection.
+        /// </summary>
+        /// <param name="baseQuery">Base query.</param>
+        /// <param name="isStoredProcedure">Flag indicating whether base query is stored procedure.</param>
+        /// <param name="tableValuedParameters">Table-valued parameter descriptions.</param>
+        /// <param name="connectionString">Optional connection string override.</param>
+        /// <returns>Execution result.</returns>
+        async Task<int> ExecuteNonQueryWithTableValuedParametersAsync(string baseQuery, bool isStoredProcedure, SqlTableValuedParameterInfo[]? tableValuedParameters, Dictionary<string, object?>? parameters, string? connectionString)
+        {
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            CreateSqlCommand(baseQuery, isStoredProcedure);
+
+            try
+            {
+                await OpenSqlConnectionAsync().ConfigureAwait(false);
+
+                SqlParameter[] sqlParameters = await CreateTableValuedParametersAsync(tableValuedParameters).ConfigureAwait(false);
+                AddParametersToSqlCommand(sqlParameters);
+                AddParametersToSqlCommand(parameters);
+
+                return await SqlCommand!.ExecuteNonQueryAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                await DisposeAsync().ConfigureAwait(false);
             }
         }
 
