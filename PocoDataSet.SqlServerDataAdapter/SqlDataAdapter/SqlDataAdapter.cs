@@ -257,6 +257,63 @@ namespace PocoDataSet.SqlServerDataAdapter
             return dataSet!;
         }
 
+
+        /// <summary>
+        /// Fills data set using table-valued parameter descriptions.
+        /// The adapter opens one connection, creates the TVP parameters on that connection,
+        /// executes the command, reads data, closes the reader, loads metadata, and then disposes the connection.
+        /// </summary>
+        public async Task<IDataSet> FillAsync(string baseQuery, bool isStoredProcedure, SqlTableValuedParameterInfo[]? tableValuedParameters, List<string>? returnedTableNames, string? connectionString, IDataSet? dataSet)
+        {
+            InitializeComponent(returnedTableNames);
+            DataTableCreator!.DataSet = dataSet;
+
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            CreateSqlCommand(baseQuery, isStoredProcedure);
+
+            try
+            {
+                await OpenSqlConnectionAsync().ConfigureAwait(false);
+
+                SqlParameter[] sqlParameters = await CreateTableValuedParametersAsync(tableValuedParameters).ConfigureAwait(false);
+                AddParametersToSqlCommand(sqlParameters);
+
+                await ExecuteReaderOnOpenConnectionAsync().ConfigureAwait(false);
+                await DataTableCreator.AddTablesToDataSetAsync().ConfigureAwait(false);
+                await CloseDataReaderAsync().ConfigureAwait(false);
+
+                if (DataTableCreator.DataSet is not null)
+                {
+                    await RelationsManager.PopulateColumnMetadataFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
+                        .ConfigureAwait(false);
+                }
+
+                if (PopulateRelationsFromSchema && DataTableCreator.DataSet is not null)
+                {
+                    await RelationsManager.PopulateRelationsFromDatabaseSchemaAsync(DataTableCreator.DataSet, SqlConnection!)
+                        .ConfigureAwait(false);
+                }
+
+                dataSet = DataTableCreator.DataSet;
+                dataSet!.AcceptChanges();
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await DisposeAsync().ConfigureAwait(false);
+            }
+
+            return dataSet!;
+        }
+
+
         /// <summary>
         /// Fills an existing data set by adding one or more result-set tables into it.
         /// </summary>
@@ -311,6 +368,21 @@ namespace PocoDataSet.SqlServerDataAdapter
             }
 
             return await FillAsync(baseQuery, isStoredProcedure, parameters, returnedTableNames, connectionString, dataSet)
+                .ConfigureAwait(false);
+        }
+
+
+        /// <summary>
+        /// Fills an existing data set by adding one or more result-set tables into it using table-valued parameter descriptions.
+        /// </summary>
+        public async Task<IDataSet> FillIntoExistingDataSetAsync(IDataSet dataSet, string baseQuery, bool isStoredProcedure, SqlTableValuedParameterInfo[]? tableValuedParameters, List<string>? returnedTableNames, string? connectionString)
+        {
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException(nameof(dataSet));
+            }
+
+            return await FillAsync(baseQuery, isStoredProcedure, tableValuedParameters, returnedTableNames, connectionString, dataSet)
                 .ConfigureAwait(false);
         }
 

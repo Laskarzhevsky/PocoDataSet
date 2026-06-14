@@ -142,6 +142,68 @@ namespace PocoDataSet.SqlServerDataAdapter
             DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Opens the adapter connection for an operation that needs to prepare parameters
+        /// before executing the reader.
+        /// </summary>
+        internal async Task OpenSqlConnectionAsync()
+        {
+            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            SqlConnection = sqlConnection;
+
+            SqlCommand!.Connection = sqlConnection;
+            await sqlConnection.OpenAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Executes the current SQL command on the already-open adapter connection.
+        /// </summary>
+        internal async Task ExecuteReaderOnOpenConnectionAsync()
+        {
+            if (SqlConnection == null)
+            {
+                throw new InvalidOperationException("SQL connection is not open.");
+            }
+
+            SqlCommand!.Connection = SqlConnection;
+            DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Creates SQL Server table-valued parameters inside the current adapter operation.
+        /// </summary>
+        internal async Task<SqlParameter[]> CreateTableValuedParametersAsync(SqlTableValuedParameterInfo[]? tableValuedParameters)
+        {
+            if (tableValuedParameters == null || tableValuedParameters.Length == 0)
+            {
+                return Array.Empty<SqlParameter>();
+            }
+
+            SqlParameter[] sqlParameters = new SqlParameter[tableValuedParameters.Length];
+
+            SqlServerTableValuedParameterCreator creator = new SqlServerTableValuedParameterCreator();
+            creator.LoadTableValuedParameterSchemaRequest += TableValuedParameterCreator_LoadTableValuedParameterSchemaRequestAsync;
+
+            try
+            {
+                for (int i = 0; i < tableValuedParameters.Length; i++)
+                {
+                    SqlTableValuedParameterInfo parameterInfo = tableValuedParameters[i];
+                    sqlParameters[i] = await creator.CreateStructuredParameterAsync(
+                        parameterInfo.ParameterName,
+                        parameterInfo.TypeName,
+                        parameterInfo.DataTable,
+                        parameterInfo.ChangedRowsOnly).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                creator.LoadTableValuedParameterSchemaRequest -= TableValuedParameterCreator_LoadTableValuedParameterSchemaRequestAsync;
+            }
+
+            return sqlParameters;
+        }
+
 /// <summary>
 /// Gets data from database using an existing open connection and optional transaction.
 /// </summary>
@@ -362,13 +424,35 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
 
             List<SqlServerTableValuedParameterColumn> columns = new List<SqlServerTableValuedParameterColumn>();
 
-            await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
+            if (SqlConnection != null && SqlConnection.State == System.Data.ConnectionState.Open)
             {
-                await sqlConnection.OpenAsync().ConfigureAwait(false);
-
-                await using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
+                await LoadTableValuedParameterColumnsAsync(SqlConnection, schemaName, tableTypeName, columns).ConfigureAwait(false);
+            }
+            else
+            {
+                await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
                 {
-                    sqlCommand.CommandText =
+                    await sqlConnection.OpenAsync().ConfigureAwait(false);
+                    await LoadTableValuedParameterColumnsAsync(sqlConnection, schemaName, tableTypeName, columns).ConfigureAwait(false);
+                }
+            }
+
+            if (columns.Count == 0)
+            {
+                throw new InvalidOperationException("SQL Server table-valued parameter type was not found: " + typeName);
+            }
+
+            return columns;
+        }
+
+        /// <summary>
+        /// Loads SQL Server table-valued parameter column metadata using an already-open connection.
+        /// </summary>
+        static async Task LoadTableValuedParameterColumnsAsync(SqlConnection sqlConnection, string schemaName, string tableTypeName, List<SqlServerTableValuedParameterColumn> columns)
+        {
+            await using (SqlCommand sqlCommand = sqlConnection.CreateCommand())
+            {
+                sqlCommand.CommandText =
 @"select
     c.[name] as ColumnName,
     st.[name] as DataType
@@ -383,27 +467,19 @@ where
 order by
     c.column_id";
 
-                    sqlCommand.Parameters.AddWithValue("@SchemaName", schemaName);
-                    sqlCommand.Parameters.AddWithValue("@TypeName", tableTypeName);
+                sqlCommand.Parameters.AddWithValue("@SchemaName", schemaName);
+                sqlCommand.Parameters.AddWithValue("@TypeName", tableTypeName);
 
-                    await using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+                await using (SqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync().ConfigureAwait(false))
+                {
+                    while (await sqlDataReader.ReadAsync().ConfigureAwait(false))
                     {
-                        while (await sqlDataReader.ReadAsync().ConfigureAwait(false))
-                        {
-                            string columnName = sqlDataReader.GetString(0);
-                            string dataType = sqlDataReader.GetString(1);
-                            columns.Add(new SqlServerTableValuedParameterColumn(columnName, dataType));
-                        }
+                        string columnName = sqlDataReader.GetString(0);
+                        string dataType = sqlDataReader.GetString(1);
+                        columns.Add(new SqlServerTableValuedParameterColumn(columnName, dataType));
                     }
                 }
             }
-
-            if (columns.Count == 0)
-            {
-                throw new InvalidOperationException("SQL Server table-valued parameter type was not found: " + typeName);
-            }
-
-            return columns;
         }
 
         /// <summary>
