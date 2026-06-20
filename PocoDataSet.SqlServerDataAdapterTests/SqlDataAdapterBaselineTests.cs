@@ -13,7 +13,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         [Fact]
         public async Task FillAsync_InvalidConnectionString_Throws()
         {
-            SqlDataAdapter adapter = new SqlDataAdapter(null);
+            SqlDataAdapter adapter = new SqlDataAdapter((string?)null);
 
             // Intentionally invalid. We just want to ensure exceptions are not swallowed.
             string connectionString = "NotAValidConnectionString";
@@ -33,7 +33,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         [Fact]
         public async Task SaveChangesAsync_EmptyChangeset_IsNoOp_ReturnsZero()
         {
-            SqlDataAdapter adapter = new SqlDataAdapter(null);
+            SqlDataAdapter adapter = new SqlDataAdapter((string?)null);
 
             PocoDataSet.IData.IDataSet emptyChangeset = new PocoDataSet.Data.DataSet();
 
@@ -47,7 +47,7 @@ namespace PocoDataSet.SqlServerDataAdapterTests
         [Fact]
         public async Task SaveChangesAsync_EmptyChangeset_WithBatchStoredProcedureMode_IsNoOp_ReturnsZero()
         {
-            SqlDataAdapter adapter = new SqlDataAdapter(null);
+            SqlDataAdapter adapter = new SqlDataAdapter((string?)null);
             PocoDataSet.IData.IDataSet emptyChangeset = new PocoDataSet.Data.DataSet();
 
             SqlDataAdapterOptions options = new SqlDataAdapterOptions();
