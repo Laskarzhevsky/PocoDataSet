@@ -52,6 +52,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.DataTests", "Po
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAdapter.IntegrationTests", "PocoDataSet.SqlServerDataAdapter.IntegrationTests\PocoDataSet.SqlServerDataAdapter.IntegrationTests.csproj", "{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SqlServerDataAdapterTestDatabase", "SqlServerDataAdapterTestDatabase\SqlServerDataAdapterTestDatabase.sqlproj", "{4F1B81EF-70D4-4F4A-8E27-288A6561144C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +140,12 @@ Global
 		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
