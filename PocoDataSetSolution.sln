@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.IData", "PocoDataSet.IData\PocoDataSet.IData.csproj", "{C6D966B9-90EC-DA99-1771-5DD487B4F711}"
 EndProject
@@ -49,6 +49,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.ObservableDataTests", "PocoDataSet.ObservableDataTests\PocoDataSet.ObservableDataTests.csproj", "{3C28D0C1-34C8-4E2F-BFE5-0B34CD5D2124}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.DataTests", "PocoDataSet.DataTests\PocoDataSet.DataTests.csproj", "{2AC5A55F-4DE4-4467-BFEA-836A4F6180CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAdapter.IntegrationTests", "PocoDataSet.SqlServerDataAdapter.IntegrationTests\PocoDataSet.SqlServerDataAdapter.IntegrationTests.csproj", "{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -132,6 +134,10 @@ Global
 		{2AC5A55F-4DE4-4467-BFEA-836A4F6180CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AC5A55F-4DE4-4467-BFEA-836A4F6180CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AC5A55F-4DE4-4467-BFEA-836A4F6180CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FE9C3CF-7C88-CD61-6E63-53A7E23E14A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

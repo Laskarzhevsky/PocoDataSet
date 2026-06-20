@@ -22,6 +22,26 @@ namespace PocoDataSet.SqlServerDataAdapter
         public SqlDataAdapter(string? connectionString)
         {
             ConnectionString = connectionString;
+            OwnsSqlConnection = true;
+            ExecutionEngine = new SqlExecutionEngine(this);
+        }
+
+        /// <summary>
+        /// Creates adapter that uses an already opened SQL connection.
+        /// The adapter will not dispose this connection. This overload is useful for integration tests
+        /// and for callers that want to control connection lifetime explicitly.
+        /// </summary>
+        /// <param name="sqlConnection">Existing SQL connection.</param>
+        public SqlDataAdapter(SqlConnection sqlConnection)
+        {
+            if (sqlConnection == null)
+            {
+                throw new ArgumentNullException(nameof(sqlConnection));
+            }
+
+            SqlConnection = sqlConnection;
+            ConnectionString = sqlConnection.ConnectionString;
+            OwnsSqlConnection = false;
             ExecutionEngine = new SqlExecutionEngine(this);
         }
         #endregion
@@ -34,6 +54,15 @@ namespace PocoDataSet.SqlServerDataAdapter
         internal SqlExecutionEngine ExecutionEngine
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets flag indicating whether this adapter created and owns the current SQL connection.
+        /// </summary>
+        internal bool OwnsSqlConnection
+        {
+            get;
+            private set;
         }
         #endregion
 
@@ -450,12 +479,28 @@ namespace PocoDataSet.SqlServerDataAdapter
                 throw new InvalidOperationException("ConnectionString is not set.");
             }
 
-            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
-            await sqlConnection.OpenAsync().ConfigureAwait(false);
+            SqlConnection sqlConnection;
+            bool ownsConnection;
+
+            if (SqlConnection != null)
+            {
+                sqlConnection = SqlConnection;
+                ownsConnection = false;
+            }
+            else
+            {
+                sqlConnection = new SqlConnection(ConnectionString);
+                ownsConnection = true;
+            }
+
+            if (sqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
+            }
 
             SqlTransaction sqlTransaction = sqlConnection.BeginTransaction();
 
-            return new SqlDataAdapterTransaction(this, sqlConnection, sqlTransaction, true);
+            return new SqlDataAdapterTransaction(this, sqlConnection, sqlTransaction, ownsConnection);
         }
 
         /// <summary>

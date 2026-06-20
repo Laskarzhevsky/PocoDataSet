@@ -115,15 +115,14 @@ namespace PocoDataSet.SqlServerDataAdapter
 
             try
             {
-                await using (SqlConnection sqlConnection = new SqlConnection(ConnectionString))
-                {
-                    return await ExecutionEngine.ExecuteNonQueryAsync(
-                        baseQuery,
-                        isStoredProcedure,
-                        parameters,
-                        sqlConnection,
-                        null).ConfigureAwait(false);
-                }
+                SqlConnection sqlConnection = GetOrCreateSqlConnection();
+
+                return await ExecutionEngine.ExecuteNonQueryAsync(
+                    baseQuery,
+                    isStoredProcedure,
+                    parameters,
+                    sqlConnection,
+                    null).ConfigureAwait(false);
             }
             finally
             {
@@ -171,11 +170,14 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         internal async Task GetDataFromDatabaseAsync()
         {
-            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
-            SqlConnection = sqlConnection;
+            SqlConnection sqlConnection = GetOrCreateSqlConnection();
 
             SqlCommand!.Connection = sqlConnection;
-            await sqlConnection.OpenAsync().ConfigureAwait(false);
+            if (sqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
+            }
+
             DataTableCreator!.SqlDataReader = await SqlCommand!.ExecuteReaderAsync().ConfigureAwait(false);
         }
 
@@ -185,11 +187,36 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// </summary>
         internal async Task OpenSqlConnectionAsync()
         {
-            SqlConnection sqlConnection = new SqlConnection(ConnectionString);
-            SqlConnection = sqlConnection;
+            SqlConnection sqlConnection = GetOrCreateSqlConnection();
 
             SqlCommand!.Connection = sqlConnection;
-            await sqlConnection.OpenAsync().ConfigureAwait(false);
+            if (sqlConnection.State != System.Data.ConnectionState.Open)
+            {
+                await sqlConnection.OpenAsync().ConfigureAwait(false);
+            }
+        }
+
+
+        /// <summary>
+        /// Gets an existing adapter connection or creates a new one when the adapter owns connection lifetime.
+        /// </summary>
+        internal SqlConnection GetOrCreateSqlConnection()
+        {
+            SqlConnection? sqlConnection = SqlConnection;
+
+            if (sqlConnection == null)
+            {
+                if (string.IsNullOrEmpty(ConnectionString))
+                {
+                    throw new InvalidOperationException("ConnectionString is not set.");
+                }
+
+                sqlConnection = new SqlConnection(ConnectionString);
+                SqlConnection = sqlConnection;
+                OwnsSqlConnection = true;
+            }
+
+            return sqlConnection;
         }
 
         /// <summary>
@@ -313,7 +340,11 @@ internal async Task GetDataFromDatabaseAsync(SqlConnection sqlConnection, SqlTra
 
             if (SqlConnection is not null)
             {
-                await SqlConnection.DisposeAsync().ConfigureAwait(false);
+                if (OwnsSqlConnection)
+                {
+                    await SqlConnection.DisposeAsync().ConfigureAwait(false);
+                }
+
                 SqlConnection = null;
             }
 
