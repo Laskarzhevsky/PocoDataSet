@@ -5,3 +5,4 @@
 [assembly: InternalsVisibleTo("PocoDataSet.ObservableExtensions")]
 [assembly: InternalsVisibleTo("PocoDataSet.ObservableExtensionsTests")]
 [assembly: InternalsVisibleTo("PocoDataSet.SqlServerDataAdapter")]
+[assembly: InternalsVisibleTo("PocoDataSet.PostgreSqlDataAdapter")]

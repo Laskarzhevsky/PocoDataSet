@@ -54,6 +54,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.SqlServerDataAd
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SqlServerDataAdapterTestDatabase", "SqlServerDataAdapterTestDatabase\SqlServerDataAdapterTestDatabase.sqlproj", "{4F1B81EF-70D4-4F4A-8E27-288A6561144C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.RelationalDataAdapter.Abstractions", "PocoDataSet.RelationalDataAdapter.Abstractions\PocoDataSet.RelationalDataAdapter.Abstractions.csproj", "{A0D21EC0-B021-E34C-B706-DE37C83A92D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocoDataSet.PostgreSqlDataAdapter", "PocoDataSet.PostgreSqlDataAdapter\PocoDataSet.PostgreSqlDataAdapter.csproj", "{0FC6227C-C00F-A691-6F4B-B3361C5FAA49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -146,6 +150,14 @@ Global
 		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F1B81EF-70D4-4F4A-8E27-288A6561144C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{A0D21EC0-B021-E34C-B706-DE37C83A92D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0D21EC0-B021-E34C-B706-DE37C83A92D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0D21EC0-B021-E34C-B706-DE37C83A92D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0D21EC0-B021-E34C-B706-DE37C83A92D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC6227C-C00F-A691-6F4B-B3361C5FAA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC6227C-C00F-A691-6F4B-B3361C5FAA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC6227C-C00F-A691-6F4B-B3361C5FAA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC6227C-C00F-A691-6F4B-B3361C5FAA49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

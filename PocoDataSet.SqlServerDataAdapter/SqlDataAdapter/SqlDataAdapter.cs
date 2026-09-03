@@ -6,13 +6,14 @@ using Microsoft.Data.SqlClient;
 
 using PocoDataSet.Extensions;
 using PocoDataSet.IData;
+using PocoDataSet.RelationalDataAdapter.Abstractions;
 
 namespace PocoDataSet.SqlServerDataAdapter
 {
     /// <summary>
     /// Provides SQL data adapter functionality
     /// </summary>
-    public partial class SqlDataAdapter : AsyncDisposableObject
+    public partial class SqlDataAdapter : AsyncDisposableObject, IRelationalDataAdapter
     {
         #region Constructors
         /// <summary>
@@ -442,6 +443,34 @@ namespace PocoDataSet.SqlServerDataAdapter
         public async Task<int> ExecuteNonQueryAsync(string baseQuery, bool isStoredProcedure, SqlTableValuedParameterInfo[]? tableValuedParameters, Dictionary<string, object?>? parameters, string? connectionString = null)
         {
             return await ExecuteNonQueryWithTableValuedParametersAsync(baseQuery, isStoredProcedure, tableValuedParameters, parameters, connectionString).ConfigureAwait(false);
+        }
+
+
+        /// <summary>
+        /// Executes a scalar command and returns the first column of the first row.
+        /// </summary>
+        public async Task<object?> ExecuteScalarAsync(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, string? connectionString)
+        {
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                ConnectionString = connectionString;
+            }
+
+            try
+            {
+                SqlConnection sqlConnection = GetOrCreateSqlConnection();
+
+                return await ExecutionEngine.ExecuteScalarAsync(
+                    baseQuery,
+                    isStoredProcedure,
+                    parameters,
+                    sqlConnection,
+                    null).ConfigureAwait(false);
+            }
+            finally
+            {
+                await DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         /// <summary>

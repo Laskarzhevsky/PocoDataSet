@@ -106,7 +106,7 @@ namespace PocoDataSet.SqlServerDataAdapter
         /// <param name="parameters">Query parameters.</param>
         /// <param name="connectionString">Optional connection string override.</param>
         /// <returns>Execution result.</returns>
-        async Task<int> ExecuteNonQueryAsync(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, string? connectionString)
+        public async Task<int> ExecuteNonQueryAsync(string baseQuery, bool isStoredProcedure, Dictionary<string, object?>? parameters, string? connectionString)
         {
             if (!string.IsNullOrEmpty(connectionString))
             {

@@ -1,26 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\\SharedBuildSettings.props" />
   <PropertyGroup>
-    <Description>POCO DataSet SQL Server data adapter. The POCO DataSet documentation is published in the "POCO DataSet" section of businessprocessprogramming.net website. Technical support: support@businessprocessprogramming.net</Description>
+    <Description>POCO DataSet PostgreSQL data adapter. This package provides an Npgsql-based implementation of the provider-independent relational data adapter abstraction.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>PocoDataSet.SqlServerDataAdapter</PackageId>
+    <PackageId>PocoDataSet.PostgreSqlDataAdapter</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Laskarzhevsky/PocoDataSet</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Laskarzhevsky/PocoDataSet</RepositoryUrl>
   </PropertyGroup>
+
   <ItemGroup>
-    <Compile Remove="SqlDataAdapter\SqlDataAdapter_Old.cs" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
