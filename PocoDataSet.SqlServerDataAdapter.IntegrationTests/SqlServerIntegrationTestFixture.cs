@@ -11,14 +11,14 @@ namespace PocoDataSet.SqlServerDataAdapter.IntegrationTests
             get; private set;
         } = null!;
 
-        public async Task InitializeAsync()
+        public async ValueTask InitializeAsync()
         {
             string connectionString = IntegrationTestConnectionString.GetRequiredConnectionString();
             Connection = new SqlConnection(connectionString);
             await Connection.OpenAsync().ConfigureAwait(false);
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (Connection != null)
             {
